@@ -10,8 +10,9 @@
 #   1. Checks for Python 3.11+
 #   2. Creates a virtual environment (.venv)
 #   3. Installs the project and its dependencies
-#   4. Copies config/example.env → .env (if .env doesn't exist)
-#   5. Tells you how to run the agent
+#   4. Copies config/example.env -> .env (if .env doesn't exist)
+#   5. Prompts for your Anthropic API key
+#   6. Tells you how to run the agent
 # ============================================================================
 
 set -e
@@ -21,10 +22,11 @@ if [ -t 1 ]; then
     GREEN='\033[0;32m'
     YELLOW='\033[1;33m'
     RED='\033[0;31m'
+    CYAN='\033[0;36m'
     BOLD='\033[1m'
     NC='\033[0m'
 else
-    GREEN='' YELLOW='' RED='' BOLD='' NC=''
+    GREEN='' YELLOW='' RED='' CYAN='' BOLD='' NC=''
 fi
 
 info()  { echo -e "${GREEN}✓${NC} $1"; }
@@ -89,14 +91,42 @@ pip install -q -e "$INSTALL_FLAG"
 info "Installed ocp-policy-hub"
 
 # --------------------------------------------------------------------------
-# 4. Copy example.env → .env
+# 4. Copy example.env -> .env and prompt for API key
 # --------------------------------------------------------------------------
 if [ ! -f ".env" ]; then
     cp config/example.env .env
     info "Created .env from config/example.env"
-    warn "Edit .env and add your ANTHROPIC_API_KEY before running the agent"
 else
     info ".env already exists"
+fi
+
+# Check if the .env still has the placeholder key
+if grep -q "your-key-here\|your-real-key-here" .env 2>/dev/null; then
+    echo ""
+    echo -e "${CYAN}--------------------------------------------------------------${NC}"
+    echo -e "${CYAN}  An Anthropic API key is required to run the agent.${NC}"
+    echo -e "${CYAN}  Get one at: https://console.anthropic.com/${NC}"
+    echo -e "${CYAN}--------------------------------------------------------------${NC}"
+    echo ""
+    echo -n "Paste your ANTHROPIC_API_KEY (or press Enter to skip): "
+    read -r api_key
+
+    # Trim whitespace
+    api_key=$(echo "$api_key" | xargs)
+
+    if [ -n "$api_key" ] && [ ${#api_key} -gt 40 ]; then
+        # Replace the placeholder line in .env
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "s|ANTHROPIC_API_KEY=.*|ANTHROPIC_API_KEY=$api_key|" .env
+        else
+            sed -i "s|ANTHROPIC_API_KEY=.*|ANTHROPIC_API_KEY=$api_key|" .env
+        fi
+        info "API key saved to .env"
+    elif [ -n "$api_key" ]; then
+        warn "That key looks too short. Edit .env manually and paste your full key."
+    else
+        warn "Skipped. Edit .env and add your ANTHROPIC_API_KEY before running the agent."
+    fi
 fi
 
 # --------------------------------------------------------------------------
@@ -107,12 +137,9 @@ echo -e "${BOLD}Setup complete!${NC}"
 echo ""
 echo "Next steps:"
 echo ""
-echo "  1. Edit .env and add your Anthropic API key"
-echo "     Get one at: https://console.anthropic.com/"
-echo ""
-echo "  2. Activate the virtual environment (needed each new terminal):"
+echo "  1. Activate the virtual environment (needed each new terminal):"
 echo "     source .venv/bin/activate"
 echo ""
-echo "  3. Run the agent:"
+echo "  2. Run the agent:"
 echo "     python -m src.agent"
 echo ""

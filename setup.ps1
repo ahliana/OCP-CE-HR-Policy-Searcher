@@ -10,7 +10,8 @@
 #   2. Creates a virtual environment (.venv)
 #   3. Installs the project and its dependencies
 #   4. Copies config/example.env -> .env (if .env doesn't exist)
-#   5. Tells you how to run the agent
+#   5. Prompts for your Anthropic API key
+#   6. Tells you how to run the agent
 #
 # Note: If you get "cannot be loaded because running scripts is disabled",
 #       run this first (as Administrator):
@@ -89,14 +90,39 @@ if ($Dev) {
 Write-Info "Installed ocp-policy-hub"
 
 # --------------------------------------------------------------------------
-# 4. Copy example.env -> .env
+# 4. Copy example.env -> .env and prompt for API key
 # --------------------------------------------------------------------------
+$envCreated = $false
 if (-not (Test-Path ".env")) {
     Copy-Item "config\example.env" ".env"
     Write-Info "Created .env from config\example.env"
-    Write-Warn "Edit .env and add your ANTHROPIC_API_KEY before running the agent"
+    $envCreated = $true
 } else {
     Write-Info ".env already exists"
+}
+
+# Check if the .env still has the placeholder key
+$envContent = Get-Content ".env" -Raw
+if ($envContent -match "your-key-here" -or $envContent -match "your-real-key-here") {
+    Write-Host ""
+    Write-Host "--------------------------------------------------------------" -ForegroundColor Cyan
+    Write-Host "  An Anthropic API key is required to run the agent." -ForegroundColor Cyan
+    Write-Host "  Get one at: https://console.anthropic.com/" -ForegroundColor Cyan
+    Write-Host "--------------------------------------------------------------" -ForegroundColor Cyan
+    Write-Host ""
+    $apiKey = Read-Host "Paste your ANTHROPIC_API_KEY (or press Enter to skip)"
+    $apiKey = $apiKey.Trim()
+
+    if ($apiKey -and $apiKey.Length -gt 40) {
+        # Replace the placeholder line in .env
+        $envContent = $envContent -replace "ANTHROPIC_API_KEY=.*", "ANTHROPIC_API_KEY=$apiKey"
+        Set-Content ".env" $envContent -NoNewline
+        Write-Info "API key saved to .env"
+    } elseif ($apiKey) {
+        Write-Warn "That key looks too short. Edit .env manually and paste your full key."
+    } else {
+        Write-Warn "Skipped. Edit .env and add your ANTHROPIC_API_KEY before running the agent."
+    }
 }
 
 # --------------------------------------------------------------------------
@@ -107,12 +133,9 @@ Write-Host "Setup complete!" -ForegroundColor White -BackgroundColor DarkGreen
 Write-Host ""
 Write-Host "Next steps:"
 Write-Host ""
-Write-Host "  1. Edit .env and add your Anthropic API key"
-Write-Host "     Get one at: https://console.anthropic.com/"
-Write-Host ""
-Write-Host "  2. Activate the virtual environment (needed each new terminal):"
+Write-Host "  1. Activate the virtual environment (needed each new terminal):"
 Write-Host "     .venv\Scripts\Activate.ps1"
 Write-Host ""
-Write-Host "  3. Run the agent:"
+Write-Host "  2. Run the agent:"
 Write-Host "     python -m src.agent"
 Write-Host ""
