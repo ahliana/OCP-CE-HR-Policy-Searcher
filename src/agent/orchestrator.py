@@ -216,7 +216,14 @@ class PolicyAgent:
                         config=self.config,
                         scan_manager=self.scan_manager,
                     )
-                    is_error = "error" in result and len(result) == 1
+                    # Mark as tool failure only when error is the sole content.
+                    # Partial results (e.g. analyze_url returning url+status+error)
+                    # are NOT tool failures — they contain useful context.
+                    is_error = (
+                        isinstance(result, dict)
+                        and "error" in result
+                        and len(result) == 1
+                    )
                     result_content = json.dumps(result, indent=2, default=str)
 
                     tool_results.append({

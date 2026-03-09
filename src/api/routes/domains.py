@@ -2,10 +2,10 @@
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from ..deps import get_config
-from ...core.config import ConfigLoader
+from ...core.config import ConfigLoader, ConfigurationError
 
 router = APIRouter(prefix="/api", tags=["domains"])
 
@@ -18,10 +18,13 @@ def list_domains(
     config: ConfigLoader = Depends(get_config),
 ):
     """List domains, optionally filtered by group, category, or tag."""
-    if group:
-        domains = config.get_enabled_domains(group)
-    else:
-        domains = config.list_domains()
+    try:
+        if group:
+            domains = config.get_enabled_domains(group)
+        else:
+            domains = config.list_domains()
+    except ConfigurationError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     if category:
         domains = [d for d in domains if d.get("category") == category]
@@ -36,7 +39,7 @@ def get_domain(domain_id: str, config: ConfigLoader = Depends(get_config)):
     """Get full config for a single domain."""
     all_domains = {d["id"]: d for d in config.domains_config.get("domains", [])}
     if domain_id not in all_domains:
-        return {"error": f"Domain '{domain_id}' not found"}, 404
+        raise HTTPException(status_code=404, detail=f"Domain '{domain_id}' not found")
     return all_domains[domain_id]
 
 

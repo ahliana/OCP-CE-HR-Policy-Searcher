@@ -6,10 +6,6 @@ External services (HTTP, Anthropic API, Google Sheets) are mocked, but
 all internal wiring uses real code and real config files.
 """
 
-import asyncio
-import json
-import os
-import shutil
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -17,16 +13,10 @@ import pytest
 
 from src.agent.orchestrator import PolicyAgent, _build_system_prompt
 from src.agent.tools import execute_tool, get_all_tools
-from src.core.cache import URLCache
 from src.core.config import ConfigLoader, ConfigurationError
-from src.core.crawler import AsyncCrawler
-from src.core.extractor import HtmlExtractor
-from src.core.keywords import KeywordMatcher
 from src.core.models import (
-    CrawlResult, PageStatus, Policy, PolicyType, ScanStatus,
-    VerificationFlag, CostInfo, OutputSettings,
+    CrawlResult, PageStatus, Policy, PolicyType,
 )
-from src.core.verifier import Verifier
 from src.orchestration.events import EventBroadcaster
 from src.orchestration.scan_manager import ScanManager
 
@@ -790,7 +780,7 @@ class TestSheetsExportIntegration:
             existing_urls = sheets.get_existing_urls("Staging")
             new_policies = [p for p in all_policies if p.url not in existing_urls]
             if new_policies:
-                count = sheets.append_policies(new_policies, "Staging")
+                sheets.append_policies(new_policies, "Staging")
 
         mock_sheets.connect.assert_called_once()
         mock_sheets.get_existing_urls.assert_called_once_with("Staging")
@@ -803,7 +793,7 @@ class TestSheetsExportIntegration:
     async def test_sheets_dedup_skips_existing(self, tmp_config_dir, monkeypatch):
         """Sheets export skips policies whose URLs already exist."""
         try:
-            from src.output.sheets import SheetsClient
+            from src.output.sheets import SheetsClient  # noqa: F401
         except ImportError:
             pytest.skip("gspread not installed")
 

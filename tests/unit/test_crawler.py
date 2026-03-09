@@ -1,7 +1,7 @@
 """Tests for AsyncCrawler — URL filtering, link extraction, and diagnosis."""
 
 import re
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -71,7 +71,7 @@ class TestExtractLinks:
         )
         assert "https://example.gov/page2" in links
         assert "https://example.gov/page3" in links
-        assert not any("other.com" in l for l in links)
+        assert not any("other.com" in link for link in links)
 
     def test_skips_file_extensions(self):
         crawler = AsyncCrawler()
@@ -85,8 +85,8 @@ class TestExtractLinks:
         links = crawler._extract_links(
             html, "https://example.gov/", "https://example.gov",
         )
-        assert not any(l.endswith(".pdf") for l in links)
-        assert not any(l.endswith(".jpg") for l in links)
+        assert not any(link.endswith(".pdf") for link in links)
+        assert not any(link.endswith(".jpg") for link in links)
         assert "https://example.gov/page" in links
 
     def test_blocked_patterns_filtered(self):
@@ -102,7 +102,7 @@ class TestExtractLinks:
             blocked_patterns=["/archive/*"],
         )
         assert "https://example.gov/policy/good" in links
-        assert not any("archive" in l for l in links)
+        assert not any("archive" in link for link in links)
 
     def test_allowed_patterns_restrict(self):
         crawler = AsyncCrawler()
@@ -117,7 +117,7 @@ class TestExtractLinks:
             allowed_patterns=["/policy/*"],
         )
         assert "https://example.gov/policy/heat" in links
-        assert not any("about" in l for l in links)
+        assert not any("about" in link for link in links)
 
     def test_removes_nav_links(self):
         crawler = AsyncCrawler()
@@ -154,7 +154,7 @@ class TestExtractLinks:
             html, "https://example.gov/", "https://example.gov",
         )
         # Fragments should be stripped during normalization
-        assert any("/page" in l and "#" not in l for l in links)
+        assert any("/page" in link and "#" not in link for link in links)
 
     def test_skips_non_http_schemes(self):
         crawler = AsyncCrawler()
@@ -168,8 +168,8 @@ class TestExtractLinks:
         links = crawler._extract_links(
             html, "https://example.gov/", "https://example.gov",
         )
-        assert not any("mailto" in l for l in links)
-        assert not any("javascript" in l for l in links)
+        assert not any("mailto" in link for link in links)
+        assert not any("javascript" in link for link in links)
 
 
 # --- AsyncCrawler fetch and crawl (async tests using mocked httpx) ---

@@ -1,7 +1,7 @@
 """Tests for Google Sheets integration and Policy sheet methods."""
 
 from datetime import date, datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 

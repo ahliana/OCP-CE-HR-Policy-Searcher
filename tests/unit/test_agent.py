@@ -1,11 +1,9 @@
 """Tests for the agent tools and orchestrator."""
 
-import asyncio
-import json
 import pytest
 
 from src.agent.tools import get_all_tools, execute_tool, POLICY_TOOLS, WEB_SEARCH_TOOL
-from src.agent.orchestrator import PolicyAgent, _build_system_prompt
+from src.agent.orchestrator import _build_system_prompt
 from src.core.config import ConfigLoader
 from src.orchestration.events import EventBroadcaster
 from src.orchestration.scan_manager import ScanManager
@@ -33,7 +31,7 @@ class TestToolDefinitions:
 
     def test_policy_tools_have_required_fields(self):
         for tool in POLICY_TOOLS:
-            assert "name" in tool, f"Missing name in tool"
+            assert "name" in tool, "Missing name in tool"
             assert "description" in tool, f"Missing description in {tool['name']}"
             assert "input_schema" in tool, f"Missing input_schema in {tool['name']}"
             schema = tool["input_schema"]

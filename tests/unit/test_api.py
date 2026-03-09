@@ -1,6 +1,6 @@
 """Tests for FastAPI API routes."""
 
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock, AsyncMock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -130,6 +130,24 @@ class TestDomainRoutes:
         response = client.get("/api/tags")
         assert response.status_code == 200
 
+    def test_get_domain_not_found(self, client):
+        response = client.get("/api/domains/nonexistent_domain")
+        assert response.status_code == 404
+        data = response.json()
+        assert "detail" in data
+        assert "nonexistent_domain" in data["detail"]
+
+    def test_list_domains_invalid_group(self, client, mock_config):
+        from src.core.config import ConfigurationError
+        mock_config.get_enabled_domains.side_effect = ConfigurationError(
+            "Unknown group/region/domain: 'bogus'"
+        )
+        response = client.get("/api/domains?group=bogus")
+        assert response.status_code == 400
+        data = response.json()
+        assert "detail" in data
+        assert "bogus" in data["detail"]
+
 
 # --- Policies ---
 
@@ -212,9 +230,9 @@ class TestScanRoutes:
 
     def test_get_scan_not_found(self, client):
         response = client.get("/api/scans/nonexistent")
-        assert response.status_code == 200
+        assert response.status_code == 404
         data = response.json()
-        assert "error" in data
+        assert "detail" in data
 
     def test_get_scan_detail(self, client, mock_manager):
         job = ScanJob(
@@ -235,6 +253,6 @@ class TestScanRoutes:
     def test_cancel_scan_not_found(self, client, mock_manager):
         mock_manager.stop_scan = AsyncMock(return_value=False)
         response = client.delete("/api/scans/nonexistent")
-        assert response.status_code == 200
+        assert response.status_code == 404
         data = response.json()
-        assert "error" in data
+        assert "detail" in data

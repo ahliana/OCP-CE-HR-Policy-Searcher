@@ -1,7 +1,5 @@
 """Tests for the domain generator — ID generation, region detection, YAML formatting."""
 
-import pytest
-import yaml
 
 from src.agent.domain_generator import (
     generate_domain_id,

@@ -1,6 +1,6 @@
 """Tests for DomainScanner pipeline with mocked dependencies."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -264,7 +264,7 @@ class TestDomainScannerScan:
     @pytest.mark.asyncio
     async def test_verifier_called_on_policies(self, scanner_deps):
         scanner = DomainScanner(domain=_make_domain(), scan_id="s1", **scanner_deps)
-        policies = await scanner.scan()
+        await scanner.scan()
         scanner_deps["verifier"].verify_batch.assert_called_once()
         args = scanner_deps["verifier"].verify_batch.call_args
         assert len(args[0][0]) == 1  # One policy verified

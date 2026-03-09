@@ -1,7 +1,7 @@
 """Scan endpoints — start/stop/status + WebSocket progress."""
 
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, Query
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, Query
 
 from ..deps import get_scan_manager, get_broadcaster, get_policy_store
 from ...core.models import ScanRequest
@@ -59,7 +59,7 @@ def get_scan(
     """Get detailed scan status including per-domain progress."""
     job = manager.jobs.get(scan_id)
     if not job:
-        return {"error": f"Scan '{scan_id}' not found"}
+        raise HTTPException(status_code=404, detail=f"Scan '{scan_id}' not found")
 
     policies = manager.get_policies(scan_id)
 
@@ -91,7 +91,7 @@ async def cancel_scan(
     success = await manager.stop_scan(scan_id)
     if success:
         return {"status": "cancelled", "scan_id": scan_id}
-    return {"error": f"Scan '{scan_id}' not running or not found"}
+    raise HTTPException(status_code=404, detail=f"Scan '{scan_id}' not running or not found")
 
 
 @router.websocket("/api/scans/{scan_id}/ws")

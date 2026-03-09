@@ -2,7 +2,6 @@
 
 from datetime import date, timedelta
 
-import pytest
 
 from src.core.models import Policy, PolicyType, VerificationFlag
 from src.core.verifier import Verifier

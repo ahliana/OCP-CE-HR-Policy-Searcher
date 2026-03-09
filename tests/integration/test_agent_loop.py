@@ -1,7 +1,6 @@
 """Integration tests for the agent loop with mocked Anthropic API."""
 
-import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from src.agent.orchestrator import PolicyAgent
@@ -143,7 +142,7 @@ class TestAgentLoop:
         agent.client = mock_client
 
         text_received = []
-        result = await agent.run("Hi", on_text=lambda t: text_received.append(t))
+        await agent.run("Hi", on_text=lambda t: text_received.append(t))
 
         assert len(text_received) == 1
         assert "find policies" in text_received[0]
@@ -174,7 +173,7 @@ class TestAgentLoop:
         agent.client = mock_client
 
         tools_called = []
-        result = await agent.run(
+        await agent.run(
             "Estimate cost for quick scan",
             on_tool_call=lambda name, inp: tools_called.append(name),
         )
