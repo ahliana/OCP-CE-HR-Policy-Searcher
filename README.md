@@ -1,0 +1,994 @@
+# OCP Policy Hub
+
+**Automated discovery of government data center heat reuse policies across 275+ domains in 23 regions.**
+
+OCP Policy Hub crawls government websites, extracts policy content, scores it with multi-language keyword matching, and uses Claude AI for structured policy analysis. Talk to it in natural language, and it handles everything — discovering websites, scanning pages, and delivering organized results.
+
+Built for the [Open Compute Project](https://www.opencompute.org/) to track global policy developments around data center waste heat recovery, energy efficiency mandates, and district heating integration.
+
+### Try it now
+
+```bash
+pip install -e .
+export ANTHROPIC_API_KEY=sk-ant-...
+python -m src.agent
+```
+
+```
+You: Find heat reuse policies in Germany
+
+  [Browsing available domains...]
+  [Estimating cost for 'eu' scan...]
+
+I found 15 German government websites in the database. A scan would
+cost approximately $0.45. Let me scan them now...
+
+  [Starting scan of 'germany' domains...]
+  [Checking scan progress...]
+
+Found 3 policies:
+
+1. **Energy Efficiency Act (EnEfG)** - Germany
+   Requires data centers above 500kW to reuse waste heat.
+   Relevance: 9/10
+
+2. ...
+```
+
+---
+
+## Table of Contents
+
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+- [Quick Start](#quick-start)
+- [AI Agent](#ai-agent)
+- [Running the Server](#running-the-server)
+- [API Reference](#api-reference)
+- [WebSocket Events](#websocket-events)
+- [Configuration](#configuration)
+- [Domain Groups](#domain-groups)
+- [Keyword System](#keyword-system)
+- [Examples](#examples)
+- [Project Structure](#project-structure)
+- [Development](#development)
+- [MCP Server (Advanced)](#mcp-server-advanced)
+- [License](#license)
+
+---
+
+## Key Features
+
+- **Natural language AI agent** — ask questions in plain English, the agent handles scanning, discovery, and analysis
+- **Web search + auto-discovery** — finds new government websites via web search and permanently adds them to the database
+- **275+ government domains** across 23 regions (EU, US states, Nordic, APAC)
+- **Parallel scanning** — scan multiple domains concurrently with configurable workers
+- **Multi-language keyword matching** — 7 categories across 8 languages (EN, DE, FR, NL, SV, DA, IT, ES) with compound word support for German, Dutch, Swedish, and Danish
+- **Two-stage AI analysis** — cheap Haiku screening filters irrelevant pages before expensive Sonnet extraction
+- **Real-time progress** — WebSocket events stream scan progress to your frontend
+- **Deterministic verification** — catches jurisdiction mismatches, impossible dates, generic names, and duplicates without LLM calls
+- **Post-scan auditor** — one bounded LLM call per scan generates strategic recommendations
+- **URL caching** — 30-day TTL with content-hash change detection avoids redundant API calls
+- **Cost-aware** — full scan of all domains costs ~$3.50; cost estimation before you run
+- **Google Sheets export** — automatically writes discovered policies to a Google Spreadsheet after each scan
+- **Three entry points** — interactive CLI, REST API for frontends, MCP server for Claude Desktop
+
+---
+
+## Architecture
+
+```
+   User (natural language)         React Frontend
+       |                                  |
+       | Agent CLI or                     | REST + WebSocket
+       | POST /api/agent/run              | /api/agent/ws
+       v                                  v
++------------------+             +-------------------+
+| PolicyAgent      |             | FastAPI Server    |
+| (Anthropic API   |             | /api/...          |
+|  tool use loop)  |             |                   |
++---------|--------+             +--------|----------+
+          |                               |
+          +----------- SHARED -----------+
+                         |
+              +----------|----------+
+              |    SCAN MANAGER     |
+              | Parallel dispatch   |
+              | asyncio.Semaphore   |
+              | Progress tracking   |
+              +----------|----------+
+                         |
+           asyncio.gather() + Semaphore
+          +------+------+------+------+
+          |      |      |      |      |
+       Worker Worker Worker Worker  ...
+          |      |      |      |
+          v      v      v      v
+       Per-domain pipeline (deterministic):
+       crawl -> extract -> url_filter -> keywords
+       -> cache_check -> haiku_screen -> sonnet_analyze
+       -> verify
+                    |
+                    v
+             +------|------+
+             |  POST-SCAN  |
+             | Verifier    |  (deterministic)
+             | Auditor     |  (1 LLM call)
+             | Store       |  (JSON persistence)
+             +-------------+
+```
+
+The **AI agent** is the primary entry point. It uses the Anthropic API's tool use feature to orchestrate 13 tools (11 policy tools + web search + add domain) in a conversation loop. Users ask questions in natural language and the agent handles everything — including discovering new government websites via web search.
+
+**Why this design:** Per-page agent reasoning costs 5-10x more (~$17-35 vs ~$3.50/full scan) with negligible accuracy gain. The multi-stage funnel drops 90% of pages before any LLM call. The agent drives the system at a *strategic* level (discover sites, start scans, investigate URLs, review audit insights), while the pipeline stays deterministic for reliability and cost.
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- Python 3.11+
+- An [Anthropic API key](https://console.anthropic.com/) (for LLM analysis)
+
+### Install
+
+```bash
+git clone https://github.com/ahliana/ocp-policy-hub.git
+cd ocp-policy-hub
+pip install -e .
+```
+
+### Configure
+
+```bash
+cp config/example.env .env
+# Edit .env and add your ANTHROPIC_API_KEY
+```
+
+### Run the AI Agent (recommended)
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+python -m src.agent
+```
+
+This starts an interactive session where you can ask questions in plain English. See [AI Agent](#ai-agent) for details.
+
+### Run the REST API (for frontend development)
+
+```bash
+uvicorn src.api.app:app --port 8000
+```
+
+Open [http://localhost:8000/docs](http://localhost:8000/docs) for the interactive API documentation.
+
+---
+
+## AI Agent
+
+The AI agent is the primary way to interact with OCP Policy Hub. It uses natural language — no need to learn API endpoints or write code.
+
+### Interactive Mode
+
+```bash
+python -m src.agent
+```
+
+```
+OCP Policy Hub Agent
+====================
+I help you find data center heat reuse policies worldwide.
+
+Try asking:
+  "What countries are covered?"
+  "Find heat reuse policies in Germany"
+  "Scan Nordic countries for new policies"
+  "How much would it cost to scan all EU domains?"
+
+Type 'quit' to exit.
+
+You: _
+```
+
+### Single Command Mode
+
+```bash
+python -m src.agent "What countries have heat reuse mandates?"
+```
+
+### What the Agent Can Do
+
+**Discover new websites** — The agent can search the web for government websites about heat reuse policies in any country, even ones not yet in the database. It permanently saves discovered sites for future scans.
+
+```
+You: Find government websites about heat reuse in Japan
+  [Searching the web...]
+  [Adding new domain: go.jp energy agency...]
+I found 3 Japanese government websites with heat reuse content
+and added them to the database for future scanning.
+```
+
+**Scan known websites** — The database has 275+ government websites. The agent can scan them to discover policies.
+
+```
+You: Scan Nordic countries for policies
+  [Estimating cost for 'nordic' scan...]
+  [Starting scan...]
+  [Checking scan progress...]
+Found 5 policies across Denmark, Sweden, and Finland...
+```
+
+**Analyze individual URLs** — Check any webpage for policy content without a full scan.
+
+```
+You: Analyze this page: https://www.bmwk.de/Redaktion/DE/Gesetze/Energie/EnEfG.html
+  [Analyzing URL...]
+This page contains the German Energy Efficiency Act (EnEfG)...
+Relevance: 9/10
+```
+
+**Search existing results** — Query previously discovered policies by country, type, or keywords.
+
+### Agent REST API
+
+For frontend integration, the agent is also available via REST and WebSocket:
+
+```bash
+# REST endpoint
+curl -X POST http://localhost:8000/api/agent/run \
+  -H "Content-Type: application/json" \
+  -d '{"message": "List Nordic domains"}'
+```
+
+**Response:**
+```json
+{
+  "response": "Here are the Nordic domains...",
+  "iterations": 3,
+  "tools_called": ["list_domains"]
+}
+```
+
+### Agent WebSocket
+
+For real-time streaming (React frontend integration):
+
+```javascript
+const ws = new WebSocket('ws://localhost:8000/api/agent/ws');
+
+ws.send(JSON.stringify({ message: "Scan quick domains" }));
+
+ws.onmessage = (event) => {
+  const msg = JSON.parse(event.data);
+  switch (msg.type) {
+    case 'text':       // Agent's reasoning text
+    case 'tool_call':  // Tool being called (name + input)
+    case 'tool_result': // Tool result
+    case 'complete':   // Final response
+    case 'error':      // Error occurred
+  }
+};
+```
+
+### Agent Tools (13 total)
+
+| Tool | Description |
+|------|-------------|
+| `list_domains` | Browse available domains by group, region, category |
+| `get_domain_config` | Full configuration for a specific domain |
+| `start_scan` | Start a parallel scan of domain groups |
+| `get_scan_status` | Check scan progress and results |
+| `stop_scan` | Cancel a running scan |
+| `analyze_url` | Run the full pipeline on any URL |
+| `match_keywords` | Test keyword scoring on any text |
+| `search_policies` | Search discovered policies with filters |
+| `get_policy_stats` | Aggregate statistics across all scans |
+| `get_audit_advisory` | Post-scan strategic recommendations |
+| `estimate_cost` | Predict API costs before scanning |
+| `web_search` | Search the web for new government websites |
+| `add_domain` | Add a discovered website to the database permanently |
+
+---
+
+## Running the Server
+
+### REST API Server
+
+```bash
+# Development (auto-reload)
+uvicorn src.api.app:app --reload --port 8000
+
+# Production
+uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --workers 4
+```
+
+The server provides:
+- Interactive API docs at `/docs` (Swagger UI)
+- Alternative docs at `/redoc`
+- Health check at `/health`
+
+---
+
+## API Reference
+
+### Domains
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/domains` | List all domains |
+| GET | `/api/domains?group=eu` | Filter by group or region |
+| GET | `/api/domains?category=energy_ministry` | Filter by category |
+| GET | `/api/domains?tag=mandates` | Filter by tag |
+| GET | `/api/domains/{domain_id}` | Get full config for one domain |
+| GET | `/api/groups` | List available domain groups |
+| GET | `/api/regions` | List available regions |
+| GET | `/api/categories` | List valid categories |
+| GET | `/api/tags` | List valid tags |
+
+**Example:**
+```bash
+# Get all EU energy ministry domains
+curl "http://localhost:8000/api/domains?group=eu&category=energy_ministry"
+```
+
+**Response:**
+```json
+{
+  "domains": [
+    {
+      "id": "bmwk_de",
+      "name": "German Federal Ministry for Economic Affairs",
+      "base_url": "https://www.bmwk.de",
+      "region": ["eu", "germany", "eu_central"],
+      "category": "energy_ministry",
+      "tags": ["mandates", "energy_efficiency", "waste_heat"]
+    }
+  ],
+  "count": 1
+}
+```
+
+### Scans
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/scans` | Start a new parallel scan |
+| GET | `/api/scans` | List all scans |
+| GET | `/api/scans/{scan_id}` | Get scan status with per-domain progress |
+| DELETE | `/api/scans/{scan_id}` | Cancel a running scan |
+| WebSocket | `/api/scans/{scan_id}/ws` | Real-time progress stream |
+| POST | `/api/cost-estimate?domains=eu` | Estimate scan costs |
+
+**Start a scan:**
+```bash
+curl -X POST http://localhost:8000/api/scans \
+  -H "Content-Type: application/json" \
+  -d '{"domains": "eu", "max_concurrent": 5}'
+```
+
+**Request body (ScanRequest):**
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `domains` | string | `"quick"` | Domain group to scan |
+| `max_concurrent` | integer (1-20) | `5` | Parallel workers |
+| `skip_llm` | boolean | `false` | Skip LLM analysis (keywords only) |
+| `dry_run` | boolean | `false` | Resolve domains without scanning |
+| `category` | string | `null` | Additional category filter |
+| `tags` | string[] | `null` | Additional tag filters |
+| `policy_type` | string | `null` | Additional policy type filter |
+
+**Response:**
+```json
+{
+  "scan_id": "a1b2c3d4",
+  "status": "running",
+  "domain_count": 10
+}
+```
+
+**Check scan status:**
+```bash
+curl http://localhost:8000/api/scans/a1b2c3d4
+```
+
+**Response (detailed):**
+```json
+{
+  "scan_id": "a1b2c3d4",
+  "status": "completed",
+  "domain_count": 10,
+  "policy_count": 7,
+  "progress": {
+    "total": 10,
+    "completed": 10,
+    "domains": [
+      {
+        "domain_id": "bmwk_de",
+        "domain_name": "German Federal Ministry",
+        "status": "completed",
+        "pages_crawled": 45,
+        "pages_filtered": 38,
+        "keywords_matched": 12,
+        "policies_found": 3,
+        "errors": 0
+      }
+    ]
+  },
+  "policies": [ ... ],
+  "cost": {
+    "input_tokens": 125000,
+    "output_tokens": 8500,
+    "screening_calls": 12,
+    "analysis_calls": 7,
+    "total_usd": 0.45
+  },
+  "audit_advisory": "## Key Findings\n..."
+}
+```
+
+### Policies
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/policies` | Search policies with filters |
+| GET | `/api/policies/stats` | Aggregate statistics |
+
+**Search policies:**
+```bash
+# Find German laws with relevance >= 7
+curl "http://localhost:8000/api/policies?jurisdiction=Germany&policy_type=law&min_score=7"
+```
+
+**Response:**
+```json
+{
+  "policies": [
+    {
+      "url": "https://www.bmwk.de/...",
+      "policy_name": "Energy Efficiency Act (EnEfG)",
+      "jurisdiction": "Germany",
+      "policy_type": "law",
+      "summary": "Requires data centers above 500kW to reuse waste heat...",
+      "relevance_score": 9,
+      "effective_date": "2024-03-01",
+      "key_requirements": "Data centers must achieve PUE of 1.2 by 2030...",
+      "verification_flags": []
+    }
+  ],
+  "count": 1
+}
+```
+
+### Analysis
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/analyze` | Full pipeline on a single URL |
+| GET | `/api/config/keywords` | View keyword configuration |
+| GET | `/api/config/settings` | View application settings |
+
+**Analyze a single URL:**
+```bash
+curl -X POST http://localhost:8000/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.bmwk.de/Redaktion/DE/Gesetze/Energie/EnEfG.html"}'
+```
+
+**Response:**
+```json
+{
+  "url": "https://www.bmwk.de/...",
+  "title": "Energy Efficiency Act",
+  "language": "de",
+  "word_count": 3200,
+  "crawl_status": "success",
+  "keyword_score": 14.5,
+  "keyword_matches": [
+    {"term": "data center", "category": "context", "weight": 1.0, "language": "en"},
+    {"term": "waste heat", "category": "subject", "weight": 3.0, "language": "en"}
+  ],
+  "categories_matched": ["context", "subject", "policy_type"],
+  "passes_keyword_threshold": true,
+  "screening": {"relevant": true, "confidence": 9},
+  "policy": { ... },
+  "verification_flags": []
+}
+```
+
+---
+
+## WebSocket Events
+
+Connect to `/api/scans/{scan_id}/ws` for real-time scan progress.
+
+```javascript
+const ws = new WebSocket('ws://localhost:8000/api/scans/a1b2c3d4/ws');
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log(data.type, data.data);
+};
+```
+
+### Event Types
+
+| Type | Data | Description |
+|------|------|-------------|
+| `scan_started` | `{domain_count}` | Scan begins |
+| `domain_started` | `{domain_name}` | Domain processing starts |
+| `page_fetched` | `{url, status, response_ms}` | Page downloaded |
+| `keyword_match` | `{url, score, categories}` | Keywords matched |
+| `policy_found` | `{url, policy_name, relevance}` | Policy extracted |
+| `domain_complete` | `{pages, policies, errors}` | Domain finished |
+| `verification_complete` | `{flagged, passed}` | Verification done |
+| `audit_complete` | `{advisory}` | Auditor recommendation ready |
+| `scan_complete` | `{total_policies, cost_usd}` | Scan finished |
+| `error` | `{error, domain_id?}` | Error occurred |
+
+Late-connecting clients receive full event history on connect.
+
+---
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ANTHROPIC_API_KEY` | — | **Required** for LLM analysis |
+| `OCP_HOST` | `0.0.0.0` | Server bind address |
+| `OCP_PORT` | `8000` | Server port |
+| `OCP_MAX_CONCURRENT` | `5` | Default parallel workers |
+| `OCP_CONFIG_DIR` | `config` | Configuration directory |
+| `OCP_DATA_DIR` | `data` | Data/cache directory |
+| `GOOGLE_CREDENTIALS` | — | Base64-encoded Google service account JSON (for Sheets export) |
+| `SPREADSHEET_ID` | — | Google Spreadsheet ID (for Sheets export) |
+
+### Settings (config/settings.yaml)
+
+**Crawler:**
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `max_depth` | `3` | How many links deep to crawl (1-10) |
+| `max_pages_per_domain` | `200` | Page budget per domain |
+| `delay_seconds` | `3.0` | Delay between requests (min 0.5) |
+| `timeout_seconds` | `30` | HTTP timeout |
+| `max_concurrent` | `3` | Concurrent requests per domain |
+| `user_agent` | `OCP-PolicyHub/1.0` | HTTP user agent |
+| `respect_robots_txt` | `true` | Honor robots.txt |
+| `max_retries` | `3` | Retry failed requests |
+| `force_playwright` | `false` | Use browser for all pages |
+
+**Analysis:**
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `min_keyword_score` | `3.0` | Minimum score to pass keyword filter |
+| `min_relevance_score` | `5` | Minimum LLM relevance (1-10) |
+| `min_keyword_matches` | `2` | Minimum distinct keyword matches |
+| `enable_llm_analysis` | `true` | Enable Claude analysis |
+| `analysis_model` | `claude-sonnet-4-20250514` | Model for full analysis |
+| `screening_model` | `claude-haiku-4-20250514` | Model for screening |
+| `enable_two_stage` | `true` | Haiku screening before Sonnet |
+| `screening_min_confidence` | `5` | Minimum screening confidence (1-10) |
+
+### URL Filters (config/url_filters.yaml)
+
+Controls which URLs are crawled and analyzed:
+
+- **`skip_paths`** — Paths skipped after fetching (substring match): `/login`, `/contact`, `/privacy`, `/cart`, `/careers`, etc.
+- **`skip_patterns`** — Regex patterns skipped after fetching: date archives, pagination, UTM params
+- **`crawl_blocked_patterns`** — Paths blocked *before* fetching (saves page budget): `/admin/*`, `/api/*`, `/search`, `/developer/*`
+- **`skip_extensions`** — File types never fetched: `.pdf`, `.jpg`, `.css`, `.js`, `.zip`, etc.
+- **`domain_overrides`** — Per-domain skip rules
+
+### Domain Configuration (config/domains/*.yaml)
+
+Each domain YAML defines crawl targets:
+
+```yaml
+domains:
+  - id: "bmwk_de"
+    name: "German Federal Ministry for Economic Affairs"
+    enabled: true
+    base_url: "https://www.bmwk.de"
+    region: ["eu", "germany", "eu_central"]
+    category: "energy_ministry"
+    tags: ["mandates", "energy_efficiency", "waste_heat"]
+    policy_types: ["law", "regulation"]
+    start_paths:
+      - "/Redaktion/DE/Dossier/energieeffizienz.html"
+    allowed_path_patterns:
+      - "/Redaktion/DE/*"
+    blocked_path_patterns:
+      - "/Redaktion/DE/Pressemitteilungen/*"
+    max_depth: 3
+    max_pages: 100
+    requires_playwright: false
+```
+
+---
+
+## Domain Groups
+
+Use groups to scan related sets of domains. Pass the group name as the `domains` parameter.
+
+### Testing & Development
+
+| Group | Domains | Description |
+|-------|---------|-------------|
+| `test` | 1 | Single domain for quick testing |
+| `quick` | 2 | Germany + US federal (diverse test) |
+| `sample_nordic` | 3 | Nordic country sample |
+| `sample_apac` | 2 | Asia-Pacific sample |
+
+### Regional
+
+| Group | Domains | Description |
+|-------|---------|-------------|
+| `all` | 275 | Every enabled domain |
+| `eu` | 10 | EU institutions + member states |
+| `nordic` | 7 | Sweden, Denmark, Finland, Norway, Iceland |
+| `eu_central` | ~15 | Germany, Switzerland, Austria, France |
+| `eu_west` | ~8 | Netherlands, Belgium, Ireland |
+| `us` | 11 | US federal + key states |
+| `us_federal` | ~5 | Federal agencies only |
+| `us_states` | 24 | US state governments |
+| `apac` | 6 | Singapore, Japan, South Korea, Australia |
+
+### Thematic
+
+| Group | Domains | Description |
+|-------|---------|-------------|
+| `federal` | ~15 | National/EU-level only (no states/provinces) |
+| `leaders` | 9 | Countries with most advanced heat reuse policies |
+| `emerging` | 8 | Countries with emerging regulations |
+
+You can also use **region names** (`germany`, `france`, `denmark`), **domain file names**, or **individual domain IDs** as the group parameter.
+
+---
+
+## Keyword System
+
+The keyword matcher scores page content across 7 weighted categories in 8 languages.
+
+### Categories
+
+| Category | Weight | Example Terms |
+|----------|--------|---------------|
+| `subject` | 3.0 | waste heat recovery, heat reuse, Abwärmenutzung |
+| `policy_type` | 2.0 | regulation, directive, mandate, Verordnung |
+| `incentives` | 2.0 | grant, tax credit, subsidy, Förderung |
+| `enabling` | 1.5 | roadmap, pilot program, strategy |
+| `off_takers` | 1.5 | district heating, greenhouse, swimming pool |
+| `context` | 1.0 | data center, server farm, hyperscale |
+| `energy` | 1.0 | PUE, energy efficiency, decarbonization |
+
+### Languages
+
+English (en), German (de), French (fr), Dutch (nl), Swedish (sv), Danish (da), Italian (it), Spanish (es)
+
+German, Dutch, Swedish, and Danish use **substring matching** instead of word boundaries to handle compound words (e.g., "Rechenzentrumsabwärmenutzungsverordnung").
+
+### Scoring
+
+```
+base_score = sum(category_weight for each matched keyword)
+
+url_bonus:
+  +1.0  government TLD (.gov, .gov.uk, .gouv.fr, .admin.ch)
+  +1.5  legislation path (/bills/, /legislation/, /acts/)
+  +1.0  bill number in URL (H.B., S.B., H.R., S.J.R.)
+
+adjustments:
+  +3.0  per boost keyword (high-value phrases like "data center heat reuse")
+  -2.0  per penalty keyword (generic terms like "job opening")
+
+final_score = max(0, base_score + url_bonus + boosts - penalties)
+```
+
+Default threshold: score >= 5.0 with >= 2 distinct matches, plus at least one required category combination (e.g., context + subject).
+
+### Verification Flags
+
+After LLM extraction, the deterministic verifier checks for:
+
+| Flag | Description |
+|------|-------------|
+| `jurisdiction_mismatch` | Extracted jurisdiction doesn't match domain's region |
+| `future_date` | Effective date more than 2 years in the future |
+| `generic_name` | Policy name too generic (e.g., "Energy Policy") without bill number |
+| `duplicate_url` | Same URL already found in this scan |
+| `low_confidence_high_score` | Relevance 9+ on /about, /contact, /team pages |
+
+---
+
+## Examples
+
+### Estimate costs before scanning
+
+```bash
+curl -X POST "http://localhost:8000/api/cost-estimate?domains=eu"
+```
+
+```json
+{
+  "domain_count": 10,
+  "estimated_pages": 1000,
+  "estimated_keyword_passes": 100,
+  "estimated_screening_calls": 100,
+  "estimated_analysis_calls": 50,
+  "estimated_cost_usd": 1.23
+}
+```
+
+### Run a quick scan
+
+```bash
+# Start scan
+curl -X POST http://localhost:8000/api/scans \
+  -H "Content-Type: application/json" \
+  -d '{"domains": "quick", "max_concurrent": 2}'
+
+# Check status (use the scan_id from the response)
+curl http://localhost:8000/api/scans/a1b2c3d4
+
+# View discovered policies
+curl http://localhost:8000/api/policies?scan_id=a1b2c3d4
+```
+
+### Scan with filters
+
+```bash
+# Scan only energy ministries with waste heat tags
+curl -X POST http://localhost:8000/api/scans \
+  -H "Content-Type: application/json" \
+  -d '{
+    "domains": "eu",
+    "category": "energy_ministry",
+    "tags": ["waste_heat", "mandates"],
+    "max_concurrent": 3
+  }'
+```
+
+### Analyze a single URL
+
+```bash
+curl -X POST http://localhost:8000/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.bmwk.de/Redaktion/DE/Gesetze/Energie/EnEfG.html"}'
+```
+
+### Connect to WebSocket from JavaScript
+
+```javascript
+const scanId = 'a1b2c3d4';
+const ws = new WebSocket(`ws://localhost:8000/api/scans/${scanId}/ws`);
+
+ws.onmessage = (event) => {
+  const msg = JSON.parse(event.data);
+
+  switch (msg.type) {
+    case 'domain_started':
+      console.log(`Scanning: ${msg.data.domain_name}`);
+      break;
+    case 'policy_found':
+      console.log(`Found: ${msg.data.policy_name} (relevance: ${msg.data.relevance})`);
+      break;
+    case 'scan_complete':
+      console.log(`Done! ${msg.data.total_policies} policies, $${msg.data.cost_usd}`);
+      break;
+  }
+};
+```
+
+### Keyword-only scan (no LLM costs)
+
+```bash
+curl -X POST http://localhost:8000/api/scans \
+  -H "Content-Type: application/json" \
+  -d '{"domains": "all", "skip_llm": true, "max_concurrent": 10}'
+```
+
+### Dry run (resolve domains only)
+
+```bash
+curl -X POST http://localhost:8000/api/scans \
+  -H "Content-Type: application/json" \
+  -d '{"domains": "nordic", "dry_run": true}'
+```
+
+---
+
+## Project Structure
+
+```
+ocp-policy-hub/
+├── pyproject.toml              # Dependencies & build config
+├── config/
+│   ├── domains/                # 63 YAML files defining 275+ domains
+│   │   ├── eu.yaml
+│   │   ├── us_states/          # 51 US state domain files
+│   │   └── ...
+│   ├── groups.yaml             # Domain group definitions
+│   ├── keywords.yaml           # 7 categories x 8 languages
+│   ├── settings.yaml           # Runtime settings
+│   ├── url_filters.yaml        # URL skip/block rules
+│   ├── content_extraction.yaml # HTML boilerplate removal rules
+│   └── example.env             # Environment variables template
+├── src/
+│   ├── agent/                  # AI agent (primary entry point)
+│   │   ├── __main__.py         # CLI: python -m src.agent
+│   │   ├── orchestrator.py     # Agent loop (Anthropic API tool use)
+│   │   ├── tools.py            # 13 tool definitions + dispatch
+│   │   └── domain_generator.py # Auto-generate domain YAML from URLs
+│   ├── core/                   # Shared business logic
+│   │   ├── models.py           # All Pydantic data models
+│   │   ├── config.py           # YAML config loading & domain resolution
+│   │   ├── crawler.py          # Async BFS web crawler
+│   │   ├── extractor.py        # HTML content extraction
+│   │   ├── keywords.py         # Multi-language keyword matcher
+│   │   ├── llm.py              # Two-stage Claude client
+│   │   ├── cache.py            # URL cache with TTL
+│   │   ├── scanner.py          # Single-domain pipeline
+│   │   └── verifier.py         # Deterministic validation
+│   ├── orchestration/          # Parallel scan management
+│   │   ├── scan_manager.py     # Job dispatch & progress tracking
+│   │   ├── auditor.py          # Post-scan LLM advisory
+│   │   └── events.py           # WebSocket broadcasting
+│   ├── api/                    # FastAPI REST API
+│   │   ├── app.py              # FastAPI app & middleware
+│   │   ├── deps.py             # Dependency injection
+│   │   └── routes/
+│   │       ├── domains.py      # Domain endpoints
+│   │       ├── scans.py        # Scan + WebSocket endpoints
+│   │       ├── policies.py     # Policy endpoints
+│   │       ├── analysis.py     # Single URL analysis
+│   │       └── agent.py        # Agent REST + WebSocket endpoints
+│   ├── output/                  # Export integrations
+│   │   └── sheets.py            # Google Sheets export
+│   ├── mcp/
+│   │   └── server.py           # MCP server (11 tools, advanced)
+│   └── storage/
+│       └── store.py            # JSON persistence
+├── tests/                      # 293 tests (248 unit + 45 integration)
+│   ├── unit/
+│   │   ├── test_agent.py       # Agent tool + dispatch tests
+│   │   ├── test_api.py         # FastAPI endpoint tests
+│   │   ├── test_cache.py       # URL cache tests
+│   │   ├── test_crawler.py     # Web crawler tests
+│   │   ├── test_domain_generator.py  # Domain ID/region tests
+│   │   ├── test_extractor.py   # HTML extraction tests
+│   │   ├── test_keywords.py    # Keyword matcher tests
+│   │   ├── test_llm.py         # Claude client tests
+│   │   ├── test_scanner.py     # Domain scanner tests
+│   │   ├── test_sheets.py      # Sheets export + Policy row tests
+│   │   ├── test_store.py       # JSON persistence tests
+│   │   └── test_verifier.py    # Verification flag tests
+│   └── integration/
+│       ├── test_agent_loop.py  # Agent loop tests (mocked API)
+│       └── test_full_pipeline.py  # End-to-end pipeline tests
+└── data/                       # Runtime data (gitignored)
+    ├── url_cache.json
+    └── policies.json
+```
+
+---
+
+## Development
+
+### Setup
+
+```bash
+git clone https://github.com/ahliana/ocp-policy-hub.git
+cd ocp-policy-hub
+pip install -e ".[dev]"
+```
+
+### Linting
+
+```bash
+ruff check src/
+ruff format src/
+```
+
+### Testing
+
+```bash
+pytest                    # Run all 293 tests
+pytest tests/unit/        # Unit tests only (248)
+pytest tests/integration/ # Integration tests only (45)
+pytest --cov=src          # With coverage report
+```
+
+### Adding a New Domain
+
+**Via the agent (easiest):** Just ask the agent to add a URL — it auto-detects the domain ID, region, and language.
+
+```
+You: Add this site to the database: https://www.bmwk.de/energy/policies
+```
+
+**Manually:** Create a YAML file in `config/domains/` (or add to an existing one):
+
+```yaml
+domains:
+  - id: "my_domain"
+    name: "My Government Agency"
+    enabled: true
+    base_url: "https://www.example.gov"
+    region: ["us"]
+    category: "energy_ministry"
+    tags: ["mandates"]
+    start_paths: ["/energy/policies/"]
+    max_depth: 2
+```
+
+Optionally add it to a group in `config/groups.yaml`.
+
+### Adding Keywords
+
+Edit `config/keywords.yaml` to add terms to any category/language:
+
+```yaml
+keywords:
+  subject:
+    weight: 3.0
+    terms:
+      en:
+        - "heat recovery mandate"  # Add new English terms
+      de:
+        - "Wärmerückgewinnung"      # Add new German terms
+```
+
+---
+
+## Cost Estimation
+
+Approximate costs per full scan (all 275 domains):
+
+| Stage | Model | Est. Calls | Est. Cost |
+|-------|-------|-----------|-----------|
+| Keyword filtering | — | ~27,500 pages | $0.00 |
+| Haiku screening | claude-haiku | ~2,750 | ~$0.50 |
+| Sonnet analysis | claude-sonnet | ~1,375 | ~$3.00 |
+| Post-scan auditor | claude-sonnet | 1 | ~$0.05 |
+| **Total** | | | **~$3.55** |
+
+Use the cost estimate endpoint before scanning: `POST /api/cost-estimate?domains=all`
+
+---
+
+## MCP Server (Advanced)
+
+For users with [Claude Desktop](https://claude.ai/download) or [Claude Code](https://docs.anthropic.com/en/docs/claude-code), the system also provides an MCP server with the same 11 policy tools. This is optional — most users should use the [AI Agent](#ai-agent) instead.
+
+```bash
+python -m src.mcp.server
+```
+
+Add to your Claude Desktop config (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "ocp-policy-hub": {
+      "command": "python",
+      "args": ["-m", "src.mcp.server"],
+      "cwd": "/path/to/ocp-policy-hub",
+      "env": {
+        "ANTHROPIC_API_KEY": "sk-ant-..."
+      }
+    }
+  }
+}
+```
+
+---
+
+## License
+
+[MIT](LICENSE)

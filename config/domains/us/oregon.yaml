@@ -1,0 +1,62 @@
+# =============================================================================
+# OREGON (OR)
+# =============================================================================
+# State abbreviation: OR
+# Region: us, us_states
+# =============================================================================
+
+domains:
+  - name: "Oregon Department of Energy"
+    id: "or_energy"
+    enabled: true
+    region:
+      - "us"
+      - "us_states"
+    base_url: "https://www.oregon.gov/energy"
+    start_paths:
+      - "/energy-programs"
+      - "/data-center-program"
+    max_depth: 2
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "guidance"
+    notes: "Pacific Northwest data center hub with renewable energy focus"
+
+  - name: "Oregon Energy Efficiency Specialty Code 2025"
+    id: "or_building_codes"
+    enabled: true
+    region:
+      - "us"
+      - "us_states"
+      - "oregon"
+    base_url: "https://www.oregon.gov"
+    start_paths:
+      - "/bcd/codes-stand/Documents/25oeesc.pdf"
+    max_depth: 1
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "building_codes"
+    tags:
+      - "mandatory"
+      - "ashrae_90_4"
+      - "hvac"
+      - "power_distribution"
+    policy_types:
+      - "building_codes"
+      - "energy_efficiency"
+    verified_by: "Deep Research"
+    verified_date: "2026-02-03"
+    notes: |
+      Oregon Energy Efficiency Specialty Code (OEESC) 2025.
+      DCs >100 kW IT load must comply with ASHRAE Standard 90.4.
+      'Energy Standard for Data Centers' covering HVAC and power distribution.
+      Effective July 1, 2025.
+

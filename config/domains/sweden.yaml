@@ -1,0 +1,74 @@
+
+# =============================================================================
+# SWEDEN - CONFIRMED DATA CENTER REPORTING
+# =============================================================================
+
+domains:
+  - name: "Swedish Energy Agency - Data Center Reporting"
+    id: "energimyndigheten_dc"
+    enabled: true
+    region:
+      - "eu"
+      - "nordic"
+    base_url: "https://www.energimyndigheten.se"
+    start_paths:
+      - "/en/sustainability/data-centers-energy-performance/"
+      - "/en/climate/climate/data-centre-energy-performance-reporting/"
+      - "/effektiv-energianvandning/foretag/rapportering-av-datacenters-energiprestanda/"
+    allowed_path_patterns:
+      - "/en/sustainability/*"
+      - "/en/climate/*"
+      - "/effektiv-energianvandning/*datacenter*"
+    max_depth: 2
+    language: "en"
+    requires_playwright: true
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "reporting"
+      - "efficiency"
+      - "heat_reuse"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    notes: |
+      CONFIRMED WORKING - Sweden's data center energy reporting page.
+      Law 2025:570 requires reporting for 500kW+ facilities.
+      Article 26.6 waste heat requirement in consultation (Nov 2025).
+      Sweden is national coordinator for EU database.
+      Keywords: spillvärme, datacenter, energiprestanda
+      Both Swedish and English versions available.
+
+  - name: "Sweden Data Center Energy Performance Disclosure Act"
+    id: "riksdagen_se_dc"
+    enabled: true
+    region:
+      - "eu"
+      - "sweden"
+      - "nordic"
+    base_url: "https://www.riksdagen.se"
+    start_paths:
+      - "/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-2025570-om-offentliggorande-av-information_sfs-2025-570/"
+    allowed_path_patterns:
+      - "/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/*"
+    max_depth: 1
+    language: "sv"
+    requires_playwright: true
+    rate_limit_seconds: 3.0
+    category: "legislation"
+    tags:
+      - "mandatory"
+      - "reporting"
+      - "waste_heat_data"
+      - "energimyndigheten"
+    policy_types:
+      - "legislation"
+      - "reporting_requirements"
+    verified_by: "Deep Research"
+    verified_date: "2026-02-03"
+    notes: |
+      Lag (2025:570) on disclosure of data center energy performance.
+      DCs >=500kW installed IT capacity must report annually.
+      Includes waste heat data per EU Delegated Regulation 2024/1364.
+      Supervised by Energimyndigheten (Swedish Energy Agency).
+      Effective July 1, 2025.

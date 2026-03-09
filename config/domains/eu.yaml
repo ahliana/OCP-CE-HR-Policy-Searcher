@@ -1,0 +1,294 @@
+# =============================================================================
+# EUROPEAN UNION DOMAINS
+# =============================================================================
+# EU institutions and member state energy agencies
+#
+# To add a domain: Copy an entry, update fields, test with --domains test
+# =============================================================================
+
+domains:
+  - name: "European Commission - Energy"
+    id: "ec_europa_energy"
+    enabled: true
+    region:
+      - "eu"
+    base_url: "https://energy.ec.europa.eu"
+    start_paths:
+      - "/topics/energy-efficiency"
+      - "/topics/energy-efficiency/energy-efficiency-targets-directive-and-rules"
+      - "/news"
+    allowed_path_patterns:
+      - "/topics/*"
+      - "/news/*"
+    blocked_path_patterns:
+      - "/system/files/*"
+    max_depth: 3
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "mandates"
+      - "efficiency"
+      - "reporting"
+    policy_types:
+      - "directive"
+      - "regulation"
+      - "guidance"
+    verified_by: "OCP Heat Reuse Group"
+    verified_date: "2024-10-31"
+    notes: |
+      EU Energy Efficiency Directive and related policies.
+
+  - name: "EUR-Lex (EU Law)"
+    id: "eur_lex"
+    enabled: true
+    region:
+      - "eu"
+    base_url: "https://eur-lex.europa.eu"
+    start_paths:
+      - "/search.html?scope=EURLEX&text=data+center+energy"
+      - "/legal-content/EN/TXT/?uri=CELEX:32023L1791"
+    allowed_path_patterns:
+      - "/legal-content/*"
+    max_depth: 2
+    language: "en"
+    requires_playwright: true
+    rate_limit_seconds: 3.0
+    category: "legislative"
+    tags:
+      - "mandates"
+    policy_types:
+      - "law"
+      - "directive"
+      - "regulation"
+    notes: "Official EU legislation database"
+
+  - name: "Dutch Government - RVO"
+    id: "rvo_nl"
+    enabled: true
+    region:
+      - "eu"
+      - "netherlands"
+    base_url: "https://www.rvo.nl"
+    start_paths:
+      - "/onderwerpen/duurzaam-ondernemen/energie-besparen"
+      - "/onderwerpen/energiebesparingsplicht/over-de-energiebesparingplicht"
+      - "/onderwerpen/energie-besparen-de-industrie/datacenters"
+      - "/onderwerpen/energiebesparingsplicht/eed-auditplicht/rapportageplicht-datacentra"
+    allowed_path_patterns:
+      - "/onderwerpen/energiebesparingsplicht/*"
+      - "/onderwerpen/energie-besparen*"
+      - "/onderwerpen/duurzaam-ondernemen/*"
+    max_depth: 2
+    language: "nl"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "regulation"
+    tags:
+      - "mandatory"
+      - "energy_efficiency"
+      - "payback_period"
+      - "reporting"
+      - "recognized_measures"
+      - "waste_heat"
+    policy_types:
+      - "energy_efficiency"
+      - "waste_heat_recovery"
+      - "reporting_requirements"
+      - "guidance"
+    verified_by: "Deep Research"
+    verified_date: "2026-02-03"
+    notes: |
+      Netherlands Enterprise Agency - Energiebesparingsplicht (Energy Saving Obligation).
+      Companies using >=50,000 kWh must implement all measures with <=5yr payback.
+      Report measures every 4 years. Expanded requirements from 2023.
+      Recognized data center measures (Erkende Maatregelenlijst): FD1-FD3 plus six for server rooms.
+      Includes: power management, efficient cooling, waste heat recovery.
+      DCs >=500kW IT capacity must report annually by May 15 (EU EED Article 12).
+      Data forwarded to European Commission.
+
+
+
+# =============================================================================
+# EU - CONFIRMED DATA CENTER DIRECTIVE & REPORTING SCHEME
+# =============================================================================
+
+  - name: "EUR-Lex Energy Efficiency Directive 2023/1791"
+    id: "eurlex_eed_2023"
+    enabled: true
+    region:
+      - "eu"
+    base_url: "https://eur-lex.europa.eu"
+    start_paths:
+      - "/eli/dir/2023/1791/oj/eng"
+      - "/legal-content/EN/TXT/HTML/?uri=CELEX:32023L1791"
+      - "/EN/legal-content/summary/energy-efficiency-from-2025.html"
+    allowed_path_patterns:
+      - "/eli/dir/2023/*"
+      - "/legal-content/EN/*32023L1791*"
+    max_depth: 1
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "legislation"
+    tags:
+      - "mandates"
+      - "reporting"
+      - "efficiency"
+    policy_types:
+      - "directive"
+      - "law"
+    notes: |
+      CONFIRMED WORKING - EU Energy Efficiency Directive (recast).
+      Article 12: Data center reporting obligations (500kW+ facilities).
+      Article 26.6: Waste heat utilization requirements (1MW+ facilities).
+      Annex VII: Reporting information requirements.
+      Transposition deadline: October 2025.
+
+  - name: "EUR-Lex Data Centre Delegated Regulation 2024/1364"
+    id: "eurlex_dc_regulation"
+    enabled: true
+    region:
+      - "eu"
+    base_url: "https://eur-lex.europa.eu"
+    start_paths:
+      - "/eli/reg_del/2024/1364/oj/eng"
+      - "/legal-content/EN/TXT/HTML/?uri=OJ:L_202401364"
+    allowed_path_patterns:
+      - "/eli/reg_del/2024/*"
+      - "/legal-content/EN/*202401364*"
+    max_depth: 1
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "legislation"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    notes: |
+      CONFIRMED WORKING - EU data center sustainability rating scheme.
+      Sets KPIs: energy consumption, water usage, WASTE HEAT UTILIZATION.
+      Reporting deadline: 15 May annually.
+      500kW+ installed IT power threshold.
+
+  - name: "EU Commission Recommendation 2024/2395 - Article 26 Guidelines"
+    id: "eurlex_eed_recommendation"
+    enabled: true
+    region:
+      - "eu"
+    base_url: "https://eur-lex.europa.eu"
+    start_paths:
+      - "/eli/reco/2024/2395/oj/eng"
+    allowed_path_patterns:
+      - "/eli/reco/2024/*"
+      - "/legal-content/EN/*2024/2395*"
+    max_depth: 1
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "guidance"
+    tags:
+      - "guidance"
+      - "article_26"
+      - "cost_benefit_analysis"
+      - "interpretation"
+    policy_types:
+      - "guidance"
+      - "waste_heat_recovery"
+    verified_by: "Deep Research"
+    verified_date: "2026-02-03"
+    notes: |
+      Official interpretation guidelines for EED Article 26(6).
+      Clarifies requirement applies to ALL operating DCs >1MW without current waste heat use.
+      Cost-benefit analysis mandatory where no recovery exists.
+      Waste heat treated as revenue-generating energy product.
+
+  - name: "EC Energy - Data Centre Performance"
+    id: "ec_energy_datacentres"
+    enabled: true
+    region:
+      - "eu"
+    base_url: "https://energy.ec.europa.eu"
+    start_paths:
+      - "/topics/energy-efficiency/energy-efficiency-targets-directive-and-rules/energy-efficiency-directive/energy-performance-data-centres_en"
+      - "/topics/energy-efficiency/energy-efficiency-targets-directive-and-rules/energy-efficiency-directive_en"
+    allowed_path_patterns:
+      - "/topics/energy-efficiency/*data-centre*"
+      - "/news/*data-centre*"
+      - "/publications/*data-centre*"
+    max_depth: 2
+    language: "en"
+    requires_playwright: true
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "reporting"
+      - "guidance"
+      - "efficiency"
+    policy_types:
+      - "guidance"
+      - "report"
+    notes: |
+      CONFIRMED WORKING - EC main page for data center energy performance.
+      Links to European database, user manuals, reporting guidance.
+      Dashboard with aggregated data center KPIs.
+      Data Centre Energy Efficiency Package planned March 2026.
+
+  - name: "EU JRC Code of Conduct for Data Centres"
+    id: "jrc_coc_datacentres"
+    enabled: true
+    region:
+      - "eu"
+    base_url: "https://joint-research-centre.ec.europa.eu"
+    start_paths:
+      - "/scientific-activities-z/energy-efficiency/energy-efficiency-products/code-conduct-ict/european-code-conduct-energy-efficiency-data-centres_en"
+    allowed_path_patterns:
+      - "/scientific-activities-z/energy-efficiency/*data-centre*"
+      - "/jrc-news-and-updates/*data-centre*"
+    max_depth: 2
+    language: "en"
+    requires_playwright: true
+    rate_limit_seconds: 3.0
+    category: "standards"
+    tags:
+      - "efficiency"
+      - "best_practices"
+    policy_types:
+      - "guidance"
+      - "standard"
+    notes: |
+      CONFIRMED WORKING - EU voluntary Code of Conduct.
+      Best practices including heat reuse/recovery.
+      Referenced in Taxonomy Regulation and EED Article 12.
+      Annual awards for efficiency achievements.
+
+  - name: "EU E3P Data Centres Code of Conduct"
+    id: "e3p_coc"
+    enabled: true
+    region:
+      - "eu"
+    base_url: "https://e3p.jrc.ec.europa.eu"
+    start_paths:
+      - "/en/groups/data-centres-code-conduct"
+      - "/en/publications/2024-best-practice-guidelines-eu-code-conduct-data-centre-energy-efficiency"
+    allowed_path_patterns:
+      - "/groups/data-centres*"
+      - "/publications/*data-centre*"
+      - "/en/publications/*"
+    max_depth: 2
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "standards"
+    tags:
+      - "efficiency"
+      - "best_practices"
+    policy_types:
+      - "guidance"
+    notes: |
+      CONFIRMED WORKING - E3P platform with CoC publications.
+      Annual Best Practice Guidelines PDFs.
+      Includes waste heat recovery best practices.
