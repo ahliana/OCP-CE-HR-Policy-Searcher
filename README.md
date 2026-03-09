@@ -11,6 +11,7 @@ Built for the [Open Compute Project](https://www.opencompute.org/) to track glob
 ```bash
 git clone https://github.com/ahliana/ocp-policy-hub.git
 cd ocp-policy-hub
+python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -e .
 cp config/example.env .env        # then edit .env and add your API key
 python -m src.agent
@@ -138,6 +139,8 @@ The **AI agent** is the primary entry point. It uses the Anthropic API's tool us
 ```bash
 git clone https://github.com/ahliana/ocp-policy-hub.git
 cd ocp-policy-hub
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e .
 ```
 
@@ -889,6 +892,8 @@ ocp-policy-hub/
 ```bash
 git clone https://github.com/ahliana/ocp-policy-hub.git
 cd ocp-policy-hub
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
 

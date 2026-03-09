@@ -973,3 +973,126 @@ class TestAgentAPIErrors:
         result = await agent.run("Test", on_text=lambda t: text_received.append(t))
         assert "API error" in result
         assert len(text_received) == 1
+
+
+# ---------------------------------------------------------------------------
+# 11. README onboarding flow — fresh-clone experience
+# ---------------------------------------------------------------------------
+
+class TestOnboardingFlow:
+    """Verify the README 'Try it now' steps work for a new user.
+
+    Tests the full flow: pyproject.toml is valid, example.env exists,
+    config loads, python -m src.agent shows helpful errors when
+    prerequisites are missing, and the entry point works end-to-end.
+    """
+
+    def test_pyproject_toml_exists_at_repo_root(self):
+        """pip install -e . requires pyproject.toml at the repo root."""
+        pyproject = Path("pyproject.toml")
+        assert pyproject.exists(), "pyproject.toml not found at repo root"
+
+    def test_pyproject_toml_has_project_metadata(self):
+        """pyproject.toml has enough metadata for pip install."""
+        content = Path("pyproject.toml").read_text(encoding="utf-8")
+        assert "[project]" in content
+        assert 'name = "ocp-policy-hub"' in content
+        assert "dependencies" in content
+
+    def test_example_env_exists(self):
+        """cp config/example.env .env — the source file must exist."""
+        assert Path("config/example.env").exists()
+
+    def test_example_env_has_api_key_placeholder(self):
+        """example.env should have an ANTHROPIC_API_KEY line to fill in."""
+        content = Path("config/example.env").read_text(encoding="utf-8")
+        assert "ANTHROPIC_API_KEY" in content
+
+    def test_example_env_has_sheets_placeholders(self):
+        """example.env should document the optional Sheets config."""
+        content = Path("config/example.env").read_text(encoding="utf-8")
+        assert "GOOGLE_CREDENTIALS" in content
+        assert "SPREADSHEET_ID" in content
+
+    def test_config_dir_exists_with_required_files(self):
+        """Real config dir has all files the loader expects."""
+        config = Path("config")
+        assert (config / "settings.yaml").exists()
+        assert (config / "keywords.yaml").exists()
+        assert (config / "groups.yaml").exists()
+        assert (config / "domains").is_dir()
+        domain_files = list((config / "domains").glob("*.yaml"))
+        assert len(domain_files) > 0, "No domain YAML files found"
+
+    def test_config_loads_from_repo_root(self):
+        """ConfigLoader succeeds with real config files."""
+        from src.core.config import ConfigLoader
+
+        c = ConfigLoader(config_dir="config")
+        c.load()
+        assert len(c.get_enabled_domains("all")) > 100
+
+    def test_agent_no_api_key_exits_with_helpful_error(self, monkeypatch, capsys):
+        """python -m src.agent with no key shows a helpful message."""
+        # Import first so module-level load_dotenv() runs and gets cached.
+        # Then delenv removes the key — main() won't find it.
+        from src.agent.__main__ import main
+
+        monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+
+        with pytest.raises(SystemExit) as exc_info:
+            main()
+        assert exc_info.value.code == 1
+
+        output = capsys.readouterr().out
+        assert "ANTHROPIC_API_KEY" in output
+        assert "example.env" in output
+        assert "console.anthropic.com" in output
+
+    def test_agent_no_api_key_shows_cross_platform_help(self, monkeypatch, capsys):
+        """Error message includes both bash and PowerShell syntax."""
+        from src.agent.__main__ import main
+
+        monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+
+        with pytest.raises(SystemExit):
+            main()
+
+        output = capsys.readouterr().out
+        assert "export ANTHROPIC_API_KEY" in output  # bash/zsh
+        assert "$env:ANTHROPIC_API_KEY" in output    # PowerShell
+
+    def test_agent_placeholder_key_starts(self, monkeypatch):
+        """Agent starts (doesn't crash) with a placeholder key.
+
+        It will fail at first API call, but the config loading and
+        initialization should succeed.
+        """
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-api03-placeholder")
+        from src.agent.orchestrator import PolicyAgent
+
+        agent = PolicyAgent(
+            api_key="sk-ant-api03-placeholder",
+            config_dir="config",
+            data_dir="data",
+        )
+        assert len(agent.tools) == 13
+        assert agent.config is not None
+
+    def test_rest_api_starts_without_api_key(self):
+        """FastAPI server starts even without an API key.
+
+        The API key is only needed for agent/analysis endpoints,
+        not for domain listing or config endpoints.
+        """
+        from fastapi.testclient import TestClient
+        from src.api.app import app
+
+        with TestClient(app) as client:
+            r = client.get("/health")
+            assert r.status_code == 200
+            assert r.json()["status"] == "ok"
+
+            r = client.get("/api/domains")
+            assert r.status_code == 200
+            assert r.json()["count"] > 100

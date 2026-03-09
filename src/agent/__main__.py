@@ -114,10 +114,15 @@ def main():
     # Check for API key
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
-        print("Error: ANTHROPIC_API_KEY environment variable is required.")
+        print("Error: ANTHROPIC_API_KEY is not set.")
         print()
-        print("Set it with:")
-        print("  export ANTHROPIC_API_KEY=sk-ant-...")
+        print("Quick fix — add your key to the .env file:")
+        print("  cp config/example.env .env")
+        print("  # then edit .env and paste your key")
+        print()
+        print("Or set it directly in your shell:")
+        print("  Linux/macOS:  export ANTHROPIC_API_KEY=sk-ant-...")
+        print("  PowerShell:   $env:ANTHROPIC_API_KEY='sk-ant-...'")
         print()
         print("Get your key at: https://console.anthropic.com/")
         sys.exit(1)
