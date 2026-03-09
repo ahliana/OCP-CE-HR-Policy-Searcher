@@ -8,11 +8,10 @@ Built for the [Open Compute Project](https://www.opencompute.org/) to track glob
 
 ### Try it now
 
-```bash
+```powershell
 git clone https://github.com/ahliana/ocp-policy-hub.git
 cd ocp-policy-hub
-./setup.sh              # Windows: .\setup.ps1
-# edit .env and add your API key
+.\setup.ps1             # Linux/macOS: ./setup.sh
 python -m src.agent
 ```
 
@@ -55,6 +54,7 @@ Found 3 policies:
 - [Project Structure](#project-structure)
 - [Development](#development)
 - [MCP Server (Advanced)](#mcp-server-advanced)
+- [Troubleshooting](#troubleshooting)
 - [License](#license)
 
 ---
@@ -135,23 +135,25 @@ The **AI agent** is the primary entry point. It uses the Anthropic API's tool us
 
 ### Install
 
-```bash
+```powershell
 git clone https://github.com/ahliana/ocp-policy-hub.git
 cd ocp-policy-hub
-./setup.sh              # Windows: .\setup.ps1
+.\setup.ps1             # Linux/macOS: ./setup.sh
 ```
 
 The setup script automatically creates a virtual environment, installs all dependencies, and copies the example `.env` file. On Windows, if you get a script execution error, run `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` first.
 
 ### Configure
 
-```bash
-cp config/example.env .env
-# Edit .env and add your ANTHROPIC_API_KEY
-# For Google Sheets export, also add GOOGLE_CREDENTIALS and SPREADSHEET_ID
+Open `.env` (created by the setup script) and add your Anthropic API key:
+
+```
+ANTHROPIC_API_KEY=sk-ant-api03-your-real-key-here
 ```
 
-The `.env` file is auto-loaded on startup (via `python-dotenv`) — no need to manually `source` or `export`.
+Get your key at [console.anthropic.com](https://console.anthropic.com/). For Google Sheets export, also add `GOOGLE_CREDENTIALS` and `SPREADSHEET_ID`.
+
+The `.env` file is auto-loaded on startup — no need to manually `source` or `export`.
 
 ### Run the AI Agent (recommended)
 
@@ -862,7 +864,7 @@ ocp-policy-hub/
 │   │   └── server.py           # MCP server (11 tools, advanced)
 │   └── storage/
 │       └── store.py            # JSON persistence
-├── tests/                      # 327 tests (244 unit + 83 integration)
+├── tests/                      # 346 tests (244 unit + 102 integration)
 │   ├── unit/
 │   │   ├── test_agent.py       # Agent tool + dispatch tests
 │   │   ├── test_api.py         # FastAPI endpoint tests
@@ -890,10 +892,10 @@ ocp-policy-hub/
 
 ### Setup
 
-```bash
+```powershell
 git clone https://github.com/ahliana/ocp-policy-hub.git
 cd ocp-policy-hub
-./setup.sh --dev        # Windows: .\setup.ps1 -Dev
+.\setup.ps1 -Dev        # Linux/macOS: ./setup.sh --dev
 ```
 
 ### Linting
@@ -906,7 +908,7 @@ ruff format src/
 ### Testing
 
 ```bash
-pytest                    # Run all 327 tests
+pytest                    # Run all 346 tests
 pytest tests/unit/        # Unit tests only (244)
 pytest tests/integration/ # Integration tests only (83)
 pytest --cov=src          # With coverage report
@@ -993,6 +995,39 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
     }
   }
 }
+```
+
+---
+
+## Troubleshooting
+
+### "ANTHROPIC_API_KEY looks like the placeholder value"
+
+The `.env` file still has the example key from setup. Open `.env` and replace the `ANTHROPIC_API_KEY` value with your real key from [console.anthropic.com](https://console.anthropic.com/). Real keys are 100+ characters starting with `sk-ant-`.
+
+### "Authentication failed — your API key is invalid"
+
+Your key is being sent but rejected. Common causes:
+- The key was copied with extra spaces or missing characters
+- The key has been revoked — generate a new one at [console.anthropic.com](https://console.anthropic.com/)
+- A stale empty `ANTHROPIC_API_KEY` in your system environment is overriding `.env` — close and reopen your terminal, or run `Remove-Item Env:ANTHROPIC_API_KEY` (PowerShell) / `unset ANTHROPIC_API_KEY` (bash)
+
+### "ANTHROPIC_API_KEY is not set"
+
+The `.env` file is missing or doesn't have the key. The setup script should have created it — if not, copy it manually:
+
+```powershell
+copy config\example.env .env      # Linux/macOS: cp config/example.env .env
+```
+
+Then edit `.env` and add your key.
+
+### Script execution error on Windows
+
+If `.\setup.ps1` fails with a security error, run this once:
+
+```powershell
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 ---
