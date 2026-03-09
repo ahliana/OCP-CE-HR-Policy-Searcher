@@ -144,12 +144,14 @@ pip install -e .
 ```bash
 cp config/example.env .env
 # Edit .env and add your ANTHROPIC_API_KEY
+# For Google Sheets export, also add GOOGLE_CREDENTIALS and SPREADSHEET_ID
 ```
+
+The `.env` file is auto-loaded on startup (via `python-dotenv`) — no need to manually `source` or `export`.
 
 ### Run the AI Agent (recommended)
 
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-...
 python -m src.agent
 ```
 
