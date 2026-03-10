@@ -57,6 +57,7 @@ Found 3 policies:
 - [Development](#development)
 - [MCP Server (Advanced)](#mcp-server-advanced)
 - [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
 - [License](#license)
 
 ---
@@ -659,23 +660,25 @@ Use groups to scan related sets of domains. Pass the group name as the `domains`
 
 | Group | Domains | Description |
 |-------|---------|-------------|
-| `all` | 275 | Every enabled domain |
-| `eu` | 10 | EU institutions + member states |
+| `all` | 301 | Every enabled domain |
+| `eu` | 46 | EU institutions + member states |
 | `nordic` | 12 | Sweden, Denmark, Finland, Norway, Iceland |
-| `eu_central` | ~15 | Germany, Switzerland, Austria, France |
-| `eu_west` | ~8 | Netherlands, Belgium, Ireland |
-| `us` | 11 | US federal + key states |
-| `us_federal` | ~5 | Federal agencies only |
-| `us_states` | 24 | US state governments |
-| `apac` | 6 | Singapore, Japan, South Korea, Australia |
+| `eu_central` | 21 | Germany, Switzerland, Austria, France |
+| `eu_west` | 3 | Netherlands, Belgium, Ireland |
+| `eu_south` | 8 | Spain, Italy, Portugal, Greece |
+| `eu_east` | 8 | Poland, Czech Republic, Hungary, Romania |
+| `us` | 154 | US federal + all 50 states |
+| `us_federal` | 6 | Federal agencies only |
+| `us_states` | 148 | US state governments |
+| `apac` | 7 | Singapore, Japan, South Korea, Australia |
 
 ### Thematic
 
 | Group | Domains | Description |
 |-------|---------|-------------|
-| `federal` | ~15 | National/EU-level only (no states/provinces) |
+| `federal` | 8 | National/EU-level only (no states/provinces) |
 | `leaders` | 9 | Countries with most advanced heat reuse policies |
-| `emerging` | 8 | Countries with emerging regulations |
+| `emerging` | 7 | Countries with emerging regulations |
 
 You can also use **region names** (`germany`, `france`, `denmark`), **domain file names**, or **individual domain IDs** as the group parameter.
 
@@ -697,11 +700,11 @@ The keyword matcher scores page content across 7 weighted categories in 17 langu
 | `context` | 1.0 | data center, server farm, hyperscale |
 | `energy` | 1.0 | PUE, energy efficiency, decarbonization |
 
-### Languages
+### Languages (17)
 
-English (en), German (de), French (fr), Dutch (nl), Swedish (sv), Danish (da), Italian (it), Spanish (es), Norwegian (no), Finnish (fi), Icelandic (is)
+English (en), German (de), French (fr), Dutch (nl), Swedish (sv), Danish (da), Italian (it), Spanish (es), Norwegian (no), Finnish (fi), Icelandic (is), Polish (pl), Portuguese (pt), Czech (cs), Greek (el), Hungarian (hu), Romanian (ro)
 
-German, Dutch, Swedish, Danish, Norwegian, Finnish, and Icelandic use **substring matching** instead of word boundaries to handle compound words (e.g., "Rechenzentrumsabwärmenutzungsverordnung", "spillvarmeprosjekt").
+German, Dutch, Swedish, Danish, Norwegian, Finnish, Icelandic, and Hungarian use **substring matching** instead of word boundaries to handle compound words (e.g., "Rechenzentrumsabwärmenutzungsverordnung", "spillvarmeprosjekt", "hulladékhőhasznosítás").
 
 ### Scoring
 
@@ -886,7 +889,7 @@ ocp-policy-hub/
 │   │   └── server.py           # MCP server (11 tools, advanced)
 │   └── storage/
 │       └── store.py            # JSON persistence
-├── tests/                      # 389 tests (276 unit + 113 integration)
+├── tests/                      # 389 tests (280 unit + 109 integration)
 │   ├── unit/
 │   │   ├── test_agent.py       # Agent tool + dispatch tests
 │   │   ├── test_api.py         # FastAPI endpoint tests
@@ -894,7 +897,7 @@ ocp-policy-hub/
 │   │   ├── test_crawler.py     # Web crawler tests
 │   │   ├── test_domain_generator.py  # Domain ID/region tests
 │   │   ├── test_extractor.py   # HTML extraction tests
-│   │   ├── test_keywords.py    # Keyword matcher tests
+│   │   ├── test_keywords.py    # Keyword matcher tests (49 tests, 17 languages)
 │   │   ├── test_llm.py         # Claude client tests
 │   │   ├── test_scanner.py     # Domain scanner tests
 │   │   ├── test_sheets.py      # Sheets export + Policy row tests
@@ -902,7 +905,8 @@ ocp-policy-hub/
 │   │   └── test_verifier.py    # Verification flag tests
 │   └── integration/
 │       ├── test_agent_loop.py  # Agent loop tests (mocked API)
-│       └── test_full_pipeline.py  # End-to-end pipeline tests
+│       ├── test_discovery.py   # Discovery workflow + auto-group tests
+│       └── test_full_pipeline.py  # End-to-end pipeline + onboarding tests
 └── data/                       # Runtime data (gitignored)
     ├── url_cache.json
     └── policies.json
@@ -931,8 +935,8 @@ ruff format src/
 
 ```bash
 pytest                    # Run all 389 tests
-pytest tests/unit/        # Unit tests only (~257)
-pytest tests/integration/ # Integration tests only (~103)
+pytest tests/unit/        # Unit tests only (280)
+pytest tests/integration/ # Integration tests only (109)
 pytest --cov=src          # With coverage report
 ```
 
@@ -980,7 +984,7 @@ keywords:
 
 ## Cost Estimation
 
-Approximate costs per full scan (all 275 domains):
+Approximate costs per full scan (all 301 domains):
 
 | Stage | Model | Est. Calls | Est. Cost |
 |-------|-------|-----------|-----------|
@@ -1051,6 +1055,69 @@ If `.\setup.ps1` fails with a security error, run this once:
 ```powershell
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
+
+---
+
+## Contributing
+
+Contributions are welcome! This project is open source under the MIT license.
+
+### Getting Started
+
+1. Fork the repo and clone it
+2. Run `.\setup.ps1 -Dev` (Windows) or `./setup.sh --dev` (Linux/macOS) — this installs dev dependencies including pytest and ruff
+3. Create a branch for your feature: `git checkout -b my-feature`
+4. Make your changes and verify they pass: `pytest && ruff check src/ tests/`
+5. Submit a pull request
+
+### Where to Contribute
+
+**Add a new country or region:**
+1. Create a domain YAML file in `config/domains/` (follow `germany.yaml` as a template)
+2. Add keywords in the country's language to `config/keywords.yaml` (all 7 categories)
+3. If the language has compound words (like German or Hungarian), add it to `COMPOUND_LANGUAGES` in `src/core/keywords.py`
+4. Add the new region to `VALID_REGIONS` in `src/core/config.py`
+5. Add TLD mappings to `TLD_REGION_MAP` in `src/agent/domain_generator.py`
+6. Update `config/groups.yaml` with the new domains
+7. Add tests to `tests/unit/test_keywords.py`
+
+**Improve keyword accuracy:**
+- Edit `config/keywords.yaml` — add terms, adjust weights, add boost/penalty phrases
+- Test with: `python -m src.agent "Match keywords: 'your test text here'"`
+
+**Fix bugs or improve code:**
+- All source code is in `src/`, organized into `core/`, `agent/`, `api/`, `orchestration/`, `output/`, `mcp/`, `storage/`
+- The [Architecture](#architecture) section explains how the pipeline works
+- Run `ruff check src/` to verify code style
+
+### Code Architecture (for contributors)
+
+```
+User input → Agent (orchestrator.py) → Tool dispatch (tools.py)
+                                              ↓
+                            Per-domain pipeline (scanner.py):
+                            crawl → extract → url_filter → keywords
+                            → cache_check → haiku_screen → sonnet_analyze → verify
+                                              ↓
+                            Post-scan: verifier → auditor → store → sheets export
+```
+
+Key abstractions:
+- **`ConfigLoader`** (`src/core/config.py`) — loads all YAML configs, resolves domain groups
+- **`KeywordMatcher`** (`src/core/keywords.py`) — multi-language scoring with compound word support
+- **`ClaudeClient`** (`src/core/llm.py`) — two-stage LLM (Haiku screens, Sonnet analyzes)
+- **`ScanManager`** (`src/orchestration/scan_manager.py`) — parallel scan orchestration
+- **`PolicyAgent`** (`src/agent/orchestrator.py`) — Anthropic API tool-use loop
+- **`REGION_TO_GROUPS`** (`src/agent/tools.py`) — maps regions to groups for auto-assignment
+
+### Test Categories
+
+| Category | Count | Location | What it covers |
+|----------|-------|----------|----------------|
+| Unit tests | 280 | `tests/unit/` | Keywords, models, API routes, agent tools, cache, crawler, verifier |
+| Integration tests | 109 | `tests/integration/` | Full pipeline, agent loop, discovery workflow, onboarding |
+| Edge case tests | ~95 | across both | Missing files, invalid input, duplicates, error handling |
+| Onboarding tests | 51 | `test_full_pipeline.py` | Setup scripts, env files, banner, error messages, CLI feedback |
 
 ---
 
