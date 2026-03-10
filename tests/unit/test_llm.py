@@ -85,11 +85,17 @@ class TestCoerceTypes:
             "jurisdiction": "N/A",
             "summary": "None",
             "effective_date": "n/a",
+            "key_requirements": "unknown",
+            "bill_number": "None",
         })
-        assert result["policy_name"] is None
-        assert result["jurisdiction"] is None
-        assert result["summary"] is None
+        # Required str fields → "" (not None), so Pydantic won't crash
+        assert result["policy_name"] == ""
+        assert result["jurisdiction"] == ""
+        assert result["summary"] == ""
+        assert result["key_requirements"] == ""
+        # Optional fields → None
         assert result["effective_date"] is None
+        assert result["bill_number"] is None
 
     def test_missing_relevance_explanation(self):
         result = _coerce_types({})

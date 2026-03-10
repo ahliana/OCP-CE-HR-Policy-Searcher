@@ -59,7 +59,7 @@ analysis:
   enable_llm_analysis: true
 
   # Which Claude model to use for full analysis
-  # Options: claude-sonnet-4-20250514, claude-haiku-4-20250514
+  # Options: claude-sonnet-4-20250514, claude-haiku-4-5-20251001
   # Sonnet is more accurate for detailed extraction
   llm_model: "claude-sonnet-4-20250514"
 
@@ -88,7 +88,7 @@ analysis:
 
   # Model for quick relevance screening (fast and cheap)
   # Haiku costs ~$0.25/MTok vs Sonnet ~$3/MTok (12x cheaper)
-  screening_model: "claude-haiku-4-20250514"
+  screening_model: "claude-haiku-4-5-20251001"
 
   # Minimum confidence from screening to proceed to full analysis
   # 1-10 scale. Lower = more permissive, higher = more strict

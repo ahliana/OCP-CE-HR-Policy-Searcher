@@ -167,7 +167,7 @@ class ConfigLoader:
             min_keyword_matches=analysis_data.get("min_keyword_matches", 2),
             enable_llm_analysis=analysis_data.get("enable_llm_analysis", True),
             analysis_model=analysis_data.get("analysis_model", "claude-sonnet-4-20250514"),
-            screening_model=analysis_data.get("screening_model", "claude-haiku-4-20250514"),
+            screening_model=analysis_data.get("screening_model", "claude-haiku-4-5-20251001"),
             enable_two_stage=analysis_data.get("enable_two_stage", True),
             screening_min_confidence=analysis_data.get("screening_min_confidence", 5),
         )

@@ -182,10 +182,17 @@ def _coerce_types(data: dict) -> dict:
             result["relevance_score"] = max(0, min(10, result["relevance_score"]))
 
     # Normalize null-like values
+    # Optional[str] fields get None; required str fields get ""
+    _OPTIONAL_FIELDS = {"effective_date", "bill_number"}
     for key in ["policy_name", "jurisdiction", "summary", "effective_date",
                 "key_requirements", "bill_number", "relevance_explanation"]:
         if key in result and result[key] in _NULL_VALUES:
-            result[key] = "No explanation provided" if key == "relevance_explanation" else None
+            if key == "relevance_explanation":
+                result[key] = "No explanation provided"
+            elif key in _OPTIONAL_FIELDS:
+                result[key] = None
+            else:
+                result[key] = ""  # required str fields can't be None
 
     if "relevance_explanation" not in result or not result["relevance_explanation"]:
         result["relevance_explanation"] = "No explanation provided"
@@ -211,7 +218,7 @@ class ClaudeClient:
         self,
         api_key: str,
         analysis_model: str = "claude-sonnet-4-20250514",
-        screening_model: str = "claude-haiku-4-20250514",
+        screening_model: str = "claude-haiku-4-5-20251001",
     ):
         self.client = anthropic.AsyncAnthropic(api_key=api_key)
         self.analysis_model = analysis_model
@@ -259,6 +266,16 @@ class ClaudeClient:
 
         except anthropic.AuthenticationError as e:
             raise LLMAuthError(f"Authentication failed: {e}") from e
+        except anthropic.NotFoundError:
+            # Model doesn't exist — log ONCE and disable screening
+            if not getattr(self, "_screening_model_warned", False):
+                logger.error(
+                    f"Screening model '{self.screening_model}' not found (404). "
+                    f"All pages will bypass screening and go directly to analysis. "
+                    f"Fix: update 'screening_model' in config/settings.yaml to a valid model."
+                )
+                self._screening_model_warned = True
+            return ScreeningResult(relevant=True, confidence=5)
         except Exception as e:
             # Fail open: any error → assume relevant
             logger.warning(f"Screening error for {url}: {e}, assuming relevant")
