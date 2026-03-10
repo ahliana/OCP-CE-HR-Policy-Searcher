@@ -68,6 +68,11 @@ def _on_tool_call(name: str, input_data: dict):
     print(f"\n  [{status}]\n")
 
 
+# Track which domains have already been celebrated, so we only show the
+# 🎉 line once per domain instead of repeating it on every poll.
+_celebrated_domains: set[str] = set()
+
+
 def _on_tool_result(name: str, result):
     """Show brief result summaries for key tools.
 
@@ -82,8 +87,13 @@ def _on_tool_result(name: str, result):
         print(f"  → Found {result['count']} domains")
 
     elif name == "start_scan" and "scan_id" in result:
-        print(f"  → Scan {result['scan_id']} started "
-              f"({result.get('domain_count', '?')} domains)")
+        msg = (f"  → Scan {result['scan_id']} started "
+               f"({result.get('domain_count', '?')} domains)")
+        if result.get("warning"):
+            msg += f"\n  ⚠️  {result['warning']}"
+        print(msg)
+        # Reset celebrations for the new scan
+        _celebrated_domains.clear()
 
     elif name == "get_scan_status" and "status" in result:
         progress = result.get("progress", {})
@@ -102,15 +112,17 @@ def _on_tool_result(name: str, result):
             icon = "→"
 
         print(f"  {icon} {result['status']}: {done}/{total} domains, "
-              f"{policies} policies found")
+              f"{policies} policies found so far (running total)")
 
-        # Highlight individual domains that found policies — these are
-        # rare and important, so make them visually prominent
+        # Celebrate domains that found policies — but only the FIRST time
+        # we see them, so the celebration doesn't repeat on every poll.
         for dp in progress.get("domains", []):
             found = dp.get("policies_found", 0)
-            if found > 0:
-                name_str = dp.get("domain_name", dp.get("domain_id", "?"))
-                print(f"  🎉 ★ {name_str}: {found} policy(ies) found! ★")
+            domain_key = dp.get("domain_id", dp.get("domain_name", ""))
+            if found > 0 and domain_key not in _celebrated_domains:
+                _celebrated_domains.add(domain_key)
+                name_str = dp.get("domain_name", domain_key)
+                print(f"  🎉 NEW: {name_str} — {found} policy(ies) found!")
 
     elif name == "estimate_cost" and "estimated_cost_usd" in result:
         print(f"  → Estimated cost: ${result['estimated_cost_usd']:.2f} "

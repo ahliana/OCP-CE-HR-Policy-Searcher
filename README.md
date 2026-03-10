@@ -996,7 +996,7 @@ ocp-policy-hub/
 │   │   └── server.py           # MCP server (11 tools, advanced)
 │   └── storage/
 │       └── store.py            # JSON persistence
-├── tests/                      # 426 tests (296 unit + 130 integration)
+├── tests/                      # 432 tests (296 unit + 136 integration)
 │   ├── unit/
 │   │   ├── test_agent.py       # Agent tool + dispatch tests
 │   │   ├── test_api.py         # FastAPI endpoint tests
@@ -1041,7 +1041,7 @@ ruff format src/
 ### Testing
 
 ```bash
-pytest                    # Run all 426 tests
+pytest                    # Run all 432 tests
 pytest tests/unit/        # Unit tests only (296)
 pytest tests/integration/ # Integration tests only (130)
 pytest --cov=src          # With coverage report
@@ -1171,7 +1171,7 @@ Contributions are welcome! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the fu
 
 - Step-by-step instructions for adding a new country or region
 - Code style expectations (ruff, type hints, Pydantic models)
-- How to run the 426-test suite and lint checks
+- How to run the 432-test suite and lint checks
 - Domain YAML format template
 - PR checklist
 
@@ -1181,7 +1181,7 @@ Contributions are welcome! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the fu
 git clone https://github.com/ahliana/ocp-policy-hub.git
 cd ocp-policy-hub
 .\setup.ps1 -Dev        # Linux/macOS: ./setup.sh --dev
-pytest                   # All 426 tests must pass
+pytest                   # All 432 tests must pass
 ruff check src/ tests/   # No lint errors
 ```
 

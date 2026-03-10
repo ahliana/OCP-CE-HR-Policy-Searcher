@@ -134,6 +134,21 @@ give the user a brief progress summary. When all domains are complete, show \
 the final results. Results are saved automatically per-domain, so nothing is \
 lost even if the session ends early.
 
+IMPORTANT — how to present policy counts:
+- The policy_count in get_scan_status is a RUNNING TOTAL across all completed \
+domains. It only increases when a new domain finishes with results — it does \
+NOT mean new policies were found since the last check.
+- Only highlight a policy find when you see a domain's policies_found go from \
+0 to a positive number for the FIRST time. Don't re-announce the same find \
+on every poll.
+- When reporting progress, say "X policies found so far" or "running total: X" \
+to make it clear the number is cumulative, not per-check.
+
+CONCURRENT SCANS: You can start a new scan while another is running — both \
+will complete. But warn the user: both scans share the same API key, so rate \
+limits may cause retries and slower progress. The system handles this \
+automatically (retries with backoff), but scans will take longer.
+
 ## DISCOVER New Coverage
 
 When asked to discover or expand coverage for a country or region:

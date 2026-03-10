@@ -281,16 +281,34 @@ async def execute_tool(
             return all_domains[domain_id]
 
         elif name == "start_scan":
+            # Check for already-running scans — warn about rate limit pressure
+            running_scans = [
+                j for j in scan_manager.jobs.values()
+                if j.status.value == "running"
+            ]
+
             job = await scan_manager.start_scan(
                 domains_group=arguments.get("domains", "quick"),
                 max_concurrent=arguments.get("max_concurrent", 5),
                 skip_llm=arguments.get("skip_llm", False),
             )
-            return {
+
+            result = {
                 "scan_id": job.scan_id,
                 "status": job.status.value,
                 "domain_count": job.domain_count,
             }
+
+            if running_scans:
+                other_ids = ", ".join(j.scan_id for j in running_scans)
+                result["warning"] = (
+                    f"Another scan is already running ({other_ids}). "
+                    f"Both scans share the same API key, so rate limits "
+                    f"may slow things down. Both scans will still complete — "
+                    f"they'll just retry automatically if throttled."
+                )
+
+            return result
 
         elif name == "get_scan_status":
             scan_id = arguments["scan_id"]
@@ -306,7 +324,10 @@ async def execute_tool(
                 "scan_id": job.scan_id,
                 "status": job.status.value,
                 "domain_count": job.domain_count,
+                # policy_count is a RUNNING TOTAL — it increases each time a
+                # domain finishes and finds policies, not per-poll.
                 "policy_count": job.policy_count,
+                "policy_count_note": "running total across all completed domains",
                 "progress": {
                     "total": total,
                     "completed": completed,

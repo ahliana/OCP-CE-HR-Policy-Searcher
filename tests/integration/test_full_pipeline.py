@@ -1777,6 +1777,76 @@ class TestScanStatusPolling:
 
         assert result["recommended_wait_seconds"] == 20
 
+    @pytest.mark.asyncio
+    async def test_scan_status_includes_running_total_note(self, real_config, scan_manager):
+        """get_scan_status response clarifies that policy_count is a running total."""
+        from src.core.models import ScanJob, ScanStatus, ScanProgress, DomainProgress
+
+        job = ScanJob(
+            scan_id="note-test",
+            status=ScanStatus.RUNNING,
+            domain_count=5,
+            policy_count=3,
+            progress=ScanProgress(
+                total_domains=5,
+                completed_domains=2,
+                domains=[
+                    DomainProgress(domain_id=f"d{i}", domain_name=f"D{i}")
+                    for i in range(5)
+                ],
+            ),
+        )
+        scan_manager._jobs["note-test"] = job
+        scan_manager._policies["note-test"] = []
+
+        result = await execute_tool(
+            "get_scan_status",
+            {"scan_id": "note-test"},
+            real_config, scan_manager,
+        )
+
+        assert result["policy_count"] == 3
+        assert "running total" in result["policy_count_note"]
+
+    @pytest.mark.asyncio
+    async def test_concurrent_scan_warning(self, real_config, scan_manager):
+        """Starting a scan while another is running includes a warning."""
+        from src.core.models import ScanJob, ScanStatus, ScanProgress
+
+        # Simulate an already-running scan
+        running_job = ScanJob(
+            scan_id="existing-scan",
+            status=ScanStatus.RUNNING,
+            domain_count=10,
+            progress=ScanProgress(total_domains=10),
+        )
+        scan_manager._jobs["existing-scan"] = running_job
+
+        # Start a new scan (dry_run to avoid actual crawling)
+        result = await execute_tool(
+            "start_scan",
+            {"domains": "quick", "skip_llm": True},
+            real_config, scan_manager,
+        )
+
+        # Verify the response includes the scan_id and the warning
+        assert "scan_id" in result
+        assert "warning" in result
+        assert "existing-scan" in result["warning"]
+        assert "rate limit" in result["warning"].lower()
+
+    @pytest.mark.asyncio
+    async def test_no_warning_when_no_concurrent_scans(self, real_config, scan_manager):
+        """Starting a scan with no other scans running has no warning."""
+        result = await execute_tool(
+            "start_scan",
+            {"domains": "quick", "skip_llm": True},
+            real_config, scan_manager,
+        )
+
+        assert "scan_id" in result
+        assert "warning" not in result
+
 
 # ---------------------------------------------------------------------------
 # 14. --deep flag
@@ -1929,7 +1999,8 @@ class TestEdgeCases:
 
     def test_on_tool_result_scan_status_icons(self, capsys):
         """get_scan_status output uses correct status icons."""
-        from src.agent.__main__ import _on_tool_result
+        from src.agent.__main__ import _on_tool_result, _celebrated_domains
+        _celebrated_domains.clear()
 
         # Running scan
         _on_tool_result("get_scan_status", {
@@ -1938,6 +2009,7 @@ class TestEdgeCases:
         })
         output = capsys.readouterr().out
         assert "⏳" in output
+        assert "running total" in output
 
         # Completed scan
         _on_tool_result("get_scan_status", {
@@ -1957,7 +2029,8 @@ class TestEdgeCases:
 
     def test_on_tool_result_highlights_policy_finds(self, capsys):
         """Domains that found policies get 🎉 highlight."""
-        from src.agent.__main__ import _on_tool_result
+        from src.agent.__main__ import _on_tool_result, _celebrated_domains
+        _celebrated_domains.clear()
 
         _on_tool_result("get_scan_status", {
             "status": "running", "policy_count": 2,
@@ -1975,6 +2048,62 @@ class TestEdgeCases:
         assert "2 policy" in output
         # "Other Gov" should NOT have 🎉
         assert "Other Gov" not in output
+
+    def test_on_tool_result_celebrates_only_once(self, capsys):
+        """Domains that found policies only get 🎉 on the first poll."""
+        from src.agent.__main__ import _on_tool_result, _celebrated_domains
+        _celebrated_domains.clear()
+
+        status_data = {
+            "status": "running", "policy_count": 1,
+            "progress": {
+                "completed": 3, "total": 10,
+                "domains": [
+                    {"domain_id": "sweden_dc", "domain_name": "Sweden DC Act", "policies_found": 1},
+                ],
+            },
+        }
+
+        # First poll — should celebrate
+        _on_tool_result("get_scan_status", status_data)
+        output = capsys.readouterr().out
+        assert "🎉" in output
+        assert "Sweden DC Act" in output
+
+        # Second poll with same data — should NOT celebrate again
+        _on_tool_result("get_scan_status", status_data)
+        output = capsys.readouterr().out
+        assert "🎉" not in output
+        # But should still show the running total
+        assert "running total" in output
+
+    def test_on_tool_result_start_scan_resets_celebrations(self, capsys):
+        """Starting a new scan resets the celebration tracker."""
+        from src.agent.__main__ import _on_tool_result, _celebrated_domains
+
+        # Simulate a previous scan with celebrations
+        _celebrated_domains.add("old_domain")
+
+        # Start new scan
+        _on_tool_result("start_scan", {
+            "scan_id": "new-scan", "status": "running", "domain_count": 5,
+        })
+        capsys.readouterr()  # consume output
+
+        assert len(_celebrated_domains) == 0
+
+    def test_on_tool_result_start_scan_shows_warning(self, capsys):
+        """start_scan with a concurrent scan warning displays ⚠️."""
+        from src.agent.__main__ import _on_tool_result, _celebrated_domains
+        _celebrated_domains.clear()
+
+        _on_tool_result("start_scan", {
+            "scan_id": "new-scan", "status": "running", "domain_count": 8,
+            "warning": "Another scan is already running (abc123). Both share the same API key.",
+        })
+        output = capsys.readouterr().out
+        assert "⚠️" in output
+        assert "abc123" in output
 
     def test_on_tool_result_analyze_url_policy_find(self, capsys):
         """analyze_url with a policy found shows 🎉 celebration."""
