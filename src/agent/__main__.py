@@ -32,6 +32,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from ..core.log_setup import log_audit_event
+
 load_dotenv(override=True)  # .env wins over stale system env vars
 
 
@@ -161,6 +163,8 @@ def _handle_logs_command(args: list[str], data_dir: str):
                              f"${entry.get('cost_usd', 0):.2f}")
                 elif event == "scan_started":
                     extra = f" — {entry.get('domain_count', '?')} domains"
+                elif event == "session_ended":
+                    extra = f" — {entry.get('reason', 'unknown')}"
                 print(f"  {ts}  {event:<18} [{sid}]{extra}")
     else:
         entries = read_logs(
@@ -371,19 +375,40 @@ def _on_tool_result(name: str, result):
 
 
 async def _run_interactive(agent, log_file: Path):
-    """Run the agent in interactive chat mode."""
+    """Run the agent in interactive chat mode.
+
+    Logs session end events (quit, Ctrl+C, EOF) to both the standard log
+    and the audit trail so there is always a record of how the session
+    ended — even if a scan was still running.
+    """
+    interactive_logger = logging.getLogger(__name__)
     _print_banner(log_file)
 
     while True:
         try:
             user_input = input("You: ").strip()
         except (EOFError, KeyboardInterrupt):
+            interactive_logger.info("Session ended by user (Ctrl+C / EOF)")
+            log_audit_event(
+                data_dir=agent.scan_manager.data_dir,
+                event="session_ended",
+                reason="interrupt",
+            )
             print("\nGoodbye!")
             break
 
         if not user_input:
             continue
         if user_input.lower() in ("quit", "exit", "q"):
+            interactive_logger.info(
+                "Session ended by user (quit command)",
+                extra={"quit_command": user_input.lower()},
+            )
+            log_audit_event(
+                data_dir=agent.scan_manager.data_dir,
+                event="session_ended",
+                reason="quit",
+            )
             print("Goodbye!")
             break
 
@@ -403,7 +428,13 @@ async def _run_interactive(agent, log_file: Path):
 
 
 async def _run_single(agent, message: str):
-    """Run a single command and exit."""
+    """Run a single command and exit.
+
+    Logs a session_ended audit event on Ctrl+C so the audit trail
+    records the interruption even if a scan was running in the
+    background.
+    """
+    single_logger = logging.getLogger(__name__)
     print("  Thinking...\n")
     try:
         await agent.run(
@@ -413,6 +444,12 @@ async def _run_single(agent, message: str):
             on_tool_result=_on_tool_result,
         )
     except KeyboardInterrupt:
+        single_logger.info("Single-command session interrupted (Ctrl+C)")
+        log_audit_event(
+            data_dir=agent.scan_manager.data_dir,
+            event="session_ended",
+            reason="interrupt",
+        )
         print("\n\nInterrupted.")
         sys.exit(130)  # Standard exit code for Ctrl+C
     except Exception as e:

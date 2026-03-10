@@ -377,7 +377,7 @@ All activity is logged to structured JSON files for debugging, auditing, and mon
 | File | Format | Contents |
 |------|--------|----------|
 | `data/logs/agent.log` | JSON-lines | All application logs (rotated, 10 MB × 5 backups) |
-| `data/logs/audit.jsonl` | JSON-lines | Critical events only — scan starts, completions, policy finds (crash-safe with fsync) |
+| `data/logs/audit.jsonl` | JSON-lines | Critical events only — scan starts, completions, policy finds, session ends (crash-safe with fsync) |
 
 ### CLI Log Viewer
 
@@ -465,16 +465,18 @@ Results are saved automatically and survive crashes, network errors, and rate li
 |----------|----------|-------------|
 | `data/policies.json` | All discovered policies (deduplicated by URL) | After each domain completes scanning |
 | `data/url_cache.json` | Cached URLs with 30-day TTL | Periodically during scan + at scan end |
-| Google Sheets (if configured) | Policies exported to staging sheet | At scan completion |
+| Google Sheets (if configured) | Policies exported to staging sheet | After each domain completes scanning |
+| `data/logs/audit.jsonl` | Critical events: scan start/complete, policies found, session end | Immediately (fsync'd to disk) |
 
 ### Crash Recovery
 
-Policies are saved to `data/policies.json` **per-domain** as each domain finishes scanning — not at the end of the full scan. This means:
+Both `data/policies.json` and Google Sheets are updated **per-domain** as each domain finishes scanning — not at the end of the full scan. This means:
 
-- If the process crashes at 9/12 domains, the first 9 domains' policies are safe on disk
+- If the process crashes at 9/12 domains, the first 9 domains' policies are safe on disk **and** in Google Sheets
 - If a rate limit error interrupts the agent conversation, background scans continue running
+- If you quit mid-scan (typing `quit` or pressing Ctrl+C), all policies found so far are already saved
 - You can always check what was found with `search_policies` or by reading `data/policies.json`
-- Google Sheets export runs at scan completion as a second layer of persistence
+- A reconciliation step at scan completion catches any policies that slipped through the per-domain export
 
 ### Rate Limit Handling
 
@@ -1150,7 +1152,7 @@ ruff format src/
 ### Testing
 
 ```bash
-pytest                    # Run all 505+ tests
+pytest                    # Run all 514+ tests
 pytest tests/unit/        # Unit tests only
 pytest tests/integration/ # Integration tests only
 pytest --cov=src          # With coverage report

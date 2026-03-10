@@ -223,11 +223,17 @@ def _coerce_types(data: dict) -> dict:
 # --- Client ---
 
 class ClaudeClient:
-    """Async Claude API client with two-stage analysis."""
+    """Async Claude API client with two-stage analysis.
+
+    Rate limit handling: Both screening and analysis retry on 429 errors
+    using the API's retry-after header when available, falling back to
+    exponential backoff.  BASE_DELAY is set generously because Anthropic
+    rate limit windows are typically 60-120 seconds.
+    """
 
     MAX_RETRIES = 3
-    BASE_DELAY = 1.0
-    MAX_DELAY = 30.0
+    BASE_DELAY = 10.0   # generous fallback — API retry-after is usually 60-120s
+    MAX_DELAY = 120.0   # cap matches typical API retry-after values
     MAX_CONTENT_CHARS = 45000
 
     def __init__(
@@ -244,69 +250,116 @@ class ClaudeClient:
     async def screen_relevance(
         self, content: str, url: str, min_confidence: int = 5,
     ) -> ScreeningResult:
-        """Quick relevance screening using Haiku (fail-open on errors)."""
+        """Quick relevance screening using Haiku.
+
+        Retries on rate limits to avoid failing open unnecessarily — if
+        screening fails open, the page goes to expensive Sonnet analysis,
+        which worsens rate limit pressure and costs.  Only falls open on
+        non-retryable errors (connection issues, parse failures).
+
+        Args:
+            content: Full page text.
+            url: Source URL (for logging and prompt context).
+            min_confidence: Unused (reserved for future threshold filtering).
+
+        Returns:
+            ScreeningResult with relevant=True/False and confidence 1-10.
+        """
         screening_content = content[:5000]
         prompt = SCREENING_PROMPT.format(url=url, content=screening_content)
+        delay = self.BASE_DELAY
 
-        try:
-            import time
-            _t0 = time.monotonic()
-            response = await self.client.messages.create(
-                model=self.screening_model,
-                max_tokens=50,
-                temperature=0.0,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            _latency_ms = int((time.monotonic() - _t0) * 1000)
-            self.cost.screening_calls += 1
-            if hasattr(response, "usage"):
-                self.cost.input_tokens += response.usage.input_tokens
-                self.cost.output_tokens += response.usage.output_tokens
-                logger.info(
-                    "llm_call: screening model=%s url=%s "
-                    "input_tokens=%d output_tokens=%d latency_ms=%d",
-                    self.screening_model, url,
-                    response.usage.input_tokens,
-                    response.usage.output_tokens,
-                    _latency_ms,
-                )
-
-            raw = response.content[0].text
+        for attempt in range(1, self.MAX_RETRIES + 1):
             try:
-                data = json.loads(_extract_json(raw))
-            except json.JSONDecodeError:
-                logger.warning(f"Screening parse failed for {url}, assuming relevant")
+                import time
+                _t0 = time.monotonic()
+                response = await self.client.messages.create(
+                    model=self.screening_model,
+                    max_tokens=50,
+                    temperature=0.0,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                _latency_ms = int((time.monotonic() - _t0) * 1000)
+                self.cost.screening_calls += 1
+                if hasattr(response, "usage"):
+                    self.cost.input_tokens += response.usage.input_tokens
+                    self.cost.output_tokens += response.usage.output_tokens
+                    logger.info(
+                        "llm_call: screening model=%s url=%s "
+                        "input_tokens=%d output_tokens=%d latency_ms=%d",
+                        self.screening_model, url,
+                        response.usage.input_tokens,
+                        response.usage.output_tokens,
+                        _latency_ms,
+                    )
+
+                raw = response.content[0].text
+                try:
+                    data = json.loads(_extract_json(raw))
+                except json.JSONDecodeError:
+                    logger.warning(f"Screening parse failed for {url}, assuming relevant")
+                    return ScreeningResult(relevant=True, confidence=5)
+
+                relevant = data.get("relevant", True)
+                if isinstance(relevant, str):
+                    relevant = relevant.lower() in ("true", "yes", "1")
+                confidence = data.get("confidence", 5)
+                if isinstance(confidence, str):
+                    try:
+                        confidence = int(confidence)
+                    except ValueError:
+                        confidence = 5
+                confidence = max(1, min(10, confidence))
+
+                return ScreeningResult(relevant=relevant, confidence=confidence)
+
+            except anthropic.AuthenticationError as e:
+                raise LLMAuthError(f"Authentication failed: {e}") from e
+
+            except anthropic.RateLimitError as e:
+                # Retry screening on rate limit — falling open here would
+                # send ALL pages to expensive Sonnet analysis, making the
+                # rate limit cascade worse.
+                if attempt < self.MAX_RETRIES:
+                    retry_after = delay
+                    try:
+                        if hasattr(e, "response") and e.response:
+                            retry_after = float(
+                                e.response.headers.get("retry-after", delay)
+                            )
+                    except (ValueError, AttributeError):
+                        pass
+                    logger.warning(
+                        f"Screening rate limited for {url}, "
+                        f"waiting {retry_after:.1f}s (attempt {attempt}/{self.MAX_RETRIES})"
+                    )
+                    await asyncio.sleep(retry_after)
+                    delay = min(delay * 2, self.MAX_DELAY)
+                else:
+                    # Exhausted retries — fail open as last resort
+                    logger.warning(
+                        f"Screening rate limit exhausted for {url}, assuming relevant"
+                    )
+                    return ScreeningResult(relevant=True, confidence=5)
+
+            except anthropic.NotFoundError:
+                # Model doesn't exist — log ONCE and disable screening
+                if not getattr(self, "_screening_model_warned", False):
+                    logger.error(
+                        f"Screening model '{self.screening_model}' not found (404). "
+                        f"All pages will bypass screening and go directly to analysis. "
+                        f"Fix: update 'screening_model' in config/settings.yaml to a valid model."
+                    )
+                    self._screening_model_warned = True
                 return ScreeningResult(relevant=True, confidence=5)
 
-            relevant = data.get("relevant", True)
-            if isinstance(relevant, str):
-                relevant = relevant.lower() in ("true", "yes", "1")
-            confidence = data.get("confidence", 5)
-            if isinstance(confidence, str):
-                try:
-                    confidence = int(confidence)
-                except ValueError:
-                    confidence = 5
-            confidence = max(1, min(10, confidence))
+            except Exception as e:
+                # Fail open: any non-retryable error → assume relevant
+                logger.warning(f"Screening error for {url}: {e}, assuming relevant")
+                return ScreeningResult(relevant=True, confidence=5)
 
-            return ScreeningResult(relevant=relevant, confidence=confidence)
-
-        except anthropic.AuthenticationError as e:
-            raise LLMAuthError(f"Authentication failed: {e}") from e
-        except anthropic.NotFoundError:
-            # Model doesn't exist — log ONCE and disable screening
-            if not getattr(self, "_screening_model_warned", False):
-                logger.error(
-                    f"Screening model '{self.screening_model}' not found (404). "
-                    f"All pages will bypass screening and go directly to analysis. "
-                    f"Fix: update 'screening_model' in config/settings.yaml to a valid model."
-                )
-                self._screening_model_warned = True
-            return ScreeningResult(relevant=True, confidence=5)
-        except Exception as e:
-            # Fail open: any error → assume relevant
-            logger.warning(f"Screening error for {url}: {e}, assuming relevant")
-            return ScreeningResult(relevant=True, confidence=5)
+        # Should never reach here, but fail open for safety
+        return ScreeningResult(relevant=True, confidence=5)
 
     async def analyze_policy(
         self, content: str, url: str, language: Optional[str] = None,

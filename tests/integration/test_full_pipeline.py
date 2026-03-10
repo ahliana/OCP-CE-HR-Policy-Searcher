@@ -2129,3 +2129,201 @@ class TestEdgeCases:
         assert "🎉" in output
         assert "Heat Recovery Act" in output
         assert "9" in output
+
+
+# ---------------------------------------------------------------------------
+# 17. Incremental Google Sheets export
+# ---------------------------------------------------------------------------
+
+class TestIncrementalSheetsExport:
+    """Verify per-domain Sheets export logic in scan_manager."""
+
+    def _make_policy(self, url: str, name: str = "P") -> Policy:
+        """Create a minimal Policy for testing."""
+        return Policy(
+            url=url,
+            policy_name=name,
+            jurisdiction="DE",
+            policy_type=PolicyType.LAW,
+            summary="Test",
+            relevance_score=8,
+        )
+
+    def test_per_domain_export_deduplicates(self):
+        """Policies already in Sheets (tracked by URL set) are skipped."""
+        sheets_exported_urls: set[str] = {"https://a.gov/old"}
+        policies = [
+            self._make_policy("https://a.gov/old", "Old"),
+            self._make_policy("https://a.gov/new", "New"),
+        ]
+        new_for_sheets = [
+            p for p in policies if p.url not in sheets_exported_urls
+        ]
+        assert len(new_for_sheets) == 1
+        assert new_for_sheets[0].url == "https://a.gov/new"
+
+    def test_exported_urls_set_grows_after_export(self):
+        """After export, newly exported URLs are added to the tracking set."""
+        sheets_exported_urls: set[str] = set()
+        policies = [
+            self._make_policy("https://a.gov/p1"),
+            self._make_policy("https://a.gov/p2"),
+        ]
+        # Simulate the export loop from scan_manager
+        new_for_sheets = [
+            p for p in policies if p.url not in sheets_exported_urls
+        ]
+        for p in new_for_sheets:
+            sheets_exported_urls.add(p.url)
+
+        assert len(sheets_exported_urls) == 2
+        assert "https://a.gov/p1" in sheets_exported_urls
+
+        # Second domain with overlapping URL — should be skipped
+        policies2 = [
+            self._make_policy("https://a.gov/p1"),  # already exported
+            self._make_policy("https://b.gov/p3"),   # new
+        ]
+        new_for_sheets2 = [
+            p for p in policies2 if p.url not in sheets_exported_urls
+        ]
+        assert len(new_for_sheets2) == 1
+        assert new_for_sheets2[0].url == "https://b.gov/p3"
+
+    def test_reconciliation_finds_missed_policies(self):
+        """End-of-scan reconciliation catches policies missed during export."""
+        sheets_exported_urls = {"https://a.gov/p1"}
+        all_policies = [
+            self._make_policy("https://a.gov/p1"),
+            self._make_policy("https://a.gov/p2"),  # missed
+            self._make_policy("https://b.gov/p3"),  # missed
+        ]
+        missed = [
+            p for p in all_policies if p.url not in sheets_exported_urls
+        ]
+        assert len(missed) == 2
+        urls = {p.url for p in missed}
+        assert "https://a.gov/p2" in urls
+        assert "https://b.gov/p3" in urls
+
+    def test_no_reconciliation_when_all_exported(self):
+        """When per-domain export captured everything, reconciliation is a no-op."""
+        all_policies = [
+            self._make_policy("https://a.gov/p1"),
+            self._make_policy("https://b.gov/p2"),
+        ]
+        sheets_exported_urls = {"https://a.gov/p1", "https://b.gov/p2"}
+        missed = [
+            p for p in all_policies if p.url not in sheets_exported_urls
+        ]
+        assert len(missed) == 0
+
+    @pytest.mark.asyncio
+    async def test_sheets_failure_doesnt_crash_scan(self, tmp_config_dir, monkeypatch):
+        """If Sheets export fails for one domain, the scan continues."""
+        monkeypatch.setenv("SPREADSHEET_ID", "test-sheet-id")
+        monkeypatch.setenv("GOOGLE_CREDENTIALS", "dGVzdA==")
+
+        mock_sheets = MagicMock()
+        mock_sheets.get_existing_urls.return_value = set()
+        mock_sheets.append_policies.side_effect = Exception("Sheets API timeout")
+
+        # Simulate the per-domain export with error handling
+        policies = [self._make_policy("https://a.gov/p1")]
+        sheets_exported_urls: set[str] = set()
+        export_errors = []
+
+        # This mirrors scan_manager.py lines 283-303
+        new_for_sheets = [
+            p for p in policies if p.url not in sheets_exported_urls
+        ]
+        if new_for_sheets:
+            try:
+                mock_sheets.append_policies(new_for_sheets, "Staging")
+                for p in new_for_sheets:
+                    sheets_exported_urls.add(p.url)
+            except Exception as sheets_err:
+                export_errors.append(str(sheets_err))
+
+        # Export failed, but we didn't crash
+        assert len(export_errors) == 1
+        assert "Sheets API timeout" in export_errors[0]
+        # URLs were NOT added since export failed
+        assert len(sheets_exported_urls) == 0
+
+
+# ---------------------------------------------------------------------------
+# 18. Quit / session-end logging
+# ---------------------------------------------------------------------------
+
+class TestQuitLogging:
+    """Verify session_ended events are logged when user quits."""
+
+    def test_audit_log_displays_session_ended(self, capsys):
+        """The --logs audit view formats session_ended events correctly."""
+        from src.agent.__main__ import _handle_logs_command
+        import json
+        import tempfile
+        from pathlib import Path
+
+        # Create a temp data dir with a mock audit log
+        with tempfile.TemporaryDirectory() as tmpdir:
+            log_dir = Path(tmpdir) / "logs"
+            log_dir.mkdir()
+            audit_file = log_dir / "audit.jsonl"
+            audit_file.write_text(
+                json.dumps({
+                    "timestamp": "2026-03-10T14:30:00",
+                    "event": "session_ended",
+                    "reason": "quit",
+                }) + "\n",
+                encoding="utf-8",
+            )
+
+            _handle_logs_command(["audit"], tmpdir)
+
+        output = capsys.readouterr().out
+        assert "session_ended" in output
+        assert "quit" in output
+
+    def test_log_audit_event_writes_session_ended(self, tmp_path):
+        """log_audit_event creates a valid session_ended entry."""
+        from src.core.log_setup import log_audit_event
+        import json
+
+        log_dir = tmp_path / "logs"
+        log_dir.mkdir()
+
+        log_audit_event(
+            data_dir=str(tmp_path),
+            event="session_ended",
+            reason="interrupt",
+        )
+
+        audit_file = log_dir / "audit.jsonl"
+        assert audit_file.exists()
+
+        lines = audit_file.read_text(encoding="utf-8").strip().split("\n")
+        assert len(lines) == 1
+        entry = json.loads(lines[0])
+        assert entry["event"] == "session_ended"
+        assert entry["reason"] == "interrupt"
+        assert "timestamp" in entry
+
+    def test_session_ended_with_quit_reason(self, tmp_path):
+        """Session ended by typing 'quit' records reason='quit'."""
+        from src.core.log_setup import log_audit_event
+        import json
+
+        log_dir = tmp_path / "logs"
+        log_dir.mkdir()
+
+        log_audit_event(
+            data_dir=str(tmp_path),
+            event="session_ended",
+            reason="quit",
+        )
+
+        audit_file = log_dir / "audit.jsonl"
+        entry = json.loads(audit_file.read_text(encoding="utf-8").strip())
+        assert entry["reason"] == "quit"

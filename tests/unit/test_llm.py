@@ -1,7 +1,9 @@
 """Tests for LLM helpers and ClaudeClient.to_policy()."""
 
 from datetime import date
+from unittest.mock import AsyncMock, MagicMock
 
+import anthropic
 import pytest
 
 from src.core.llm import (
@@ -307,3 +309,144 @@ class TestPromptContent:
 
     def test_analysis_mentions_eed(self):
         assert "EED" in ANALYSIS_PROMPT
+
+
+# --- Scanner delay constants ---
+
+class TestScannerDelayConstants:
+    """Verify scanner delay constants are generous enough for Anthropic rate limits."""
+
+    def test_base_delay_is_generous(self):
+        """BASE_DELAY should be >= 10s since Anthropic rate limits are 60-120s."""
+        assert ClaudeClient.BASE_DELAY >= 10.0
+
+    def test_max_delay_matches_api_retry_after(self):
+        """MAX_DELAY should be >= 120s to match typical retry-after headers."""
+        assert ClaudeClient.MAX_DELAY >= 120.0
+
+    def test_max_retries_at_least_3(self):
+        """At least 3 retries to survive transient rate limits."""
+        assert ClaudeClient.MAX_RETRIES >= 3
+
+
+# --- Screening rate limit retry ---
+
+def _make_screening_response(relevant: bool = True, confidence: int = 7):
+    """Create a mock API response for screening."""
+    usage = MagicMock()
+    usage.input_tokens = 100
+    usage.output_tokens = 10
+    content_block = MagicMock()
+    content_block.text = f'{{"relevant": {str(relevant).lower()}, "confidence": {confidence}}}'
+    response = MagicMock()
+    response.content = [content_block]
+    response.usage = usage
+    return response
+
+
+class TestScreeningRateLimitRetry:
+    """Verify that screen_relevance retries on 429 instead of failing open."""
+
+    def _build_client(self):
+        """Create a ClaudeClient with mocked async client."""
+        client = ClaudeClient.__new__(ClaudeClient)
+        client.screening_model = "claude-haiku-4-5-20251001"
+        client.analysis_model = "claude-sonnet-4-20250514"
+        client.cost = CostInfo()
+        client.client = AsyncMock()
+        return client
+
+    @pytest.mark.asyncio
+    async def test_screening_retries_on_rate_limit(self):
+        """Should retry on 429 and succeed on second attempt."""
+        client = self._build_client()
+
+        rate_error = anthropic.RateLimitError.__new__(anthropic.RateLimitError)
+        rate_error.response = None
+
+        success = _make_screening_response(relevant=False, confidence=2)
+
+        client.client.messages.create = AsyncMock(
+            side_effect=[rate_error, success]
+        )
+
+        result = await client.screen_relevance("test content", "https://test.gov/page")
+
+        # Should have retried and gotten the actual result (not relevant)
+        assert result.relevant is False
+        assert result.confidence == 2
+        assert client.client.messages.create.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_screening_uses_retry_after_header(self):
+        """Should respect retry-after header from API response."""
+        client = self._build_client()
+
+        # Create a real exception instance with a mock response bearing retry-after
+        rate_error = anthropic.RateLimitError.__new__(anthropic.RateLimitError)
+        rate_error.response = MagicMock()
+        rate_error.response.headers = {"retry-after": "0.01"}
+
+        success = _make_screening_response(relevant=True, confidence=8)
+
+        client.client.messages.create = AsyncMock(
+            side_effect=[rate_error, success]
+        )
+
+        result = await client.screen_relevance("test content", "https://test.gov/page")
+
+        assert result.relevant is True
+        assert client.client.messages.create.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_screening_fails_open_after_exhausting_retries(self):
+        """After MAX_RETRIES rate limits, should fail open (assume relevant)."""
+        client = self._build_client()
+
+        rate_error = anthropic.RateLimitError.__new__(anthropic.RateLimitError)
+        rate_error.response = None
+
+        client.client.messages.create = AsyncMock(
+            side_effect=[rate_error] * ClaudeClient.MAX_RETRIES
+        )
+
+        result = await client.screen_relevance("test content", "https://test.gov/page")
+
+        # Should fail open after exhausting retries
+        assert result.relevant is True
+        assert result.confidence == 5
+        assert client.client.messages.create.call_count == ClaudeClient.MAX_RETRIES
+
+    @pytest.mark.asyncio
+    async def test_screening_auth_error_not_retried(self):
+        """Authentication errors should raise immediately, not retry."""
+        client = self._build_client()
+
+        from src.core.llm import LLMAuthError
+
+        auth_error = anthropic.AuthenticationError.__new__(
+            anthropic.AuthenticationError
+        )
+
+        client.client.messages.create = AsyncMock(side_effect=auth_error)
+
+        with pytest.raises(LLMAuthError):
+            await client.screen_relevance("test content", "https://test.gov/page")
+
+        # Should NOT retry
+        assert client.client.messages.create.call_count == 1
+
+    @pytest.mark.asyncio
+    async def test_screening_connection_error_fails_open(self):
+        """Non-retryable errors should fail open (assume relevant)."""
+        client = self._build_client()
+
+        client.client.messages.create = AsyncMock(
+            side_effect=ConnectionError("Network down")
+        )
+
+        result = await client.screen_relevance("test content", "https://test.gov/page")
+
+        # Should fail open
+        assert result.relevant is True
+        assert result.confidence == 5

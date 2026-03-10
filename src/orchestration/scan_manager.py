@@ -177,6 +177,30 @@ class ScanManager:
         # deduplication by URL.
         store = PolicyStore(data_dir=self.data_dir)
 
+        # Incremental Google Sheets export — write policies as each domain
+        # completes, not just at scan end.  This means if the user quits
+        # mid-scan, all policies found so far are already in the Sheet.
+        sheets_client = None
+        sheets_exported_urls: set[str] = set()
+        output_cfg = self.config.settings.output
+        sheet_name = output_cfg.staging_sheet_name
+        if output_cfg.spreadsheet_id and output_cfg.google_credentials_b64:
+            try:
+                from ..output.sheets import SheetsClient
+                sheets_client = SheetsClient(
+                    credentials_b64=output_cfg.google_credentials_b64,
+                    spreadsheet_id=output_cfg.spreadsheet_id,
+                )
+                sheets_client.connect()
+                sheets_exported_urls = sheets_client.get_existing_urls(sheet_name)
+                logger.info(
+                    f"Google Sheets connected — {len(sheets_exported_urls)} "
+                    f"existing policies in '{sheet_name}'"
+                )
+            except Exception as e:
+                logger.warning(f"Google Sheets connection failed: {e}")
+                sheets_client = None
+
         llm_client = None
         if not skip_llm and self.api_key:
             llm_client = ClaudeClient(
@@ -252,6 +276,31 @@ class ScanManager:
                         # Update in-memory list and job count incrementally
                         self._policies[scan_id].extend(policies)
                         job.policy_count += len(policies)
+
+                        # Export to Google Sheets immediately — don't wait for
+                        # scan completion.  If the user quits mid-scan, these
+                        # policies are already safe in the Sheet.
+                        if sheets_client:
+                            new_for_sheets = [
+                                p for p in policies
+                                if p.url not in sheets_exported_urls
+                            ]
+                            if new_for_sheets:
+                                try:
+                                    count = sheets_client.append_policies(
+                                        new_for_sheets, sheet_name,
+                                    )
+                                    for p in new_for_sheets:
+                                        sheets_exported_urls.add(p.url)
+                                    logger.info(
+                                        f"Exported {count} policies from "
+                                        f"{domain['id']} to Google Sheets"
+                                    )
+                                except Exception as sheets_err:
+                                    logger.warning(
+                                        f"Sheets export failed for {domain['id']}: "
+                                        f"{sheets_err}"
+                                    )
 
                         # Audit: record each policy discovery
                         for p in policies:
@@ -345,23 +394,50 @@ class ScanManager:
             # Save cache
             cache.save()
 
-            # Export to Google Sheets (if configured)
-            output_cfg = self.config.settings.output
-            if output_cfg.spreadsheet_id and output_cfg.google_credentials_b64 and all_policies:
+            # Final Google Sheets reconciliation — catch any policies that
+            # slipped through the per-domain export (e.g. if Sheets was
+            # temporarily unavailable for one domain).  When incremental
+            # export is working, this usually finds nothing new.
+            if sheets_client and all_policies:
                 try:
-                    from ..output.sheets import SheetsClient
-                    sheets = SheetsClient(
-                        credentials_b64=output_cfg.google_credentials_b64,
-                        spreadsheet_id=output_cfg.spreadsheet_id,
-                    )
-                    sheets.connect()
-                    existing_urls = sheets.get_existing_urls(output_cfg.staging_sheet_name)
-                    new_policies = [p for p in all_policies if p.url not in existing_urls]
-                    if new_policies:
-                        count = sheets.append_policies(new_policies, output_cfg.staging_sheet_name)
-                        logger.info(f"Exported {count} new policies to Google Sheets")
+                    missed = [
+                        p for p in all_policies
+                        if p.url not in sheets_exported_urls
+                    ]
+                    if missed:
+                        count = sheets_client.append_policies(missed, sheet_name)
+                        logger.info(
+                            f"Final Sheets reconciliation: exported {count} "
+                            f"missed policies"
+                        )
                 except Exception as e:
-                    logger.warning(f"Google Sheets export failed: {e}")
+                    logger.warning(f"Final Sheets export failed: {e}")
+            elif not sheets_client and all_policies:
+                # Sheets wasn't configured or connection failed at start —
+                # try once more as a fallback
+                if output_cfg.spreadsheet_id and output_cfg.google_credentials_b64:
+                    try:
+                        from ..output.sheets import SheetsClient
+                        fallback = SheetsClient(
+                            credentials_b64=output_cfg.google_credentials_b64,
+                            spreadsheet_id=output_cfg.spreadsheet_id,
+                        )
+                        fallback.connect()
+                        existing = fallback.get_existing_urls(sheet_name)
+                        new_policies = [
+                            p for p in all_policies if p.url not in existing
+                        ]
+                        if new_policies:
+                            count = fallback.append_policies(
+                                new_policies, sheet_name,
+                            )
+                            logger.info(
+                                f"Fallback Sheets export: {count} policies"
+                            )
+                    except Exception as e:
+                        logger.warning(
+                            f"Fallback Sheets export failed: {e}"
+                        )
 
             job.status = ScanStatus.COMPLETED
             job.completed_at = datetime.utcnow()
