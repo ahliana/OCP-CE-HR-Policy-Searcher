@@ -115,6 +115,22 @@ class TestPolicyToSheetRow:
         row = policy.to_sheet_row()
         assert row[16] == "jurisdiction_mismatch, future_date"
 
+    def test_row_with_referenced_policies(self):
+        """Referenced policies and URLs should serialize with semicolons."""
+        policy = Policy(
+            url="https://example.gov/policy",
+            policy_name="Heat Reuse Directive",
+            jurisdiction="EU",
+            policy_type=PolicyType.DIRECTIVE,
+            summary="EU-wide heat reuse requirements",
+            relevance_score=9,
+            referenced_policies=["EU EED Art 26", "EnEfG §12"],
+            referenced_urls=["https://eur-lex.europa.eu/x", "https://bmwk.de/y"],
+        )
+        row = policy.to_sheet_row()
+        assert row[17] == "EU EED Art 26; EnEfG §12"
+        assert row[18] == "https://eur-lex.europa.eu/x; https://bmwk.de/y"
+
     def test_row_matches_headers_length(self):
         policy = Policy(
             url="https://example.gov",

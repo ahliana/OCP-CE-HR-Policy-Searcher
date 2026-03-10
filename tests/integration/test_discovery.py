@@ -5,16 +5,21 @@ Tests:
 - _execute_add_domain creates YAML and updates groups
 - --discover CLI argument parsing
 - REGION_TO_GROUPS mapping completeness
+- Full discovery workflow with mocked Anthropic API
 """
 
 import tempfile
 from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import yaml
 
-from src.agent.tools import _auto_assign_groups, REGION_TO_GROUPS
-from src.core.config import VALID_REGIONS
+from src.agent.orchestrator import PolicyAgent
+from src.agent.tools import _auto_assign_groups, REGION_TO_GROUPS, get_all_tools
+from src.core.config import ConfigLoader, VALID_REGIONS
+from src.orchestration.events import EventBroadcaster
+from src.orchestration.scan_manager import ScanManager
 
 
 class TestAutoAssignGroups:
@@ -210,3 +215,109 @@ class TestDiscoverCLI:
         args = ["--discover", "Czech", "Republic"]
         country = " ".join(args[1:])
         assert country == "Czech Republic"
+
+
+def _make_text_response(text: str):
+    """Create a mock API response with text content and end_turn."""
+    block = MagicMock()
+    block.type = "text"
+    block.text = text
+
+    response = MagicMock()
+    response.content = [block]
+    response.stop_reason = "end_turn"
+    return response
+
+
+class TestDiscoverWorkflow:
+    """Test the full --discover workflow with mocked Anthropic API."""
+
+    def _build_agent(self):
+        """Create a PolicyAgent with real config but mocked API client."""
+        agent = PolicyAgent.__new__(PolicyAgent)
+        agent.config = ConfigLoader(config_dir="config")
+        agent.config.load()
+        agent.broadcaster = EventBroadcaster()
+        agent.scan_manager = ScanManager(
+            config=agent.config, broadcaster=agent.broadcaster, data_dir="data",
+        )
+        agent.tools = get_all_tools()
+        agent.system_prompt = "test"
+        agent.model = "test-model"
+        return agent
+
+    @pytest.mark.asyncio
+    async def test_discover_runs_agent_with_correct_prompt(self):
+        """--discover Poland should pass a discovery prompt to the agent."""
+        agent = self._build_agent()
+
+        mock_client = AsyncMock()
+        mock_client.messages.create = AsyncMock(
+            return_value=_make_text_response("Discovered 3 government websites in Poland.")
+        )
+        agent.client = mock_client
+
+        # Build the discovery prompt (same logic as __main__.py)
+        country = "Poland"
+        message = (
+            f"Discover new coverage for {country}. "
+            f"Search for government websites about data center waste heat, "
+            f"energy efficiency, district heating, and heat recovery regulation "
+            f"in {country}. Use the country's native language for search terms "
+            f"when appropriate. Add any relevant government websites you find. "
+            f"Then analyze the most promising pages for policy content. "
+            f"Summarize what you discovered."
+        )
+
+        result = await agent.run(message)
+
+        # Verify the prompt reached the API with Poland in it
+        call_args = mock_client.messages.create.call_args
+        messages = call_args.kwargs.get("messages", [])
+        assert any("Poland" in str(m) for m in messages)
+        assert "Discovered" in result
+
+    @pytest.mark.asyncio
+    async def test_discover_system_prompt_has_discovery_instructions(self):
+        """The system prompt should include DISCOVER workflow instructions."""
+        from src.agent.orchestrator import _build_system_prompt
+
+        agent = self._build_agent()
+        prompt = _build_system_prompt(agent.config)
+
+        assert "DISCOVER" in prompt
+        assert "web_search" in prompt
+        assert "add_domain" in prompt
+        assert "native language" in prompt.lower() or "native" in prompt.lower()
+
+    @pytest.mark.asyncio
+    async def test_discover_agent_handles_tool_use(self):
+        """Discovery workflow should handle tool calls (e.g., list_domains)."""
+        agent = self._build_agent()
+
+        # First call: Claude wants to use list_domains to check existing coverage
+        tool_block = MagicMock()
+        tool_block.type = "tool_use"
+        tool_block.name = "list_domains"
+        tool_block.input = {"region": "poland"}
+        tool_block.id = "tool_1"
+
+        tool_response = MagicMock()
+        tool_response.content = [tool_block]
+        tool_response.stop_reason = "tool_use"
+
+        # Second call: Claude responds with findings
+        text_response = _make_text_response(
+            "Poland has 2 existing domains. I recommend adding more."
+        )
+
+        mock_client = AsyncMock()
+        mock_client.messages.create = AsyncMock(
+            side_effect=[tool_response, text_response]
+        )
+        agent.client = mock_client
+
+        result = await agent.run("Discover new coverage for Poland")
+
+        assert mock_client.messages.create.call_count == 2
+        assert "Poland" in result

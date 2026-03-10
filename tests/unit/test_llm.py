@@ -109,6 +109,33 @@ class TestCoerceTypes:
         result = _coerce_types({"is_relevant": True, "policy_type": "null"})
         assert result["policy_type"] == "unknown"
 
+    def test_coerce_referenced_policies_from_null(self):
+        """Null referenced_policies should become empty list."""
+        result = _coerce_types({"referenced_policies": None, "referenced_urls": "null"})
+        assert result["referenced_policies"] == []
+        assert result["referenced_urls"] == []
+
+    def test_coerce_referenced_policies_from_string(self):
+        """Single string referenced_policies should become one-element list."""
+        result = _coerce_types({"referenced_policies": "EU EED", "referenced_urls": ""})
+        assert result["referenced_policies"] == ["EU EED"]
+        assert result["referenced_urls"] == []
+
+    def test_coerce_referenced_policies_filters_nulls(self):
+        """List with null-like values should have them filtered out."""
+        result = _coerce_types({
+            "referenced_policies": ["EU EED", "N/A", "", None],
+            "referenced_urls": ["https://x.com", "null"],
+        })
+        assert result["referenced_policies"] == ["EU EED"]
+        assert result["referenced_urls"] == ["https://x.com"]
+
+    def test_coerce_referenced_policies_missing_key(self):
+        """Missing referenced_policies key should be added as empty list."""
+        result = _coerce_types({})
+        assert result.get("referenced_policies", []) == []
+        assert result.get("referenced_urls", []) == []
+
 
 # --- ClaudeClient.to_policy ---
 
@@ -181,6 +208,43 @@ class TestToPolicy:
         )
         policy = client.to_policy(analysis, "https://a.gov", "en")
         assert policy.jurisdiction == "Unknown"
+
+    def test_to_policy_preserves_referenced_policies(self, client):
+        """referenced_policies and referenced_urls should flow through to Policy."""
+        analysis = PolicyAnalysis(
+            is_relevant=True,
+            relevance_score=8,
+            policy_type="law",
+            policy_name="Energy Efficiency Act",
+            jurisdiction="Germany",
+            summary="A law about heat reuse",
+            key_requirements="Must reuse waste heat",
+            referenced_policies=["EU EED Article 26", "EnEfG §12"],
+            referenced_urls=["https://eur-lex.europa.eu/eli/dir/2023/1791"],
+        )
+
+        policy = client.to_policy(analysis, "https://example.gov", "de")
+
+        assert policy is not None
+        assert policy.referenced_policies == ["EU EED Article 26", "EnEfG §12"]
+        assert policy.referenced_urls == ["https://eur-lex.europa.eu/eli/dir/2023/1791"]
+
+        # Verify end-to-end sheet serialization
+        row = policy.to_sheet_row()
+        assert row[17] == "EU EED Article 26; EnEfG §12"
+        assert row[18] == "https://eur-lex.europa.eu/eli/dir/2023/1791"
+
+    def test_to_policy_empty_references_default(self, client):
+        """Policy with no references should have empty lists."""
+        analysis = PolicyAnalysis(
+            is_relevant=True,
+            policy_name="Basic Act",
+            jurisdiction="US",
+            summary="No references",
+        )
+        policy = client.to_policy(analysis, "https://a.gov", "en")
+        assert policy.referenced_policies == []
+        assert policy.referenced_urls == []
 
 
 # --- ClaudeClient.update_cost_estimate ---

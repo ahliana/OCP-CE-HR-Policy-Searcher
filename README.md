@@ -889,7 +889,7 @@ ocp-policy-hub/
 │   │   └── server.py           # MCP server (11 tools, advanced)
 │   └── storage/
 │       └── store.py            # JSON persistence
-├── tests/                      # 389 tests (280 unit + 109 integration)
+├── tests/                      # 399 tests (290 unit + 109 integration)
 │   ├── unit/
 │   │   ├── test_agent.py       # Agent tool + dispatch tests
 │   │   ├── test_api.py         # FastAPI endpoint tests
@@ -934,7 +934,7 @@ ruff format src/
 ### Testing
 
 ```bash
-pytest                    # Run all 389 tests
+pytest                    # Run all 399 tests
 pytest tests/unit/        # Unit tests only (280)
 pytest tests/integration/ # Integration tests only (109)
 pytest --cov=src          # With coverage report
@@ -1060,64 +1060,23 @@ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ## Contributing
 
-Contributions are welcome! This project is open source under the MIT license.
+Contributions are welcome! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the full guide, including:
 
-### Getting Started
+- Step-by-step instructions for adding a new country or region
+- Code style expectations (ruff, type hints, Pydantic models)
+- How to run the 399-test suite and lint checks
+- Domain YAML format template
+- PR checklist
 
-1. Fork the repo and clone it
-2. Run `.\setup.ps1 -Dev` (Windows) or `./setup.sh --dev` (Linux/macOS) — this installs dev dependencies including pytest and ruff
-3. Create a branch for your feature: `git checkout -b my-feature`
-4. Make your changes and verify they pass: `pytest && ruff check src/ tests/`
-5. Submit a pull request
+**Quick start:**
 
-### Where to Contribute
-
-**Add a new country or region:**
-1. Create a domain YAML file in `config/domains/` (follow `germany.yaml` as a template)
-2. Add keywords in the country's language to `config/keywords.yaml` (all 7 categories)
-3. If the language has compound words (like German or Hungarian), add it to `COMPOUND_LANGUAGES` in `src/core/keywords.py`
-4. Add the new region to `VALID_REGIONS` in `src/core/config.py`
-5. Add TLD mappings to `TLD_REGION_MAP` in `src/agent/domain_generator.py`
-6. Update `config/groups.yaml` with the new domains
-7. Add tests to `tests/unit/test_keywords.py`
-
-**Improve keyword accuracy:**
-- Edit `config/keywords.yaml` — add terms, adjust weights, add boost/penalty phrases
-- Test with: `python -m src.agent "Match keywords: 'your test text here'"`
-
-**Fix bugs or improve code:**
-- All source code is in `src/`, organized into `core/`, `agent/`, `api/`, `orchestration/`, `output/`, `mcp/`, `storage/`
-- The [Architecture](#architecture) section explains how the pipeline works
-- Run `ruff check src/` to verify code style
-
-### Code Architecture (for contributors)
-
+```bash
+git clone https://github.com/ahliana/ocp-policy-hub.git
+cd ocp-policy-hub
+.\setup.ps1 -Dev        # Linux/macOS: ./setup.sh --dev
+pytest                   # All 399 tests must pass
+ruff check src/ tests/   # No lint errors
 ```
-User input → Agent (orchestrator.py) → Tool dispatch (tools.py)
-                                              ↓
-                            Per-domain pipeline (scanner.py):
-                            crawl → extract → url_filter → keywords
-                            → cache_check → haiku_screen → sonnet_analyze → verify
-                                              ↓
-                            Post-scan: verifier → auditor → store → sheets export
-```
-
-Key abstractions:
-- **`ConfigLoader`** (`src/core/config.py`) — loads all YAML configs, resolves domain groups
-- **`KeywordMatcher`** (`src/core/keywords.py`) — multi-language scoring with compound word support
-- **`ClaudeClient`** (`src/core/llm.py`) — two-stage LLM (Haiku screens, Sonnet analyzes)
-- **`ScanManager`** (`src/orchestration/scan_manager.py`) — parallel scan orchestration
-- **`PolicyAgent`** (`src/agent/orchestrator.py`) — Anthropic API tool-use loop
-- **`REGION_TO_GROUPS`** (`src/agent/tools.py`) — maps regions to groups for auto-assignment
-
-### Test Categories
-
-| Category | Count | Location | What it covers |
-|----------|-------|----------|----------------|
-| Unit tests | 280 | `tests/unit/` | Keywords, models, API routes, agent tools, cache, crawler, verifier |
-| Integration tests | 109 | `tests/integration/` | Full pipeline, agent loop, discovery workflow, onboarding |
-| Edge case tests | ~95 | across both | Missing files, invalid input, duplicates, error handling |
-| Onboarding tests | 51 | `test_full_pipeline.py` | Setup scripts, env files, banner, error messages, CLI feedback |
 
 ---
 
