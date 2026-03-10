@@ -53,6 +53,12 @@ keywords:
         - "communal heating"
         - "heat reclamation"
 
+        # US-specific subject terms
+        - "combined heat and power"
+        - "CHP"
+        - "cogeneration"
+        - "thermal energy network"
+
       de:
         - "Abwärme"
         - "Abwärmenutzung"
@@ -143,6 +149,55 @@ keywords:
         - "red de calefacción urbana"
         - "distrito térmico"
 
+      pl:
+        - "ciepło odpadowe"
+        - "odzysk ciepła"
+        - "ciepło resztkowe"
+        - "ponowne wykorzystanie ciepła"
+        - "sieć ciepłownicza"
+        - "ciepłownictwo"
+        - "ciepło z centrum danych"
+
+      pt:
+        - "calor residual"
+        - "recuperação de calor"
+        - "reutilização de calor"
+        - "calor de resíduos"
+        - "rede de aquecimento urbano"
+        - "aquecimento distrital"
+        - "calor excedente"
+
+      cs:
+        - "odpadní teplo"
+        - "rekuperace tepla"
+        - "zbytkové teplo"
+        - "tepelná síť"
+        - "dálkové vytápění"
+        - "využití tepla"
+        - "odpadové teplo"
+
+      el:
+        - "απόβλητη θερμότητα"
+        - "ανάκτηση θερμότητας"
+        - "τηλεθέρμανση"
+        - "πλεονάζουσα θερμότητα"
+        - "θερμικό δίκτυο"
+
+      hu:
+        - "hulladékhő"
+        - "hővisszanyerés"
+        - "hőhasznosítás"
+        - "távhő"
+        - "távfűtés"
+        - "felesleges hő"
+
+      ro:
+        - "căldură reziduală"
+        - "recuperarea căldurii"
+        - "termoficare"
+        - "căldură excedentară"
+        - "rețea de încălzire"
+
   # ---------------------------------------------------------------------------
   # POLICY TYPE KEYWORDS (medium weight)
   # ---------------------------------------------------------------------------
@@ -168,6 +223,17 @@ keywords:
         - "rule"
         - "decree"
         - "compliance requirement"
+
+        # US-specific policy terms
+        - "public utility commission"
+        - "rate case"
+        - "renewable portfolio standard"
+        - "clean energy standard"
+        - "building code"
+        - "energy code"
+        - "docket"
+        - "rulemaking"
+        - "executive order"
 
       de:
         - "Verordnung"
@@ -246,6 +312,52 @@ keywords:
         - "normativa"
         - "obligación"
 
+      pl:
+        - "rozporządzenie"
+        - "ustawa"
+        - "dyrektywa"
+        - "dekret"
+        - "norma"
+        - "obowiązek"
+        - "przepis"
+
+      pt:
+        - "regulamento"
+        - "lei"
+        - "diretiva"
+        - "decreto"
+        - "norma"
+        - "obrigação"
+
+      cs:
+        - "nařízení"
+        - "zákon"
+        - "směrnice"
+        - "vyhláška"
+        - "předpis"
+        - "povinnost"
+
+      el:
+        - "κανονισμός"
+        - "νόμος"
+        - "οδηγία"
+        - "διάταγμα"
+        - "υποχρέωση"
+
+      hu:
+        - "rendelet"
+        - "törvény"
+        - "irányelv"
+        - "előírás"
+        - "kötelezettség"
+
+      ro:
+        - "regulament"
+        - "lege"
+        - "directivă"
+        - "decret"
+        - "obligație"
+
   # ---------------------------------------------------------------------------
   # INCENTIVE KEYWORDS (medium weight)
   # ---------------------------------------------------------------------------
@@ -272,6 +384,15 @@ keywords:
         - "co-financing"
         - "matched funding"
         - "capital allowance"
+
+        # US-specific incentive terms
+        - "property tax exemption"
+        - "sales tax exemption"
+        - "tax abatement"
+        - "investment tax credit"
+        - "production tax credit"
+        - "enterprise zone"
+        - "PACE financing"
 
       de:
         - "Förderung"
@@ -348,6 +469,46 @@ keywords:
         - "financiación"
         - "ayuda financiera"
 
+      pl:
+        - "dotacja"
+        - "subwencja"
+        - "ulga podatkowa"
+        - "dofinansowanie"
+        - "finansowanie"
+        - "zachęta"
+
+      pt:
+        - "subsídio"
+        - "incentivo"
+        - "crédito fiscal"
+        - "financiamento"
+        - "apoio financeiro"
+
+      cs:
+        - "dotace"
+        - "subvence"
+        - "daňová úleva"
+        - "financování"
+        - "podpora"
+
+      el:
+        - "επιδότηση"
+        - "φορολογική ελάφρυνση"
+        - "χρηματοδότηση"
+        - "κίνητρο"
+
+      hu:
+        - "támogatás"
+        - "adókedvezmény"
+        - "finanszírozás"
+        - "ösztönző"
+
+      ro:
+        - "subvenție"
+        - "stimulent"
+        - "credit fiscal"
+        - "finanțare"
+
   # ---------------------------------------------------------------------------
   # ENABLING ACTION KEYWORDS (lower weight)
   # ---------------------------------------------------------------------------
@@ -372,6 +533,13 @@ keywords:
         - "feasibility study"
         - "potential assessment"
         - "best practice"
+
+        # US-specific enabling terms
+        - "interconnection study"
+        - "integrated resource plan"
+        - "demand response"
+        - "energy audit"
+        - "benchmarking"
 
       de:
         - "Plattform"
@@ -449,6 +617,47 @@ keywords:
         - "hoja de ruta"
         - "plan de acción"
         - "proyecto piloto"
+
+      pl:
+        - "platforma"
+        - "strategia"
+        - "plan działania"
+        - "projekt pilotażowy"
+        - "studium wykonalności"
+
+      pt:
+        - "plataforma"
+        - "estratégia"
+        - "plano de ação"
+        - "projeto piloto"
+        - "estudo de viabilidade"
+
+      cs:
+        - "platforma"
+        - "strategie"
+        - "akční plán"
+        - "pilotní projekt"
+        - "studie proveditelnosti"
+
+      el:
+        - "πλατφόρμα"
+        - "στρατηγική"
+        - "σχέδιο δράσης"
+        - "πιλοτικό πρόγραμμα"
+
+      hu:
+        - "platform"
+        - "stratégia"
+        - "cselekvési terv"
+        - "kísérleti projekt"
+        - "megvalósíthatósági tanulmány"
+
+      ro:
+        - "platformă"
+        - "strategie"
+        - "plan de acțiune"
+        - "proiect pilot"
+        - "studiu de fezabilitate"
 
   # ---------------------------------------------------------------------------
   # OFF-TAKER KEYWORDS (lower weight)
@@ -529,6 +738,53 @@ keywords:
         - "sundlaug"
         - "gróðurhús"
 
+      it:
+        - "consumatore di calore"
+        - "teleriscaldamento utente"
+        - "piscina"
+        - "serra"
+
+      es:
+        - "consumidor de calor"
+        - "piscina"
+        - "invernadero"
+        - "calefacción residencial"
+
+      pl:
+        - "odbiorca ciepła"
+        - "basen"
+        - "szklarnia"
+        - "ogrzewanie mieszkaniowe"
+
+      pt:
+        - "consumidor de calor"
+        - "piscina"
+        - "estufa"
+        - "aquecimento residencial"
+
+      cs:
+        - "odběratel tepla"
+        - "bazén"
+        - "skleník"
+        - "bytové vytápění"
+
+      el:
+        - "καταναλωτής θερμότητας"
+        - "πισίνα"
+        - "θερμοκήπιο"
+
+      hu:
+        - "hőfogyasztó"
+        - "uszoda"
+        - "üvegház"
+        - "lakásfűtés"
+
+      ro:
+        - "consumator de căldură"
+        - "piscină"
+        - "seră"
+        - "încălzire rezidențială"
+
   # ---------------------------------------------------------------------------
   # CONTEXT KEYWORDS (lowest weight)
   # ---------------------------------------------------------------------------
@@ -548,6 +804,11 @@ keywords:
         - "edge computing"
         - "computing facility"
         - "cloud infrastructure"
+
+        # US-specific context terms
+        - "qualifying facility"
+        - "distributed generation"
+        - "behind the meter"
 
       de:
         - "Rechenzentrum"
@@ -595,6 +856,34 @@ keywords:
       es:
         - "centro de datos"
         - "sala de servidores"
+
+      pl:
+        - "centrum danych"
+        - "serwerownia"
+        - "kolokacja"
+
+      pt:
+        - "centro de dados"
+        - "sala de servidores"
+        - "infraestrutura cloud"
+
+      cs:
+        - "datové centrum"
+        - "serverovna"
+        - "kolokace"
+
+      el:
+        - "κέντρο δεδομένων"
+        - "αίθουσα διακομιστών"
+
+      hu:
+        - "adatközpont"
+        - "szerverterem"
+        - "kolokáció"
+
+      ro:
+        - "centru de date"
+        - "sală de servere"
 
   # ---------------------------------------------------------------------------
   # ENERGY EFFICIENCY CONTEXT (lowest weight)
@@ -674,6 +963,41 @@ keywords:
         - "consumo de energía"
         - "sostenibilidad"
 
+      pl:
+        - "efektywność energetyczna"
+        - "zużycie energii"
+        - "zrównoważony rozwój"
+        - "dekarbonizacja"
+
+      pt:
+        - "eficiência energética"
+        - "consumo de energia"
+        - "sustentabilidade"
+        - "descarbonização"
+
+      cs:
+        - "energetická účinnost"
+        - "spotřeba energie"
+        - "udržitelnost"
+        - "dekarbonizace"
+
+      el:
+        - "ενεργειακή απόδοση"
+        - "κατανάλωση ενέργειας"
+        - "βιωσιμότητα"
+
+      hu:
+        - "energiahatékonyság"
+        - "energiafogyasztás"
+        - "fenntarthatóság"
+        - "dekarbonizáció"
+
+      ro:
+        - "eficiență energetică"
+        - "consum de energie"
+        - "sustenabilitate"
+        - "decarbonizare"
+
 # =============================================================================
 # THRESHOLDS
 # =============================================================================
@@ -717,6 +1041,7 @@ url_bonuses:
     # US / UK
     - ".gov"
     - ".gov.uk"
+    - ".state.us"
     # Europe
     - ".gouv.fr"          # France
     - ".gv.at"            # Austria
@@ -737,6 +1062,15 @@ url_bonuses:
     - ".go.kr"            # South Korea
     - ".gov.sg"           # Singapore
     - ".gov.au"           # Australia
+    # Southern/Eastern Europe
+    - ".gob.es"           # Spain
+    - ".gov.it"           # Italy
+    - ".gov.pl"           # Poland
+    - ".gov.pt"           # Portugal
+    - ".gov.cz"           # Czech Republic
+    - ".gov.gr"           # Greece
+    - ".gov.hu"           # Hungary
+    - ".gov.ro"           # Romania
 
   # -------------------------------------------------------------------------
   # Legislation path patterns (regex)
@@ -767,8 +1101,11 @@ url_bonuses:
     - "/forskrift/"       # Norwegian regulations
     - "/eli/"             # Danish retsinformation
     - "/svensk-forfattningssamling/"  # Swedish law collection
-    # US state-specific CGI
+    # US state-specific paths
     - "/legp\\d+\\.exe"
+    - "/BillStatus/"
+    - "/docket/"
+    - "/rulemaking/"
 
   # -------------------------------------------------------------------------
   # Bill number pattern (regex)
@@ -776,7 +1113,7 @@ url_bonuses:
   # Bonus applied when URL contains a legislative bill identifier.
   # Pattern matches bill prefixes followed by numbers in path or query string.
   bill_number_bonus: 1.0
-  bill_number_pattern: "[/=](H\\.?B\\.?|S\\.?B\\.?|H\\.?R\\.?|S\\.?R\\.?|H\\.?J\\.?R\\.?|S\\.?J\\.?R\\.?)\\s*\\d+"
+  bill_number_pattern: "[/=](H\\.?B\\.?|S\\.?B\\.?|H\\.?R\\.?|S\\.?R\\.?|H\\.?J\\.?R\\.?|S\\.?J\\.?R\\.?|H\\.?F\\.?|S\\.?F\\.?|A\\.?B\\.?|L\\.?D\\.?)\\s*\\d+"
 
 # =============================================================================
 # NEGATIVE KEYWORDS (EXCLUSIONS)
@@ -917,6 +1254,12 @@ stricter_requirements:
       - "energy reuse effectiveness"
       - "ERE"  # Energy Reuse Effectiveness metric
 
+      # US legislative session terms
+      - "2025 session"
+      - "2026 session"
+      - "enacted 2025"
+      - "enacted 2026"
+
       # German
       - "Abwärmenutzungspflicht"
       - "Rechenzentrumsabwärme"
@@ -946,6 +1289,26 @@ stricter_requirements:
       # Finnish
       - "hukkalämpö datakeskus"
       - "kaukolämpö datakeskus"
+
+      # Polish
+      - "ciepło odpadowe centrum danych"
+      - "odzysk ciepła centrum danych"
+
+      # Portuguese
+      - "calor residual centro de dados"
+
+      # Czech
+      - "odpadní teplo datové centrum"
+
+      # Greek
+      - "απόβλητη θερμότητα κέντρο δεδομένων"
+
+      # Hungarian
+      - "hulladékhő adatközpont"
+      - "hőhasznosítás adatközpont"
+
+      # Romanian
+      - "căldură reziduală centru de date"
 
   # ---------------------------------------------------------------------------
   # PENALTY KEYWORDS

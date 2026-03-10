@@ -1,0 +1,58 @@
+# =============================================================================
+# CZECH REPUBLIC
+# =============================================================================
+# Language: Czech (cs)
+# Region: eu, eu_east, czech_republic
+# =============================================================================
+
+domains:
+  - name: "Czech Ministry of Industry and Trade"
+    id: "mpo_cz"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_east"
+      - "czech_republic"
+    base_url: "https://www.mpo.cz"
+    start_paths:
+      - "/en/energy/energy-efficiency"
+      - "/cz/energetika/energeticka-ucinnost"
+    max_depth: 2
+    language: "cs"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "law"
+    notes: |
+      MPO handles energy policy in the Czech Republic.
+      Czech Republic transposing EU EED.
+
+  - name: "Czech Collection of Laws (Sbirka Zakonu)"
+    id: "zakonyprolidi_cz"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_east"
+      - "czech_republic"
+    base_url: "https://www.zakonyprolidi.cz"
+    start_paths:
+      - "/hledani"
+    max_depth: 2
+    language: "cs"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "legislative"
+    tags:
+      - "legislation"
+      - "mandates"
+    policy_types:
+      - "law"
+      - "regulation"
+    notes: |
+      Zakony pro lidi - Czech legislation database.
+      Contains all enacted laws and regulations.

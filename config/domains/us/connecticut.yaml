@@ -3,7 +3,80 @@
 # =============================================================================
 # State abbreviation: CT
 # Region: us, us_states
+# Growing data center presence in Northeast corridor
 # =============================================================================
 
 domains:
-  # Add domain entries here as research is completed
+  - name: "Connecticut Department of Energy and Environmental Protection"
+    id: "ct_deep"
+    enabled: true
+    region:
+      - "us"
+      - "us_states"
+    base_url: "https://portal.ct.gov"
+    start_paths:
+      - "/DEEP/Energy"
+    allowed_path_patterns:
+      - "/DEEP/*"
+    max_depth: 2
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "clean_energy"
+    policy_types:
+      - "regulation"
+      - "incentive"
+    notes: |
+      CT DEEP administers energy and environmental programs.
+      Connecticut has aggressive clean energy targets.
+
+  - name: "Connecticut Public Utilities Regulatory Authority"
+    id: "ct_pura"
+    enabled: true
+    region:
+      - "us"
+      - "us_states"
+    base_url: "https://portal.ct.gov"
+    start_paths:
+      - "/PURA"
+    allowed_path_patterns:
+      - "/PURA/*"
+    max_depth: 2
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "regulatory"
+    tags:
+      - "utility_regulation"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+    notes: |
+      CT PURA regulates electric and gas utilities.
+      Relevant for interconnection rules and rate cases.
+
+  - name: "Connecticut General Assembly"
+    id: "ct_legislature"
+    enabled: true
+    region:
+      - "us"
+      - "us_states"
+    base_url: "https://www.cga.ct.gov"
+    start_paths:
+      - "/asp/cgabillstatus/cgabillstatus.asp"
+    max_depth: 2
+    language: "en"
+    requires_playwright: true
+    rate_limit_seconds: 2.0
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "law"
+    notes: |
+      Connecticut General Assembly bill tracking.
+      Track energy efficiency and building code legislation.

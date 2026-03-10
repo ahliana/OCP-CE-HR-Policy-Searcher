@@ -1,0 +1,58 @@
+# =============================================================================
+# PORTUGAL
+# =============================================================================
+# Language: Portuguese (pt)
+# Region: eu, eu_south, portugal
+# =============================================================================
+
+domains:
+  - name: "Portugal Directorate-General for Energy and Geology"
+    id: "dgeg_pt"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_south"
+      - "portugal"
+    base_url: "https://www.dgeg.gov.pt"
+    start_paths:
+      - "/energia/eficiencia-energetica"
+      - "/energia/energia-eletrica"
+    max_depth: 2
+    language: "pt"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "law"
+    notes: |
+      DGEG handles energy policy in Portugal.
+      Portugal transposing EU EED.
+
+  - name: "Portugal Diario da Republica"
+    id: "dre_pt"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_south"
+      - "portugal"
+    base_url: "https://dre.pt"
+    start_paths:
+      - "/legislacao-consolidada/"
+    max_depth: 2
+    language: "pt"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "legislative"
+    tags:
+      - "legislation"
+      - "mandates"
+    policy_types:
+      - "law"
+      - "regulation"
+    notes: |
+      Diario da Republica - Portugal's official gazette.
+      Contains all enacted legislation.

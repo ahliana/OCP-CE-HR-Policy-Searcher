@@ -44,6 +44,16 @@ TLD_REGION_MAP: dict[str, tuple[list[str], str] | None] = {
     ".retsinformation.dk": (["eu", "nordic"], "denmark"),
     ".go.jp": (["apac"], "apac"),
     ".go.kr": (["apac"], "apac"),
+    ".gob.es": (["eu", "eu_south", "spain"], "spain"),
+    ".gov.it": (["eu", "eu_south", "italy"], "italy"),
+    ".gov.pl": (["eu", "eu_east", "poland"], "poland"),
+    ".gov.pt": (["eu", "eu_south", "portugal"], "portugal"),
+    ".gov.cz": (["eu", "eu_east", "czech_republic"], "czech_republic"),
+    ".gov.gr": (["eu", "eu_south", "greece"], "greece"),
+    ".gov.hu": (["eu", "eu_east", "hungary"], "hungary"),
+    ".gov.ro": (["eu", "eu_east", "romania"], "romania"),
+    ".kormany.hu": (["eu", "eu_east", "hungary"], "hungary"),
+    ".sejm.gov.pl": (["eu", "eu_east", "poland"], "poland"),
     ".gov": None,  # US — handled specially in each function
 }
 

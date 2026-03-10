@@ -1,0 +1,60 @@
+# =============================================================================
+# POLAND
+# =============================================================================
+# Language: Polish (pl)
+# Region: eu, eu_east, poland
+# =============================================================================
+
+domains:
+  - name: "Poland Ministry of Climate and Environment"
+    id: "klimat_pl"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_east"
+      - "poland"
+    base_url: "https://www.gov.pl"
+    start_paths:
+      - "/web/klimat/efektywnosc-energetyczna"
+      - "/web/klimat/energia"
+    allowed_path_patterns:
+      - "/web/klimat/*"
+    max_depth: 2
+    language: "pl"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "law"
+    notes: |
+      Polish Ministry of Climate and Environment.
+      Poland's EED transposition includes data center provisions.
+
+  - name: "Poland ISAP Legislation Database"
+    id: "isap_pl"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_east"
+      - "poland"
+    base_url: "https://isap.sejm.gov.pl"
+    start_paths:
+      - "/isap.nsf/ByKeyword.xsp"
+    max_depth: 2
+    language: "pl"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "legislative"
+    tags:
+      - "legislation"
+      - "mandates"
+    policy_types:
+      - "law"
+      - "regulation"
+    notes: |
+      ISAP - Internet System of Legal Acts (Sejm).
+      Official Polish legislation database.

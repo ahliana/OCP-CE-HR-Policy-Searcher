@@ -1,0 +1,58 @@
+# =============================================================================
+# GREECE
+# =============================================================================
+# Language: Greek (el)
+# Region: eu, eu_south, greece
+# =============================================================================
+
+domains:
+  - name: "Greece Ministry of Environment and Energy"
+    id: "ypen_gr"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_south"
+      - "greece"
+    base_url: "https://ypen.gov.gr"
+    start_paths:
+      - "/energeia/energeiaki-apodotikotita"
+      - "/energeia/"
+    max_depth: 2
+    language: "el"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "law"
+    notes: |
+      YPEN handles energy policy in Greece.
+      Greece transposing EU EED.
+
+  - name: "Greece National Printing Office (FEK)"
+    id: "et_gr"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_south"
+      - "greece"
+    base_url: "https://www.et.gr"
+    start_paths:
+      - "/api/search"
+    max_depth: 2
+    language: "el"
+    requires_playwright: true
+    rate_limit_seconds: 2.0
+    category: "legislative"
+    tags:
+      - "legislation"
+      - "mandates"
+    policy_types:
+      - "law"
+      - "regulation"
+    notes: |
+      Ethniko Typografeio - Greece's official gazette (FEK).
+      Contains all enacted legislation.

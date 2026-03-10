@@ -351,3 +351,335 @@ class TestNordicLanguages:
         assert m.url_bonus("https://www.regjeringen.no/energy") >= 1.0
         # retsinformation.dk → /eli/ path bonus (1.5), no TLD match
         assert m.url_bonus("https://www.retsinformation.dk/eli/lta/2024/124") >= 1.5
+
+
+# ---------------------------------------------------------------------------
+# European expansion language tests (Phase 1c)
+# ---------------------------------------------------------------------------
+
+def _make_eu_expansion_config():
+    """Config with Polish, Portuguese, Czech, Greek, Hungarian, Romanian keywords."""
+    return {
+        "keywords": {
+            "subject": {
+                "weight": 3.0,
+                "terms": {
+                    "pl": ["ciepło odpadowe", "odzysk ciepła", "ciepłownictwo"],
+                    "pt": ["calor residual", "recuperação de calor", "aquecimento urbano"],
+                    "cs": ["odpadní teplo", "rekuperace tepla", "dálkové vytápění"],
+                    "el": ["απόβλητη θερμότητα", "ανάκτηση θερμότητας"],
+                    "hu": ["hulladékhő", "hővisszanyerés", "távfűtés"],
+                    "ro": ["căldură reziduală", "recuperarea căldurii"],
+                },
+            },
+            "context": {
+                "weight": 1.0,
+                "terms": {
+                    "pl": ["centrum danych"],
+                    "pt": ["centro de dados"],
+                    "cs": ["datové centrum"],
+                    "el": ["κέντρο δεδομένων"],
+                    "hu": ["adatközpont"],
+                    "ro": ["centru de date"],
+                },
+            },
+            "policy_type": {
+                "weight": 2.0,
+                "terms": {
+                    "pl": ["rozporządzenie", "ustawa"],
+                    "pt": ["regulamento", "decreto-lei"],
+                    "cs": ["nařízení", "zákon"],
+                    "el": ["κανονισμός", "νόμος"],
+                    "hu": ["rendelet", "törvény"],
+                    "ro": ["regulament", "lege"],
+                },
+            },
+            "energy": {
+                "weight": 1.0,
+                "terms": {
+                    "pl": ["efektywność energetyczna"],
+                    "pt": ["eficiência energética"],
+                    "cs": ["energetická účinnost"],
+                    "el": ["ενεργειακή απόδοση"],
+                    "hu": ["energiahatékonyság"],
+                    "ro": ["eficiență energetică"],
+                },
+            },
+        },
+        "thresholds": {
+            "minimum_keyword_score": 4.0,
+            "minimum_matches": 2,
+        },
+        "exclusions": [],
+        "stricter_requirements": {},
+    }
+
+
+class TestEuropeanExpansionLanguages:
+    """Tests for Polish, Portuguese, Czech, Greek, Hungarian, Romanian keywords."""
+
+    @pytest.fixture
+    def eu_matcher(self):
+        return KeywordMatcher(_make_eu_expansion_config())
+
+    def test_hungarian_in_compound_languages(self):
+        """Hungarian should be in COMPOUND_LANGUAGES for substring matching."""
+        assert "hu" in COMPOUND_LANGUAGES
+
+    def test_non_compound_expansion_languages(self):
+        """PL, PT, CS, EL, RO should NOT be in COMPOUND_LANGUAGES."""
+        for lang in ("pl", "pt", "cs", "el", "ro"):
+            assert lang not in COMPOUND_LANGUAGES, f"{lang} shouldn't be compound"
+
+    # --- Polish ---
+    def test_polish_basic_matching(self, eu_matcher):
+        text = "Rozporządzenie o ciepło odpadowe z centrum danych"
+        result = eu_matcher.match(text)
+        assert result.score > 0
+        terms = {m.term for m in result.matches}
+        assert "ciepło odpadowe" in terms
+
+    def test_polish_word_boundary(self, eu_matcher):
+        """Polish uses word boundaries, so partial matches should fail."""
+        text = "centrum danychxyz"  # not a real word boundary
+        result = eu_matcher.match(text)
+        terms = {m.term for m in result.matches}
+        assert "centrum danych" not in terms
+
+    # --- Portuguese ---
+    def test_portuguese_basic_matching(self, eu_matcher):
+        text = "Regulamento sobre calor residual do centro de dados"
+        result = eu_matcher.match(text)
+        assert result.score > 0
+        terms = {m.term for m in result.matches}
+        assert "calor residual" in terms
+        assert "centro de dados" in terms
+
+    # --- Czech ---
+    def test_czech_basic_matching(self, eu_matcher):
+        text = "Nařízení o odpadní teplo z datové centrum"
+        result = eu_matcher.match(text)
+        assert result.score > 0
+        terms = {m.term for m in result.matches}
+        assert "odpadní teplo" in terms
+
+    # --- Greek ---
+    def test_greek_basic_matching(self, eu_matcher):
+        text = "Κανονισμός για απόβλητη θερμότητα από κέντρο δεδομένων"
+        result = eu_matcher.match(text)
+        assert result.score > 0
+        terms = {m.term for m in result.matches}
+        assert "απόβλητη θερμότητα" in terms
+        assert "κέντρο δεδομένων" in terms
+
+    # --- Hungarian ---
+    def test_hungarian_basic_matching(self, eu_matcher):
+        text = "Rendelet a hulladékhő hasznosításáról adatközpont esetén"
+        result = eu_matcher.match(text)
+        assert result.score > 0
+        terms = {m.term for m in result.matches}
+        assert "hulladékhő" in terms
+        assert "adatközpont" in terms
+
+    def test_hungarian_compound_word_matching(self, eu_matcher):
+        """Hungarian compound words should match via substring (no word boundary)."""
+        # 'hulladékhőhasznosítás' contains 'hulladékhő' — should match
+        text = "hulladékhőhasznosítás szabályozása"
+        result = eu_matcher.match(text)
+        terms = {m.term for m in result.matches}
+        assert "hulladékhő" in terms
+
+    # --- Romanian ---
+    def test_romanian_basic_matching(self, eu_matcher):
+        text = "Regulament privind căldură reziduală din centru de date"
+        result = eu_matcher.match(text)
+        assert result.score > 0
+        terms = {m.term for m in result.matches}
+        assert "căldură reziduală" in terms
+        assert "centru de date" in terms
+
+    # --- Cross-language ---
+    def test_all_six_languages_have_subject_terms(self, eu_matcher):
+        """Each new language should have at least one subject term that matches."""
+        test_texts = {
+            "pl": "ciepło odpadowe",
+            "pt": "calor residual",
+            "cs": "odpadní teplo",
+            "el": "απόβλητη θερμότητα",
+            "hu": "hulladékhő",
+            "ro": "căldură reziduală",
+        }
+        for lang, text in test_texts.items():
+            result = eu_matcher.match(text)
+            assert result.score > 0, f"{lang} subject term '{text}' should match"
+
+    def test_relevance_with_multiple_categories(self, eu_matcher):
+        """Multi-category match should pass relevance threshold."""
+        # Polish: subject (3.0) + context (1.0) + policy_type (2.0) = 6.0
+        text = "Ustawa o ciepło odpadowe z centrum danych"
+        result = eu_matcher.match(text)
+        assert eu_matcher.is_relevant(result)
+
+
+# ---------------------------------------------------------------------------
+# US-specific keyword tests (Phase 3c)
+# ---------------------------------------------------------------------------
+
+def _make_us_config():
+    """Config with US-specific English terms for testing."""
+    return {
+        "keywords": {
+            "subject": {
+                "weight": 3.0,
+                "terms": {
+                    "en": [
+                        "waste heat recovery",
+                        "combined heat and power",
+                        "CHP",
+                        "cogeneration",
+                        "thermal energy network",
+                    ],
+                },
+            },
+            "policy_type": {
+                "weight": 2.0,
+                "terms": {
+                    "en": [
+                        "public utility commission",
+                        "rate case",
+                        "renewable portfolio standard",
+                        "clean energy standard",
+                        "building code",
+                        "energy code",
+                        "docket",
+                        "rulemaking",
+                        "executive order",
+                    ],
+                },
+            },
+            "incentives": {
+                "weight": 2.5,
+                "terms": {
+                    "en": [
+                        "property tax exemption",
+                        "sales tax exemption",
+                        "tax abatement",
+                        "investment tax credit",
+                        "production tax credit",
+                        "enterprise zone",
+                        "PACE financing",
+                    ],
+                },
+            },
+            "enabling": {
+                "weight": 1.5,
+                "terms": {
+                    "en": [
+                        "interconnection study",
+                        "integrated resource plan",
+                        "demand response",
+                        "energy audit",
+                        "benchmarking",
+                    ],
+                },
+            },
+            "context": {
+                "weight": 1.0,
+                "terms": {
+                    "en": [
+                        "data center",
+                        "qualifying facility",
+                        "distributed generation",
+                        "behind the meter",
+                    ],
+                },
+            },
+        },
+        "thresholds": {
+            "minimum_keyword_score": 5.0,
+            "minimum_matches": 2,
+        },
+        "exclusions": [],
+        "stricter_requirements": {
+            "boost_keywords": {
+                "enabled": True,
+                "terms": ["2025 session", "2026 session", "enacted 2025", "enacted 2026"],
+                "boost_amount": 2.0,
+            },
+        },
+    }
+
+
+class TestUSSpecificKeywords:
+    """Tests for US-specific keyword matching (state-level policies)."""
+
+    @pytest.fixture
+    def us_matcher(self):
+        return KeywordMatcher(_make_us_config())
+
+    def test_public_utility_commission(self, us_matcher):
+        text = "The public utility commission issued a rulemaking on data center waste heat recovery."
+        result = us_matcher.match(text)
+        assert result.score > 0
+        categories = set(result.categories_matched)
+        assert "policy_type" in categories
+        assert "subject" in categories
+
+    def test_chp_and_cogeneration(self, us_matcher):
+        text = "Combined heat and power cogeneration facility at the data center."
+        result = us_matcher.match(text)
+        terms = {m.term for m in result.matches}
+        assert "combined heat and power" in terms or "cogeneration" in terms
+
+    def test_tax_incentive_terms(self, us_matcher):
+        text = "Property tax exemption for data center waste heat recovery systems."
+        result = us_matcher.match(text)
+        categories = set(result.categories_matched)
+        assert "incentives" in categories
+        assert "subject" in categories
+
+    def test_state_regulatory_terms(self, us_matcher):
+        text = "The docket includes an integrated resource plan for qualifying facility status."
+        result = us_matcher.match(text)
+        categories = set(result.categories_matched)
+        assert "policy_type" in categories
+        assert "enabling" in categories
+
+    def test_session_boost_keywords(self, us_matcher):
+        text = "Waste heat recovery data center 2026 session"
+        result = us_matcher.match(text)
+        # Base score + 2.0 boost for "2026 session"
+        assert result.score >= 6.0
+
+    def test_us_bill_patterns_in_url(self):
+        """US state bill patterns (HF, SF, AB, LD) should get URL bonuses."""
+        config = _make_us_config()
+        config["url_bonuses"] = {
+            "gov_tld_bonus": 1.0,
+            "gov_tld_patterns": [".gov", ".state.us"],
+            "bill_path_bonus": 1.5,
+            "bill_path_patterns": [
+                r"/bill[s]?[-/]", r"/legislation/", r"/BillStatus/",
+                r"/docket/", r"/rulemaking/",
+            ],
+            "bill_number_bonus": 1.0,
+            "bill_number_pattern": r"[/=](H\.?B\.?|S\.?B\.?|H\.?F\.?|S\.?F\.?|A\.?B\.?|L\.?D\.?)\s*\d+",
+        }
+        m = KeywordMatcher(config)
+        # State legislature URL with bill number
+        assert m.url_bonus("https://www.revisor.mn.gov/bills/bill.php?b=HF1234") >= 1.0
+        # BillStatus path
+        assert m.url_bonus("https://olis.oregonlegislature.gov/BillStatus/HB2345") >= 1.5
+        # .state.us TLD
+        assert m.url_bonus("https://energy.state.us/programs") >= 1.0
+
+    def test_us_relevance_multi_category(self, us_matcher):
+        """A realistic US state policy text should pass relevance."""
+        text = (
+            "Executive order establishing data center waste heat recovery requirements. "
+            "Property tax exemption for combined heat and power facilities. "
+            "Energy audit and benchmarking requirements for large facilities."
+        )
+        result = us_matcher.match(text)
+        assert us_matcher.is_relevant(result)
+        assert len(result.categories_matched) >= 3

@@ -3,7 +3,58 @@
 # =============================================================================
 # State abbreviation: CO
 # Region: us, us_states
+# Major data center market: Denver metro area
 # =============================================================================
 
 domains:
-  # Add domain entries here as research is completed
+  - name: "Colorado Energy Office"
+    id: "co_energy"
+    enabled: true
+    region:
+      - "us"
+      - "us_states"
+    base_url: "https://energyoffice.colorado.gov"
+    start_paths:
+      - "/clean-energy-programs"
+      - "/climate-energy"
+    max_depth: 2
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "incentives"
+      - "clean_energy"
+    policy_types:
+      - "regulation"
+      - "incentive"
+    notes: |
+      Colorado Energy Office administers clean energy programs.
+      Colorado has aggressive climate goals and growing DC market
+      in Denver metro area.
+
+  - name: "Colorado General Assembly"
+    id: "co_legislature"
+    enabled: true
+    region:
+      - "us"
+      - "us_states"
+    base_url: "https://leg.colorado.gov"
+    start_paths:
+      - "/bills"
+    allowed_path_patterns:
+      - "/bills/*"
+    max_depth: 2
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "law"
+    notes: |
+      Colorado state legislature bill tracking.
+      Track energy efficiency and data center related bills.

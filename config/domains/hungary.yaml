@@ -1,0 +1,58 @@
+# =============================================================================
+# HUNGARY
+# =============================================================================
+# Language: Hungarian (hu)
+# Region: eu, eu_east, hungary
+# =============================================================================
+
+domains:
+  - name: "Hungary Ministry of Energy"
+    id: "energiaugyi_hu"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_east"
+      - "hungary"
+    base_url: "https://energiaugyi.kormany.hu"
+    start_paths:
+      - "/energiapolitika"
+      - "/energiahatekony"
+    max_depth: 2
+    language: "hu"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "law"
+    notes: |
+      Hungarian Ministry of Energy handles energy policy.
+      Hungary transposing EU EED.
+
+  - name: "Hungary National Legislation Database (Njt)"
+    id: "njt_hu"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_east"
+      - "hungary"
+    base_url: "https://njt.hu"
+    start_paths:
+      - "/jogszabalykereso"
+    max_depth: 2
+    language: "hu"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "legislative"
+    tags:
+      - "legislation"
+      - "mandates"
+    policy_types:
+      - "law"
+      - "regulation"
+    notes: |
+      Nemzeti Jogszabalytár - Hungary's national legislation database.
+      Contains all enacted laws and government decrees.

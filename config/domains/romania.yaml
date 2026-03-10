@@ -1,0 +1,58 @@
+# =============================================================================
+# ROMANIA
+# =============================================================================
+# Language: Romanian (ro)
+# Region: eu, eu_east, romania
+# =============================================================================
+
+domains:
+  - name: "Romania Ministry of Energy"
+    id: "energie_ro"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_east"
+      - "romania"
+    base_url: "https://energie.gov.ro"
+    start_paths:
+      - "/eficienta-energetica"
+      - "/energie"
+    max_depth: 2
+    language: "ro"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "law"
+    notes: |
+      Romanian Ministry of Energy handles energy policy.
+      Romania transposing EU EED.
+
+  - name: "Romania Official Gazette (Monitorul Oficial)"
+    id: "monitoruloficial_ro"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_east"
+      - "romania"
+    base_url: "https://www.monitoruloficial.ro"
+    start_paths:
+      - "/e-monitor"
+    max_depth: 2
+    language: "ro"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "legislative"
+    tags:
+      - "legislation"
+      - "mandates"
+    policy_types:
+      - "law"
+      - "regulation"
+    notes: |
+      Monitorul Oficial - Romania's official gazette.
+      Contains all enacted legislation.

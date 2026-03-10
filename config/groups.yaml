@@ -44,6 +44,24 @@ groups:
       - bmk_at
       - energy_be
       - seai_ie
+      # Southern Europe
+      - miteco_es
+      - boe_es
+      - mase_it
+      - normattiva_it
+      - dgeg_pt
+      - dre_pt
+      - ypen_gr
+      - et_gr
+      # Eastern Europe
+      - klimat_pl
+      - isap_pl
+      - mpo_cz
+      - zakonyprolidi_cz
+      - energiaugyi_hu
+      - njt_hu
+      - energie_ro
+      - monitoruloficial_ro
 
   nordic:
     description: "Nordic countries - leaders in heat reuse"
@@ -77,6 +95,30 @@ groups:
       - energy_be
       - seai_ie
 
+  eu_south:
+    description: "Spain, Italy, Portugal, Greece"
+    domains:
+      - miteco_es
+      - boe_es
+      - mase_it
+      - normattiva_it
+      - dgeg_pt
+      - dre_pt
+      - ypen_gr
+      - et_gr
+
+  eu_east:
+    description: "Poland, Czech Republic, Hungary, Romania"
+    domains:
+      - klimat_pl
+      - isap_pl
+      - mpo_cz
+      - zakonyprolidi_cz
+      - energiaugyi_hu
+      - njt_hu
+      - energie_ro
+      - monitoruloficial_ro
+
   us:
     description: "United States - federal and state combined"
     domains:
@@ -93,6 +135,16 @@ groups:
       - va_energy
       - tx_seco
       - wa_commerce
+      - co_energy
+      - co_legislature
+      - fl_psc
+      - fl_legislature
+      - mn_puc
+      - mn_commerce
+      - mn_legislature
+      - ct_deep
+      - ct_pura
+      - ct_legislature
 
   us_federal:
     description: "US federal agencies and regional orgs only"
@@ -126,6 +178,16 @@ groups:
       - va_energy
       - va_legislature
       - wa_commerce
+      - co_energy
+      - co_legislature
+      - fl_psc
+      - fl_legislature
+      - mn_puc
+      - mn_commerce
+      - mn_legislature
+      - ct_deep
+      - ct_pura
+      - ct_legislature
 
   apac:
     description: "Asia-Pacific region"
@@ -247,6 +309,41 @@ groups:
       - or_building_codes
       - tx_legislature
 
+  test_eu_expansion:
+    description: "New EU expansion domains (Phase 2)"
+    domains:
+      # Southern Europe
+      - miteco_es
+      - boe_es
+      - mase_it
+      - normattiva_it
+      - dgeg_pt
+      - dre_pt
+      - ypen_gr
+      - et_gr
+      # Eastern Europe
+      - klimat_pl
+      - isap_pl
+      - mpo_cz
+      - zakonyprolidi_cz
+      - energiaugyi_hu
+      - njt_hu
+      - energie_ro
+      - monitoruloficial_ro
+
+  test_us_expansion:
+    description: "New US state domains (Phase 3)"
+    domains:
+      - co_energy
+      - co_legislature
+      - fl_psc
+      - fl_legislature
+      - mn_puc
+      - mn_commerce
+      - mn_legislature
+      - ct_deep
+      - ct_pura
+      - ct_legislature
 
   # ---------------------------------------------------------------------------
   # CUSTOM GROUPS (add your own below)

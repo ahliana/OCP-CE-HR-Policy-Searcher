@@ -1,0 +1,58 @@
+# =============================================================================
+# ITALY
+# =============================================================================
+# Language: Italian (it)
+# Region: eu, eu_south, italy
+# =============================================================================
+
+domains:
+  - name: "Italy Ministry of Environment and Energy Security"
+    id: "mase_it"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_south"
+      - "italy"
+    base_url: "https://www.mase.gov.it"
+    start_paths:
+      - "/pagina/efficienza-energetica"
+      - "/pagina/energia"
+    max_depth: 2
+    language: "it"
+    requires_playwright: true
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "law"
+    notes: |
+      MASE handles energy policy in Italy.
+      Italy transposing EU EED with national energy plan (PNIEC).
+
+  - name: "Italy Normattiva - Legal Database"
+    id: "normattiva_it"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_south"
+      - "italy"
+    base_url: "https://www.normattiva.it"
+    start_paths:
+      - "/ricerca/avanzata"
+    max_depth: 2
+    language: "it"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "legislative"
+    tags:
+      - "legislation"
+      - "mandates"
+    policy_types:
+      - "law"
+      - "regulation"
+    notes: |
+      Normattiva - Italian consolidated legislation portal.
+      Contains all enacted laws and legislative decrees.

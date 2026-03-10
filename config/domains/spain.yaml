@@ -1,0 +1,58 @@
+# =============================================================================
+# SPAIN
+# =============================================================================
+# Language: Spanish (es)
+# Region: eu, eu_south, spain
+# =============================================================================
+
+domains:
+  - name: "Spain Ministry for the Ecological Transition"
+    id: "miteco_es"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_south"
+      - "spain"
+    base_url: "https://www.miteco.gob.es"
+    start_paths:
+      - "/es/energia/eficiencia-energetica.html"
+      - "/es/energia/desarrollo-sostenible.html"
+    max_depth: 2
+    language: "es"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "law"
+    notes: |
+      MITECO handles energy efficiency policy in Spain.
+      Spain transposing EU EED with data center provisions.
+
+  - name: "Spain Official State Gazette (BOE)"
+    id: "boe_es"
+    enabled: true
+    region:
+      - "eu"
+      - "eu_south"
+      - "spain"
+    base_url: "https://www.boe.es"
+    start_paths:
+      - "/buscar/act.php"
+    max_depth: 2
+    language: "es"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "legislation"
+    policy_types:
+      - "law"
+      - "regulation"
+    notes: |
+      Boletin Oficial del Estado - Spain's official gazette.
+      All laws and regulations published here.

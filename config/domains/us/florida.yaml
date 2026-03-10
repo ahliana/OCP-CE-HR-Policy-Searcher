@@ -3,7 +3,55 @@
 # =============================================================================
 # State abbreviation: FL
 # Region: us, us_states
+# Major data center market: Miami/Jacksonville corridor
 # =============================================================================
 
 domains:
-  # Add domain entries here as research is completed
+  - name: "Florida Public Service Commission"
+    id: "fl_psc"
+    enabled: true
+    region:
+      - "us"
+      - "us_states"
+    base_url: "https://www.psc.state.fl.us"
+    start_paths:
+      - "/ElectricNaturalGas"
+      - "/ConsumerAssistance"
+    max_depth: 2
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "regulatory"
+    tags:
+      - "efficiency"
+      - "utility_regulation"
+    policy_types:
+      - "regulation"
+    notes: |
+      Florida PSC regulates electric utilities.
+      Relevant for interconnection rules and large load requirements.
+
+  - name: "Florida Legislature"
+    id: "fl_legislature"
+    enabled: true
+    region:
+      - "us"
+      - "us_states"
+    base_url: "https://www.flsenate.gov"
+    start_paths:
+      - "/Session/Bill/"
+    allowed_path_patterns:
+      - "/Session/Bill/*"
+    max_depth: 2
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "law"
+    notes: |
+      Florida Senate bill tracking system.
+      Growing data center market with potential energy legislation.

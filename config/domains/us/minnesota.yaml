@@ -3,7 +3,85 @@
 # =============================================================================
 # State abbreviation: MN
 # Region: us, us_states
+# Major data center market: Minneapolis metro area
 # =============================================================================
 
 domains:
-  # Add domain entries here as research is completed
+  - name: "Minnesota Public Utilities Commission"
+    id: "mn_puc"
+    enabled: true
+    region:
+      - "us"
+      - "us_states"
+    base_url: "https://mn.gov"
+    start_paths:
+      - "/puc/"
+      - "/puc/energy"
+    allowed_path_patterns:
+      - "/puc/*"
+    max_depth: 2
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "regulatory"
+    tags:
+      - "efficiency"
+      - "utility_regulation"
+    policy_types:
+      - "regulation"
+    notes: |
+      Minnesota PUC oversees energy utilities.
+      Active in CHP/district energy policy.
+
+  - name: "Minnesota Department of Commerce - Energy"
+    id: "mn_commerce"
+    enabled: true
+    region:
+      - "us"
+      - "us_states"
+    base_url: "https://mn.gov"
+    start_paths:
+      - "/commerce/energy/"
+    allowed_path_patterns:
+      - "/commerce/energy/*"
+    max_depth: 2
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "incentives"
+    policy_types:
+      - "regulation"
+      - "incentive"
+    notes: |
+      Minnesota Commerce Department Energy Division.
+      Administers energy efficiency and conservation programs.
+
+  - name: "Minnesota Legislature"
+    id: "mn_legislature"
+    enabled: true
+    region:
+      - "us"
+      - "us_states"
+    base_url: "https://www.revisor.mn.gov"
+    start_paths:
+      - "/bills/"
+      - "/statutes/"
+    allowed_path_patterns:
+      - "/bills/*"
+      - "/statutes/*"
+    max_depth: 2
+    language: "en"
+    requires_playwright: false
+    rate_limit_seconds: 2.0
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "law"
+    notes: |
+      Minnesota Revisor of Statutes - bill tracking and statute search.
+      Minnesota uses HF/SF bill numbering (House File/Senate File).
