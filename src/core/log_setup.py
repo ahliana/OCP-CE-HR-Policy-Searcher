@@ -13,6 +13,9 @@ Features
   (WARNING+ only so it doesn't clutter the CLI UI).
 - **Crash-safe flush** — the file handler flushes after every emit, and an
   ``atexit`` handler ensures clean shutdown.
+- **Session IDs** — each process gets a unique ``session_id`` so
+  concurrent agents (multiple API workers, parallel CLI runs) can be
+  distinguished in the same log file.
 - **Correlation IDs** — ``structlog.contextvars`` propagates ``scan_id``,
   ``domain_id``, and ``request_id`` through async tasks automatically.
 - **Sensitive data redaction** — API keys and tokens are stripped from log
@@ -20,12 +23,14 @@ Features
 - **Separate audit log** — critical events (scan start/complete, policy
   found, cost) are appended to ``data/logs/audit.jsonl`` with ``os.fsync``
   for guaranteed persistence.
+- **Log reader** — ``read_logs()`` and ``read_audit_log()`` provide
+  filtered, paginated access for the CLI viewer and REST API.
 
 Usage
 -----
 ::
 
-    from src.core.log_setup import setup_logging, log_audit_event
+    from src.core.log_setup import setup_logging, log_audit_event, read_logs
 
     # At application startup (CLI or API):
     log_file = setup_logging(data_dir="data")
@@ -38,6 +43,9 @@ Usage
 
     # For critical events that MUST survive crashes:
     log_audit_event(data_dir="data", event="policy_found", policy_name="EnEfG", ...)
+
+    # Read recent logs (for CLI viewer or API endpoint):
+    entries = read_logs(data_dir="data", lines=50, level="warning")
 """
 
 import atexit
@@ -47,8 +55,9 @@ import logging.handlers
 import os
 import re
 import sys
+import uuid
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import structlog
 
@@ -64,6 +73,11 @@ LOG_BACKUP_COUNT = 5
 
 # Libraries that flood DEBUG/INFO with HTTP traffic details.
 _NOISY_LIBRARIES = ("httpx", "httpcore", "anthropic", "urllib3", "asyncio")
+
+# Unique session ID for this process.  When multiple agents or API workers
+# run concurrently, each writes to the same log file — the session_id lets
+# you filter to just one session's messages.
+SESSION_ID = str(uuid.uuid4())[:8]
 
 # Patterns that should never appear in log output.
 _SENSITIVE_PATTERNS = [
@@ -175,6 +189,13 @@ def setup_logging(
     # Silence noisy libraries
     for lib in _NOISY_LIBRARIES:
         logging.getLogger(lib).setLevel(logging.WARNING)
+
+    # ── session tracking ─────────────────────────────────────────────
+
+    # Bind session_id so every log message identifies which process wrote
+    # it.  This is critical when multiple agents or API workers share the
+    # same log file.
+    structlog.contextvars.bind_contextvars(session_id=SESSION_ID)
 
     # ── structlog configuration ──────────────────────────────────────
 
@@ -289,3 +310,153 @@ def log_audit_event(data_dir: str = "data", **fields: Any) -> None:
         logging.getLogger(__name__).error(
             "Failed to write audit event", exc_info=True,
         )
+
+
+# ---------------------------------------------------------------------------
+# Log readers — for CLI viewer and API endpoints
+# ---------------------------------------------------------------------------
+
+_LEVEL_PRIORITY = {
+    "debug": 0, "info": 1, "warning": 2, "error": 3, "critical": 4,
+}
+
+
+def read_logs(
+    data_dir: str = "data",
+    *,
+    lines: int = 50,
+    level: Optional[str] = None,
+    scan_id: Optional[str] = None,
+    session_id: Optional[str] = None,
+) -> list[dict[str, Any]]:
+    """Read recent entries from the structured log file.
+
+    Parses the JSON-lines log file and returns the most recent entries,
+    optionally filtered by level, scan_id, or session_id.  Used by the
+    ``--logs`` CLI command and the ``GET /api/logs`` endpoint.
+
+    Args:
+        data_dir:    Base data directory (logs are in ``{data_dir}/logs/``).
+        lines:       Maximum number of entries to return.
+        level:       Minimum log level (``"debug"``, ``"info"``, ``"warning"``,
+                     ``"error"``).  Case-insensitive.
+        scan_id:     Only include entries with this scan_id.
+        session_id:  Only include entries from this session.
+
+    Returns:
+        List of log entry dicts, newest first.
+    """
+    log_file = Path(data_dir) / "logs" / "agent.log"
+    if not log_file.exists():
+        return []
+
+    min_level = _LEVEL_PRIORITY.get((level or "debug").lower(), 0)
+    entries: list[dict[str, Any]] = []
+
+    try:
+        with open(log_file, "r", encoding="utf-8") as f:
+            raw_lines = f.readlines()
+    except OSError:
+        return []
+
+    # Walk backwards through the file for efficiency (newest first)
+    for raw_line in reversed(raw_lines):
+        raw_line = raw_line.strip()
+        if not raw_line:
+            continue
+        try:
+            entry = json.loads(raw_line)
+        except json.JSONDecodeError:
+            continue
+
+        # Filter by level
+        entry_level = _LEVEL_PRIORITY.get(
+            entry.get("level", "debug").lower(), 0,
+        )
+        if entry_level < min_level:
+            continue
+
+        # Filter by scan_id
+        if scan_id and entry.get("scan_id") != scan_id:
+            continue
+
+        # Filter by session_id
+        if session_id and entry.get("session_id") != session_id:
+            continue
+
+        entries.append(entry)
+        if len(entries) >= lines:
+            break
+
+    return entries
+
+
+def read_audit_log(
+    data_dir: str = "data",
+    *,
+    lines: int = 50,
+    event_type: Optional[str] = None,
+    scan_id: Optional[str] = None,
+) -> list[dict[str, Any]]:
+    """Read recent entries from the crash-safe audit log.
+
+    Args:
+        data_dir:    Base data directory.
+        lines:       Maximum number of entries to return.
+        event_type:  Only include events of this type (e.g. ``"policy_found"``).
+        scan_id:     Only include events for this scan.
+
+    Returns:
+        List of audit event dicts, newest first.
+    """
+    audit_file = Path(data_dir) / "logs" / "audit.jsonl"
+    if not audit_file.exists():
+        return []
+
+    entries: list[dict[str, Any]] = []
+
+    try:
+        with open(audit_file, "r", encoding="utf-8") as f:
+            raw_lines = f.readlines()
+    except OSError:
+        return []
+
+    for raw_line in reversed(raw_lines):
+        raw_line = raw_line.strip()
+        if not raw_line:
+            continue
+        try:
+            entry = json.loads(raw_line)
+        except json.JSONDecodeError:
+            continue
+
+        if event_type and entry.get("event") != event_type:
+            continue
+        if scan_id and entry.get("scan_id") != scan_id:
+            continue
+
+        entries.append(entry)
+        if len(entries) >= lines:
+            break
+
+    return entries
+
+
+def get_log_file_paths(data_dir: str = "data") -> dict[str, Optional[str]]:
+    """Return paths to log files, or None if they don't exist.
+
+    Useful for showing users where to find logs and for the API to
+    report log file locations.
+
+    Returns:
+        Dict with ``"agent_log"`` and ``"audit_log"`` keys.
+    """
+    log_dir = Path(data_dir) / "logs"
+    agent_log = log_dir / "agent.log"
+    audit_log = log_dir / "audit.jsonl"
+
+    return {
+        "agent_log": str(agent_log) if agent_log.exists() else None,
+        "audit_log": str(audit_log) if audit_log.exists() else None,
+        "log_directory": str(log_dir),
+    }

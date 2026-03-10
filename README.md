@@ -47,6 +47,7 @@ Found 3 policies:
 - [Quick Start](#quick-start)
 - [CLI Reference](#cli-reference) — every mode and flag
 - [AI Agent](#ai-agent)
+- [Logging & Observability](#logging--observability) — structured logs, audit trail, CLI viewer
 - [Data Persistence](#data-persistence) — where results are stored, crash recovery
 - [**⚙️ Configuration**](#configuration) — all the knobs you can tweak
 - [Domain Groups](#domain-groups)
@@ -130,7 +131,7 @@ Found 3 policies:
            data/policies.json     (crash-resilient)
 ```
 
-The **AI agent** is the primary entry point. It uses the Anthropic API's tool use feature to orchestrate 13 tools (11 policy tools + web search + add domain) in a conversation loop. Users ask questions in natural language and the agent handles everything — including discovering new government websites via web search.
+The **AI agent** is the primary entry point. It uses the Anthropic API's tool use feature to orchestrate 14 tools (12 policy tools + web search + add domain) in a conversation loop. Users ask questions in natural language and the agent handles everything — including discovering new government websites via web search. All activity is logged to structured JSON files with crash-safe audit events for critical operations.
 
 **Why this design:** Per-page agent reasoning costs 5-10x more (~$17-35 vs ~$3.50/full scan) with negligible accuracy gain. The multi-stage funnel drops 90% of pages before any LLM call. The agent drives the system at a *strategic* level (discover sites, start scans, investigate URLs, review audit insights), while the pipeline stays deterministic for reliability and cost.
 
@@ -202,6 +203,10 @@ All agent modes and flags at a glance:
 | `python -m src.agent --discover Poland` | Discover mode — find government websites for a country |
 | `python -m src.agent --deep` | Deep scanning mode — wider/deeper crawling (combine with any mode) |
 | `python -m src.agent --deep --discover Japan` | Deep discovery — combine flags |
+| `python -m src.agent --logs` | View recent log entries |
+| `python -m src.agent --logs audit` | View audit trail (scan starts, policy finds) |
+| `python -m src.agent --logs --level error` | View only errors |
+| `python -m src.agent --help` | Show full CLI help |
 
 ### Deep Scanning Mode
 
@@ -342,7 +347,7 @@ ws.onmessage = (event) => {
 };
 ```
 
-### Agent Tools (13 total)
+### Agent Tools (14 total)
 
 | Tool | Description |
 |------|-------------|
@@ -350,6 +355,7 @@ ws.onmessage = (event) => {
 | `get_domain_config` | Full configuration for a specific domain |
 | `start_scan` | Start a parallel scan of domain groups |
 | `get_scan_status` | Check scan progress and results |
+| `list_scans` | List all scans in this session (running, completed, failed) |
 | `stop_scan` | Cancel a running scan |
 | `analyze_url` | Run the full pipeline on any URL |
 | `match_keywords` | Test keyword scoring on any text |
@@ -359,6 +365,93 @@ ws.onmessage = (event) => {
 | `estimate_cost` | Predict API costs before scanning |
 | `web_search` | Search the web for new government websites |
 | `add_domain` | Add a discovered website to the database permanently |
+
+---
+
+## Logging & Observability
+
+All activity is logged to structured JSON files for debugging, auditing, and monitoring. Logs work identically across all entry points (CLI agent, REST API, MCP server).
+
+### Log Files
+
+| File | Format | Contents |
+|------|--------|----------|
+| `data/logs/agent.log` | JSON-lines | All application logs (rotated, 10 MB × 5 backups) |
+| `data/logs/audit.jsonl` | JSON-lines | Critical events only — scan starts, completions, policy finds (crash-safe with fsync) |
+
+### CLI Log Viewer
+
+View logs without needing an API key:
+
+```bash
+python -m src.agent --logs                  # Last 30 log entries
+python -m src.agent --logs audit            # Audit trail events
+python -m src.agent --logs --level error    # Only errors
+python -m src.agent --logs --level warning  # Warnings and above
+python -m src.agent --logs --lines 100      # Show 100 entries
+python -m src.agent --logs --scan-id abc    # Filter by scan ID
+python -m src.agent --logs --json           # Raw JSON (for piping/scripting)
+```
+
+Flags can be combined: `python -m src.agent --logs audit --scan-id abc123`
+
+### API Log Endpoints (for React frontend)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/logs` | Recent log entries (filterable by level, scan_id, session_id) |
+| GET | `/api/logs/audit` | Audit trail events (filterable by event_type, scan_id) |
+| GET | `/api/logs/info` | Log file paths, sizes, and current session ID |
+
+**Example — fetch recent errors:**
+```bash
+curl "http://localhost:8000/api/logs?level=error&lines=20"
+```
+
+**Example — audit events for a specific scan:**
+```bash
+curl "http://localhost:8000/api/logs/audit?scan_id=abc123"
+```
+
+**Response format:**
+```json
+{
+  "entries": [
+    {
+      "event": "policy_found",
+      "level": "info",
+      "scan_id": "abc123",
+      "domain_id": "de_bmwk",
+      "policy_name": "EnEfG",
+      "timestamp": "2024-01-15T10:30:00Z",
+      "session_id": "a1b2c3d4"
+    }
+  ],
+  "count": 1
+}
+```
+
+### Key Features
+
+- **Structured JSON** — machine-parseable, grep-friendly, one JSON object per line
+- **Crash-safe audit log** — `os.fsync()` after every write, survives power loss
+- **Session IDs** — each process gets a unique ID, so concurrent agents sharing one log file can be distinguished
+- **Correlation IDs** — `scan_id` and `domain_id` propagate through async tasks automatically via `structlog.contextvars`
+- **Sensitive data redaction** — API keys, JWTs, and Google keys are stripped before reaching any log handler
+- **Log rotation** — 10 MB per file, 5 backups, 60 MB max disk usage
+- **Noisy library silencing** — httpx, anthropic SDK, asyncio debug messages suppressed
+
+### Multiple Agents / Concurrent Sessions
+
+When multiple agents or API workers share the same log file, each process writes a unique `session_id` into every log entry. Use it to filter:
+
+```bash
+# CLI: filter to one session
+python -m src.agent --logs --session-id a1b2c3d4
+
+# API: filter to one session
+curl "http://localhost:8000/api/logs?session_id=a1b2c3d4"
+```
 
 ---
 
@@ -609,6 +702,16 @@ curl -X POST http://localhost:8000/api/analyze \
   "verification_flags": []
 }
 ```
+
+### Logs
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/logs` | Recent log entries (query: `level`, `scan_id`, `session_id`, `lines`) |
+| GET | `/api/logs/audit` | Audit trail events (query: `event_type`, `scan_id`, `lines`) |
+| GET | `/api/logs/info` | Log file paths, sizes, and current session ID |
+
+See [Logging & Observability](#logging--observability) for full details and examples.
 
 ---
 
@@ -970,6 +1073,7 @@ ocp-policy-hub/
 │   ├── core/                   # Shared business logic
 │   │   ├── models.py           # All Pydantic data models
 │   │   ├── config.py           # YAML config loading & domain resolution
+│   │   ├── log_setup.py        # Structured logging (structlog + JSON + audit)
 │   │   ├── crawler.py          # Async BFS web crawler
 │   │   ├── extractor.py        # HTML content extraction
 │   │   ├── keywords.py         # Multi-language keyword matcher
@@ -989,16 +1093,17 @@ ocp-policy-hub/
 │   │       ├── scans.py        # Scan + WebSocket endpoints
 │   │       ├── policies.py     # Policy endpoints
 │   │       ├── analysis.py     # Single URL analysis
-│   │       └── agent.py        # Agent REST + WebSocket endpoints
+│   │       ├── agent.py        # Agent REST + WebSocket endpoints
+│   │       └── logs.py         # Log viewer endpoints (for React frontend)
 │   ├── output/                  # Export integrations
 │   │   └── sheets.py            # Google Sheets export
 │   ├── mcp/
 │   │   └── server.py           # MCP server (11 tools, advanced)
 │   └── storage/
 │       └── store.py            # JSON persistence
-├── tests/                      # 432 tests (296 unit + 136 integration)
+├── tests/                      # 505+ tests
 │   ├── unit/
-│   │   ├── test_agent.py       # Agent tool + dispatch tests
+│   │   ├── test_agent.py       # Agent tool + dispatch + rate limit tests
 │   │   ├── test_api.py         # FastAPI endpoint tests
 │   │   ├── test_cache.py       # URL cache tests
 │   │   ├── test_crawler.py     # Web crawler tests
@@ -1006,6 +1111,7 @@ ocp-policy-hub/
 │   │   ├── test_extractor.py   # HTML extraction tests
 │   │   ├── test_keywords.py    # Keyword matcher tests (49 tests, 17 languages)
 │   │   ├── test_llm.py         # Claude client tests
+│   │   ├── test_logging.py     # Logging, audit, redaction, API endpoints, CLI viewer
 │   │   ├── test_scanner.py     # Domain scanner tests
 │   │   ├── test_sheets.py      # Sheets export + Policy row tests
 │   │   ├── test_store.py       # JSON persistence tests
@@ -1015,6 +1121,9 @@ ocp-policy-hub/
 │       ├── test_discovery.py   # Discovery workflow + auto-group tests
 │       └── test_full_pipeline.py  # End-to-end pipeline + onboarding tests
 └── data/                       # Runtime data (gitignored)
+    ├── logs/                   # Structured logs (auto-created)
+    │   ├── agent.log           # JSON-lines log (rotated)
+    │   └── audit.jsonl         # Crash-safe audit trail
     ├── url_cache.json
     └── policies.json
 ```
@@ -1041,9 +1150,9 @@ ruff format src/
 ### Testing
 
 ```bash
-pytest                    # Run all 432 tests
-pytest tests/unit/        # Unit tests only (296)
-pytest tests/integration/ # Integration tests only (130)
+pytest                    # Run all 505+ tests
+pytest tests/unit/        # Unit tests only
+pytest tests/integration/ # Integration tests only
 pytest --cov=src          # With coverage report
 ```
 
@@ -1171,7 +1280,7 @@ Contributions are welcome! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the fu
 
 - Step-by-step instructions for adding a new country or region
 - Code style expectations (ruff, type hints, Pydantic models)
-- How to run the 432-test suite and lint checks
+- How to run the 505+-test suite and lint checks
 - Domain YAML format template
 - PR checklist
 
@@ -1181,7 +1290,7 @@ Contributions are welcome! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the fu
 git clone https://github.com/ahliana/ocp-policy-hub.git
 cd ocp-policy-hub
 .\setup.ps1 -Dev        # Linux/macOS: ./setup.sh --dev
-pytest                   # All 432 tests must pass
+pytest                   # All tests must pass
 ruff check src/ tests/   # No lint errors
 ```
 

@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from ..core.log_setup import setup_logging
-from .routes import domains, scans, policies, analysis, agent
+from .routes import domains, scans, policies, analysis, agent, logs
 
 load_dotenv(override=True)  # .env wins over stale system env vars
 
@@ -58,6 +58,7 @@ app.include_router(scans.router)
 app.include_router(policies.router)
 app.include_router(analysis.router)
 app.include_router(agent.router)
+app.include_router(logs.router)
 
 
 @app.get("/")
@@ -72,6 +73,7 @@ def root():
             "policies": "/api/policies",
             "analyze": "/api/analyze",
             "agent": "/api/agent",
+            "logs": "/api/logs",
         },
     }
 

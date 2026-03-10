@@ -12,9 +12,19 @@ Usage:
 
     # Deep scanning mode (more pages, wider keyword match)
     python -m src.agent --deep
+
+    # View recent logs
+    python -m src.agent --logs
+    python -m src.agent --logs audit
+    python -m src.agent --logs --level error
+    python -m src.agent --logs --scan-id abc123
+
+    # Help
+    python -m src.agent --help
 """
 
 import asyncio
+import json
 import logging
 import os
 import sys
@@ -25,8 +35,182 @@ from dotenv import load_dotenv
 load_dotenv(override=True)  # .env wins over stale system env vars
 
 
+def _print_help():
+    """Print CLI usage help and exit."""
+    print("""
+OCP Policy Hub Agent — CLI Reference
+=====================================
+
+Usage:
+  python -m src.agent                    Interactive mode (default)
+  python -m src.agent "message"          Single command, then exit
+  python -m src.agent --discover COUNTRY Discover websites for a country
+  python -m src.agent --deep             Deep scanning (3-4x cost)
+  python -m src.agent --logs             View recent log entries
+  python -m src.agent --help             Show this help
+
+Log Viewer:
+  python -m src.agent --logs             Last 30 log entries
+  python -m src.agent --logs audit       Last 30 audit events
+  python -m src.agent --logs --level error   Only errors
+  python -m src.agent --logs --level warning Warnings and above
+  python -m src.agent --logs --lines 100     Show 100 entries
+  python -m src.agent --logs --scan-id abc   Filter by scan ID
+  python -m src.agent --logs --json          Raw JSON output
+
+Flags can be combined:
+  python -m src.agent --deep --discover Germany
+  python -m src.agent --logs audit --scan-id abc123
+
+Environment Variables:
+  ANTHROPIC_API_KEY   Required. Your Anthropic API key.
+  OCP_CONFIG_DIR      Config directory (default: config)
+  OCP_DATA_DIR        Data/logs directory (default: data)
+
+Log Files:
+  data/logs/agent.log    Structured JSON logs (rotated, 10 MB × 5)
+  data/logs/audit.jsonl  Critical events (scan start/complete, policies found)
+
+API (for React frontend):
+  GET /api/logs          Recent log entries (filterable)
+  GET /api/logs/audit    Audit trail events
+  GET /api/logs/info     Log file paths and session info
+""")
+
+
+def _handle_logs_command(args: list[str], data_dir: str):
+    """Handle the --logs CLI command.  Shows recent log entries.
+
+    Supports subcommands and filters:
+      --logs             → recent agent log entries
+      --logs audit       → recent audit events
+      --logs --level X   → filter by minimum level
+      --logs --scan-id X → filter by scan ID
+      --logs --lines N   → number of entries (default 30)
+      --logs --json      → raw JSON output (for piping)
+    """
+    from ..core.log_setup import read_logs, read_audit_log, get_log_file_paths
+
+    # Parse log sub-arguments
+    log_type = "agent"  # default
+    level = None
+    scan_id = None
+    num_lines = 30
+    raw_json = False
+    i = 0
+
+    while i < len(args):
+        arg = args[i]
+        if arg == "audit":
+            log_type = "audit"
+        elif arg == "--level" and i + 1 < len(args):
+            i += 1
+            level = args[i]
+        elif arg == "--scan-id" and i + 1 < len(args):
+            i += 1
+            scan_id = args[i]
+        elif arg == "--lines" and i + 1 < len(args):
+            i += 1
+            try:
+                num_lines = int(args[i])
+            except ValueError:
+                print(f"Error: --lines expects a number, got '{args[i]}'")
+                sys.exit(1)
+        elif arg == "--json":
+            raw_json = True
+        i += 1
+
+    # Show log file locations
+    paths = get_log_file_paths(data_dir)
+    if not raw_json:
+        print()
+        print(f"  Log files: {paths['log_directory']}")
+        if paths["agent_log"]:
+            log_size = Path(paths["agent_log"]).stat().st_size
+            print(f"  Agent log: {_format_size(log_size)}")
+        if paths["audit_log"]:
+            audit_size = Path(paths["audit_log"]).stat().st_size
+            print(f"  Audit log: {_format_size(audit_size)}")
+        print()
+
+    # Read and display entries
+    if log_type == "audit":
+        entries = read_audit_log(
+            data_dir, lines=num_lines, scan_id=scan_id,
+            event_type=level,  # reuse --level for event type filter
+        )
+        if not entries:
+            print("  No audit events found.")
+            return
+        if raw_json:
+            for entry in reversed(entries):  # chronological order
+                print(json.dumps(entry, default=str))
+        else:
+            print(f"  Last {len(entries)} audit events"
+                  f"{f' (scan: {scan_id})' if scan_id else ''}:")
+            print("  " + "-" * 60)
+            for entry in reversed(entries):  # chronological order
+                ts = entry.get("timestamp", "?")[:19]
+                event = entry.get("event", "?")
+                sid = entry.get("scan_id", "")
+                extra = ""
+                if event == "policy_found":
+                    extra = f" — {entry.get('policy_name', '?')}"
+                elif event == "scan_completed":
+                    extra = (f" — {entry.get('policies_found', 0)} policies, "
+                             f"${entry.get('cost_usd', 0):.2f}")
+                elif event == "scan_started":
+                    extra = f" — {entry.get('domain_count', '?')} domains"
+                print(f"  {ts}  {event:<18} [{sid}]{extra}")
+    else:
+        entries = read_logs(
+            data_dir, lines=num_lines, level=level, scan_id=scan_id,
+        )
+        if not entries:
+            print("  No log entries found"
+                  f"{f' at level {level}+' if level else ''}.")
+            return
+        if raw_json:
+            for entry in reversed(entries):
+                print(json.dumps(entry, default=str))
+        else:
+            label = f" (level: {level}+)" if level else ""
+            label += f" (scan: {scan_id})" if scan_id else ""
+            print(f"  Last {len(entries)} log entries{label}:")
+            print("  " + "-" * 60)
+            for entry in reversed(entries):
+                ts = entry.get("timestamp", "?")[:19]
+                lvl = entry.get("level", "?").upper()[:5]
+                event = entry.get("event", "?")
+                sid = entry.get("scan_id", "")
+                sid_str = f" [{sid}]" if sid else ""
+                # Color-code by level
+                if lvl.startswith("ERROR"):
+                    prefix = "❌"
+                elif lvl.startswith("WARNI"):
+                    prefix = "⚠️ "
+                elif lvl.startswith("INFO"):
+                    prefix = "  "
+                else:
+                    prefix = "  "
+                print(f"  {prefix}{ts} {lvl:5} {event}{sid_str}")
+
+
+def _format_size(size_bytes: int) -> str:
+    """Format byte count as human-readable string (e.g. '2.3 MB')."""
+    if size_bytes < 1024:
+        return f"{size_bytes} B"
+    if size_bytes < 1024 * 1024:
+        return f"{size_bytes / 1024:.1f} KB"
+    return f"{size_bytes / (1024 * 1024):.1f} MB"
+
+
 def _print_banner(log_file: Path):
-    """Print the welcome banner for interactive mode."""
+    """Print the welcome banner for interactive mode.
+
+    Shows usage tips, log file location, and log viewer hint so users
+    know that all activity is being recorded and can be reviewed later.
+    """
     print()
     print("OCP Policy Hub Agent")
     print("=" * 40)
@@ -39,7 +223,8 @@ def _print_banner(log_file: Path):
     print('  "Scan Nordic countries for new policies"')
     print('  "How much would it cost to scan all EU domains?"')
     print()
-    print(f"  Logs: {log_file}")
+    print(f"  📋 Logs: {log_file}")
+    print("  📋 View logs: python -m src.agent --logs")
     print()
     print("Type 'quit' or 'exit' to stop.")
     print("Press Ctrl+C to interrupt a running operation.")
@@ -94,6 +279,7 @@ def _on_tool_result(name: str, result):
     elif name == "start_scan" and "scan_id" in result:
         msg = (f"  → Scan {result['scan_id']} started "
                f"({result.get('domain_count', '?')} domains)")
+        msg += "\n  📋 Progress is being logged — view anytime with: python -m src.agent --logs"
         if result.get("warning"):
             msg += f"\n  ⚠️  {result['warning']}"
         print(msg)
@@ -116,8 +302,12 @@ def _on_tool_result(name: str, result):
         else:
             icon = "→"
 
-        print(f"  {icon} {result['status']}: {done}/{total} domains, "
-              f"{policies} policies found so far (running total)")
+        status_line = (f"  {icon} {result['status']}: {done}/{total} domains, "
+                       f"{policies} policies found so far (running total)")
+        # When scan completes, remind user that results are saved
+        if result["status"] == "completed":
+            status_line += "\n  📋 Results saved to data/policies.json"
+        print(status_line)
 
         # Celebrate domains that found policies — but only the FIRST time
         # we see them, so the celebration doesn't repeat on every poll.
@@ -231,8 +421,25 @@ async def _run_single(agent, message: str):
 
 
 def main():
-    """Entry point for ``python -m src.agent``."""
-    # Check for API key
+    """Entry point for ``python -m src.agent``.
+
+    Handles CLI flag routing:
+    - ``--help`` and ``--logs`` work without an API key
+    - ``--deep``, ``--discover``, and interactive mode require an API key
+    """
+    args = sys.argv[1:]
+
+    # --help and --logs don't need an API key — handle them first
+    if args and args[0] == "--help":
+        _print_help()
+        sys.exit(0)
+
+    if args and args[0] == "--logs":
+        data_dir = os.environ.get("OCP_DATA_DIR", "data")
+        _handle_logs_command(args[1:], data_dir)
+        sys.exit(0)
+
+    # Check for API key (everything below needs it)
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         print("Error: ANTHROPIC_API_KEY is not set.")
@@ -275,9 +482,6 @@ def main():
         config_dir=config_dir,
         data_dir=data_dir,
     )
-
-    # Parse CLI flags
-    args = sys.argv[1:]
 
     # --deep: override settings for wider/deeper crawling.
     # Increases max_depth (3→5), max_pages (200→500), lowers keyword
