@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.core.keywords import KeywordMatcher
+from src.core.keywords import KeywordMatcher, COMPOUND_LANGUAGES
 
 
 def _make_config(**overrides):
@@ -204,3 +204,150 @@ class TestNearMiss:
         result = matcher.match(text)
         matcher.is_relevant(result)
         assert not matcher.check_near_miss(result)
+
+
+# ---------------------------------------------------------------------------
+# Nordic language tests
+# ---------------------------------------------------------------------------
+
+def _make_nordic_config():
+    """Config with Norwegian, Finnish, and Icelandic keywords for testing."""
+    return {
+        "keywords": {
+            "subject": {
+                "weight": 3.0,
+                "terms": {
+                    "no": ["spillvarme", "overskuddsvarme", "fjernvarme", "varmegjenvinning"],
+                    "fi": ["hukkalämpö", "ylijäämälämpö", "kaukolämpö", "lämmön talteenotto"],
+                    "is": ["afgangsorka", "hitaveita", "umframhiti"],
+                },
+            },
+            "context": {
+                "weight": 1.0,
+                "terms": {
+                    "no": ["datasenter", "serverrom"],
+                    "fi": ["datakeskus", "konesali"],
+                    "is": ["gagnamiðstöð"],
+                },
+            },
+            "policy_type": {
+                "weight": 2.0,
+                "terms": {
+                    "no": ["forskrift", "lov", "krav"],
+                    "fi": ["asetus", "laki", "vaatimus"],
+                    "is": ["reglugerð", "lög"],
+                },
+            },
+            "energy": {
+                "weight": 1.0,
+                "terms": {
+                    "no": ["energieffektivitet", "energiforbruk"],
+                    "fi": ["energiatehokkuus", "energiankulutus"],
+                    "is": ["orkunýtni"],
+                },
+            },
+        },
+        "thresholds": {
+            "minimum_keyword_score": 4.0,
+            "minimum_matches": 2,
+        },
+        "exclusions": [],
+        "stricter_requirements": {},
+    }
+
+
+class TestNordicLanguages:
+    """Tests for Norwegian, Finnish, and Icelandic keyword matching."""
+
+    @pytest.fixture
+    def nordic_matcher(self):
+        return KeywordMatcher(_make_nordic_config())
+
+    def test_compound_languages_includes_nordic(self):
+        """NO, FI, IS should be in COMPOUND_LANGUAGES for substring matching."""
+        assert "no" in COMPOUND_LANGUAGES
+        assert "fi" in COMPOUND_LANGUAGES
+        assert "is" in COMPOUND_LANGUAGES
+
+    def test_norwegian_basic_matching(self, nordic_matcher):
+        text = "Forskrift om spillvarme fra datasenter"
+        result = nordic_matcher.match(text)
+        assert result.score > 0
+        terms = {m.term for m in result.matches}
+        assert "spillvarme" in terms
+        assert "datasenter" in terms
+
+    def test_finnish_basic_matching(self, nordic_matcher):
+        # Use nominative form "datakeskus" — the declined "datakeskuksen" has
+        # a stem change (s→ks) so it doesn't contain "datakeskus" as substring.
+        text = "Datakeskus tuottaa hukkalämpöä joka hyödynnetään kaukolämpöverkkoon"
+        result = nordic_matcher.match(text)
+        terms = {m.term for m in result.matches}
+        assert "hukkalämpö" in terms
+        assert "datakeskus" in terms
+
+    def test_icelandic_basic_matching(self, nordic_matcher):
+        text = "Gagnamiðstöð framleiðir afgangsorka sem hægt er að nýta"
+        result = nordic_matcher.match(text)
+        terms = {m.term for m in result.matches}
+        assert "afgangsorka" in terms
+        assert "gagnamiðstöð" in terms
+
+    def test_norwegian_compound_word_matching(self, nordic_matcher):
+        """Norwegian compound words should match via substring (no word boundary)."""
+        # 'spillvarmeprosjekt' contains 'spillvarme' — should match
+        text = "spillvarmeprosjektet ble godkjent av NVE"
+        result = nordic_matcher.match(text)
+        terms = {m.term for m in result.matches}
+        assert "spillvarme" in terms
+
+    def test_finnish_compound_word_matching(self, nordic_matcher):
+        """Finnish compound words should match via substring."""
+        # 'hukkalämpöenergia' contains 'hukkalämpö'
+        text = "hukkalämpöenergia hyödynnetään tehokkaasti"
+        result = nordic_matcher.match(text)
+        terms = {m.term for m in result.matches}
+        assert "hukkalämpö" in terms
+
+    def test_simulated_lovdata_text(self, nordic_matcher):
+        """Simulated Norwegian legislation text should score well."""
+        text = (
+            "Forskrift om krav til spillvarme fra datasenter. "
+            "Eier av datasenter med installert effekt over 2 MW skal gjennomføre "
+            "en kost-nytte analyse av utnyttelse av overskuddsvarme."
+        )
+        result = nordic_matcher.match(text)
+        assert result.score >= 4.0
+        assert len(result.matches) >= 3
+
+    def test_norwegian_relevance_with_url_bonus(self, nordic_matcher):
+        """Lovdata URL bonus should help terse legislation pages pass."""
+        text = "Forskrift om spillvarme"  # minimal text
+        result = nordic_matcher.match(text)
+        # With lovdata URL bonus
+        assert nordic_matcher.is_relevant(
+            result,
+            url="https://lovdata.no/dokument/SF/forskrift/2024-09-25-2263",
+        )
+
+    def test_nordic_url_bonuses(self, nordic_matcher):
+        """Nordic government URLs should get scoring bonuses."""
+        config = _make_nordic_config()
+        config["url_bonuses"] = {
+            "gov_tld_bonus": 1.0,
+            "gov_tld_patterns": [
+                ".regjeringen.no", ".lovdata.no", ".energimyndigheten.se",
+                ".energiavirasto.fi", ".orkustofnun.is",
+            ],
+            "bill_path_bonus": 1.5,
+            "bill_path_patterns": ["/dokument/", "/forskrift/", "/eli/"],
+            "bill_number_bonus": 1.0,
+            "bill_number_pattern": "[/=](H\\.?B\\.?)\\s*\\d+",
+        }
+        m = KeywordMatcher(config)
+        # www.lovdata.no → TLD bonus (1.0) + /dokument/ path bonus (1.5) = 2.5
+        assert m.url_bonus("https://www.lovdata.no/dokument/SF/forskrift/2024") >= 2.5
+        # www.regjeringen.no → TLD bonus (1.0)
+        assert m.url_bonus("https://www.regjeringen.no/energy") >= 1.0
+        # retsinformation.dk → /eli/ path bonus (1.5), no TLD match
+        assert m.url_bonus("https://www.retsinformation.dk/eli/lta/2024/124") >= 1.5

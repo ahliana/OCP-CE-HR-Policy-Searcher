@@ -4,7 +4,10 @@ from datetime import date
 
 import pytest
 
-from src.core.llm import _extract_json, _coerce_types, ClaudeClient
+from src.core.llm import (
+    _extract_json, _coerce_types, ClaudeClient,
+    SCREENING_PROMPT, ANALYSIS_PROMPT,
+)
 from src.core.models import PolicyAnalysis, PolicyType, CostInfo
 
 
@@ -204,3 +207,33 @@ class TestUpdateCostEstimate:
         client.cost = CostInfo()
         client.update_cost_estimate()
         assert client.cost.total_usd == 0
+
+
+# --- Prompt content tests ---
+
+class TestPromptContent:
+    """Verify expanded prompts cover broader policy types."""
+
+    def test_screening_mentions_reporting(self):
+        assert "reporting" in SCREENING_PROMPT.lower()
+
+    def test_screening_mentions_cost_benefit(self):
+        assert "cost-benefit" in SCREENING_PROMPT.lower()
+
+    def test_screening_mentions_tax_incentives(self):
+        assert "tax incentiv" in SCREENING_PROMPT.lower()
+
+    def test_screening_mentions_multi_language(self):
+        assert "NO" in SCREENING_PROMPT or "any language" in SCREENING_PROMPT.lower()
+
+    def test_analysis_mentions_reporting(self):
+        assert "reporting" in ANALYSIS_PROMPT.lower()
+
+    def test_analysis_mentions_cost_benefit(self):
+        assert "cost-benefit" in ANALYSIS_PROMPT.lower()
+
+    def test_analysis_mentions_tax_incentives(self):
+        assert "tax incentiv" in ANALYSIS_PROMPT.lower()
+
+    def test_analysis_mentions_eed(self):
+        assert "EED" in ANALYSIS_PROMPT

@@ -99,6 +99,34 @@ keywords:
         - "varmeudnyttelse"
         - "fjernvarme"
 
+      no:
+        - "spillvarme"
+        - "overskuddsvarme"
+        - "varmegjenvinning"
+        - "varmeutnyttelse"
+        - "fjernvarme"
+        - "varmeoverskudd"
+        - "restvarme"
+        - "varmenett"
+        - "varmepumpe"
+
+      fi:
+        - "hukkalämpö"
+        - "ylijäämälämpö"
+        - "lämmön talteenotto"
+        - "lämmön hyödyntäminen"
+        - "kaukolämpö"
+        - "jätelämpö"
+        - "lämpöverkko"
+        - "lämpöpumppu"
+
+      is:
+        - "afgangsorka"
+        - "umframhiti"
+        - "endurheimt varma"
+        - "hitaveita"
+        - "varmadæla"
+
       it:
         - "calore residuo"
         - "calore di scarto"
@@ -179,6 +207,28 @@ keywords:
         - "direktiv"
         - "lov"
         - "bekendtgørelse"
+
+      no:
+        - "forskrift"
+        - "lov"
+        - "direktiv"
+        - "forordning"
+        - "pålegg"
+        - "bestemmelse"
+        - "krav"
+
+      fi:
+        - "asetus"
+        - "laki"
+        - "direktiivi"
+        - "määräys"
+        - "säädös"
+        - "vaatimus"
+
+      is:
+        - "reglugerð"
+        - "lög"
+        - "tilskipun"
 
       it:
         - "regolamento"
@@ -264,6 +314,26 @@ keywords:
         - "skattefradrag"
         - "finansiering"
 
+      no:
+        - "tilskudd"
+        - "støtte"
+        - "skattefradrag"
+        - "finansiering"
+        - "bidrag"
+        - "investeringsstøtte"
+
+      fi:
+        - "tuki"
+        - "avustus"
+        - "verovähennys"
+        - "rahoitus"
+        - "investointituki"
+
+      is:
+        - "styrkur"
+        - "skattaívilnun"
+        - "fjármögnun"
+
       it:
         - "sovvenzione"
         - "incentivo"
@@ -345,6 +415,27 @@ keywords:
         - "handlingsplan"
         - "pilotprojekt"
 
+      no:
+        - "plattform"
+        - "strategi"
+        - "handlingsplan"
+        - "pilotprosjekt"
+        - "varmeplanlegging"
+        - "mulighetsstudie"
+
+      fi:
+        - "alusta"
+        - "strategia"
+        - "toimintasuunnitelma"
+        - "pilottihanke"
+        - "lämpösuunnitelma"
+        - "toteutettavuusselvitys"
+
+      is:
+        - "stefna"
+        - "áætlun"
+        - "tilraunaverkefni"
+
       it:
         - "piattaforma"
         - "strategia"
@@ -419,6 +510,25 @@ keywords:
         - "svømmehal"
         - "drivhus"
 
+      no:
+        - "varmekunde"
+        - "varmebruker"
+        - "fjernvarmekunde"
+        - "svømmehall"
+        - "drivhus"
+        - "veksthus"
+
+      fi:
+        - "lämmön käyttäjä"
+        - "kaukolämpöasiakas"
+        - "uimahalli"
+        - "kasvihuone"
+
+      is:
+        - "hitanotandi"
+        - "sundlaug"
+        - "gróðurhús"
+
   # ---------------------------------------------------------------------------
   # CONTEXT KEYWORDS (lowest weight)
   # ---------------------------------------------------------------------------
@@ -462,6 +572,20 @@ keywords:
       da:
         - "datacenter"
         - "serverrum"
+
+      no:
+        - "datasenter"
+        - "serverrom"
+        - "samlokalisering"
+
+      fi:
+        - "datakeskus"
+        - "palvelinhuone"
+        - "konesali"
+
+      is:
+        - "gagnamiðstöð"
+        - "þjónasalur"
 
       it:
         - "centro dati"
@@ -522,6 +646,23 @@ keywords:
         - "energieffektivitet"
         - "energiforbrug"
         - "bæredygtighed"
+
+      no:
+        - "energieffektivitet"
+        - "energiforbruk"
+        - "bærekraft"
+        - "klimagassutslipp"
+
+      fi:
+        - "energiatehokkuus"
+        - "energiankulutus"
+        - "kestävyys"
+        - "hiilijalanjälki"
+
+      is:
+        - "orkunýtni"
+        - "orkusparnaður"
+        - "sjálfbærni"
 
       it:
         - "efficienza energetica"
@@ -584,6 +725,13 @@ url_bonuses:
     # Nordic
     - ".riksdagen.se"     # Swedish parliament
     - ".retsinformation.dk"  # Danish law database
+    - ".regjeringen.no"   # Norwegian government
+    - ".lovdata.no"       # Norwegian law database
+    - ".energimyndigheten.se"  # Swedish Energy Agency
+    - ".enova.no"         # Norwegian energy efficiency
+    - ".energiavirasto.fi"  # Finnish Energy Authority
+    - ".tem.fi"           # Finnish Ministry
+    - ".orkustofnun.is"   # Icelandic Energy Authority
     # Asia-Pacific
     - ".go.jp"            # Japan
     - ".go.kr"            # South Korea
@@ -614,6 +762,11 @@ url_bonuses:
     # EU
     - "/legal-content/"
     - "/celex/"
+    # Nordic legislation paths
+    - "/dokument/"        # Norwegian lovdata, Swedish riksdagen
+    - "/forskrift/"       # Norwegian regulations
+    - "/eli/"             # Danish retsinformation
+    - "/svensk-forfattningssamling/"  # Swedish law collection
     # US state-specific CGI
     - "/legp\\d+\\.exe"
 
@@ -705,6 +858,10 @@ stricter_requirements:
       - primary: "subject"
         secondary: "incentives"   # grant, subsidy, tax credit, etc.
 
+      # Energy efficiency + policy type (catches broader energy regulations)
+      - primary: "energy"
+        secondary: "policy_type"  # regulation, law, directive, etc.
+
   # ---------------------------------------------------------------------------
   # KEYWORD DENSITY
   # ---------------------------------------------------------------------------
@@ -776,6 +933,19 @@ stricter_requirements:
       # French
       - "chaleur fatale centre de données"
       - "réseau de chaleur data center"
+
+      # Norwegian
+      - "spillvarme datasenter"
+      - "fjernvarme datasenter"
+      - "overskuddsvarme datasenter"
+
+      # Danish
+      - "overskudsvarme datacenter"
+      - "fjernvarme datacenter"
+
+      # Finnish
+      - "hukkalämpö datakeskus"
+      - "kaukolämpö datakeskus"
 
   # ---------------------------------------------------------------------------
   # PENALTY KEYWORDS

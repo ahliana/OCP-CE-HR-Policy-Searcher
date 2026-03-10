@@ -49,11 +49,16 @@ groups:
     description: "Nordic countries - leaders in heat reuse"
     domains:
       - energimyndigheten_se
+      - energimyndigheten_dc
+      - riksdagen_se_dc
       - ens_dk
+      - ens_dk_heat
+      - retsinformation_dk
       - energiavirasto_fi
       - tem_fi
       - oed_no
       - enova_no
+      - lovdata_no
       - orkustofnun_is
 
   eu_central:

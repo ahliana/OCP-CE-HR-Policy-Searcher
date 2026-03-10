@@ -22,6 +22,12 @@ SCREENING_PROMPT = """Quick relevance check. Does this page describe government 
 - Data center energy efficiency requirements
 - District heating involving data centers
 - Heat recovery mandates or incentives for data centers
+- Energy performance reporting requirements for data centers
+- Cost-benefit analysis requirements for waste heat utilization
+- Tax incentives or exemptions for heat recovery or district heating
+- Energy efficiency directives applicable to data centers (e.g. EU EED)
+
+Note: Content may be in any language (EN, DE, FR, SV, DA, NO, FI, IS, etc.).
 
 URL: {url}
 
@@ -47,9 +53,15 @@ TASK:
    - Energy efficiency requirements for data centers
    - District heating with data centers
    - Heat recovery mandates or incentives
+   - Energy performance reporting requirements for data centers
+   - Cost-benefit analysis requirements for waste heat utilization
+   - Tax incentives or exemptions for heat recovery or district heating
+   - Energy efficiency directives applicable to data centers (e.g. EU EED Article 26)
+
+   The content may be in any language. Look for policy substance regardless of language.
 
 2. If relevant, extract:
-   - Policy name/title
+   - Policy name/title (in original language if not English)
    - Jurisdiction (country/region)
    - Type (law/regulation/directive/incentive/grant/plan)
    - Brief summary (2-3 sentences)

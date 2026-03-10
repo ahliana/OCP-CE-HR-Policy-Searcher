@@ -159,6 +159,7 @@ domains:
     language: "no"
     requires_playwright: false
     rate_limit_seconds: 2.0
+    min_keyword_score: 2.0
     category: "legislation"
     tags:
       - "mandatory"

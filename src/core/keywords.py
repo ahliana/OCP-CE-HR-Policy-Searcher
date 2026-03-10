@@ -1,7 +1,7 @@
-"""Keyword matching with weighted scoring across 7 categories and 8 languages.
+"""Keyword matching with weighted scoring across 7 categories and 11 languages.
 
 Features:
-- Compound language substring matching (German, Dutch, Swedish, Danish)
+- Compound language substring matching (German, Dutch, Swedish, Danish, Norwegian, Finnish, Icelandic)
 - Boost/penalty keywords
 - URL-based scoring bonuses (gov TLDs, legislation paths, bill numbers)
 - Required category combinations
@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 from .models import KeywordResult, KeywordMatch
 
 # Languages that use compound words (skip word boundaries)
-COMPOUND_LANGUAGES: set[str] = {"de", "nl", "sv", "da"}
+COMPOUND_LANGUAGES: set[str] = {"de", "nl", "sv", "da", "no", "fi", "is"}
 
 # Default URL bonus values
 _DEFAULT_GOV_TLD_BONUS = 1.0

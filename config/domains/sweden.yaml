@@ -55,6 +55,7 @@ domains:
     language: "sv"
     requires_playwright: true
     rate_limit_seconds: 3.0
+    min_keyword_score: 2.0
     category: "legislation"
     tags:
       - "mandatory"
