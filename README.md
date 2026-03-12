@@ -162,9 +162,37 @@ Open `.env` (created by the setup script) and add your Anthropic API key:
 ANTHROPIC_API_KEY=sk-ant-api03-your-real-key-here
 ```
 
-Get your key at [console.anthropic.com](https://console.anthropic.com/). For Google Sheets export, also add `GOOGLE_CREDENTIALS` and `SPREADSHEET_ID`.
+Get your key at [console.anthropic.com](https://console.anthropic.com/).
 
-The `.env` file is auto-loaded on startup — no need to manually `source` or `export`.
+The `.env` file is auto-loaded on startup — no need to manually `source` or `export`. Credentials are resolved from the project root regardless of working directory.
+
+### Google Sheets Setup
+
+To export discovered policies to Google Sheets, add two more variables to `.env`:
+
+1. **Create a Google Cloud service account** with Sheets API access
+2. **Download the JSON key file** and base64-encode it:
+
+```bash
+# Linux/macOS
+base64 -i service-account.json | tr -d '\n'
+
+# PowerShell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("service-account.json"))
+```
+
+3. **Add to `.env`:**
+
+```
+GOOGLE_CREDENTIALS=<paste the base64 string as one unbroken line>
+SPREADSHEET_ID=1aBcDeFgHiJkLmNoPqRsTuVwXyZ
+```
+
+The spreadsheet ID is the long string in your Google Sheet URL between `/d/` and `/edit`.
+
+4. **Share the spreadsheet** with the service account email (found in the JSON key file under `client_email`)
+
+Without these variables, policies are saved to `data/policies.json` only.
 
 ### Run the AI Agent (recommended)
 
@@ -761,8 +789,8 @@ Late-connecting clients receive full event history on connect.
 | `OCP_MAX_CONCURRENT` | `5` | Default parallel workers |
 | `OCP_CONFIG_DIR` | `config` | Configuration directory |
 | `OCP_DATA_DIR` | `data` | Data/cache directory |
-| `GOOGLE_CREDENTIALS` | — | Base64-encoded Google service account JSON (for Sheets export) |
-| `SPREADSHEET_ID` | — | Google Spreadsheet ID (for Sheets export) |
+| `GOOGLE_CREDENTIALS` | — | Base64-encoded Google service account JSON (for Sheets export). See [Google Sheets Setup](#google-sheets-setup) |
+| `SPREADSHEET_ID` | — | Google Spreadsheet ID from the sheet URL (for Sheets export) |
 
 ### Settings (config/settings.yaml)
 
@@ -1265,6 +1293,29 @@ copy config\example.env .env      # Linux/macOS: cp config/example.env .env
 ```
 
 Then edit `.env` and add your key.
+
+### "Google Sheets connection failed: Incorrect padding"
+
+The `GOOGLE_CREDENTIALS` value in `.env` is not valid base64. Common causes:
+- The base64 string was truncated when pasting (it's ~3000+ characters)
+- Extra whitespace or line breaks were introduced — the value must be a single unbroken line
+- The `.env` file wasn't found because the process started from a different directory
+
+To re-encode your credentials:
+
+```bash
+# Linux/macOS
+base64 -i service-account.json | tr -d '\n'
+
+# PowerShell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("service-account.json"))
+```
+
+Paste the result as a single line in `.env` after `GOOGLE_CREDENTIALS=`.
+
+### "GOOGLE_CREDENTIALS looks invalid (length=0)"
+
+The `.env` file exists but `GOOGLE_CREDENTIALS` is empty or missing. Add your base64-encoded service account JSON to `.env`. See [Google Sheets Setup](#google-sheets-setup).
 
 ### Script execution error on Windows
 

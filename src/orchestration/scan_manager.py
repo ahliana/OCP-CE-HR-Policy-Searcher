@@ -198,7 +198,12 @@ class ScanManager:
                     f"existing policies in '{sheet_name}'"
                 )
             except Exception as e:
-                logger.warning(f"Google Sheets connection failed: {e}")
+                logger.warning(
+                    "Google Sheets connection failed: %s. "
+                    "Policies will be saved to data/policies.json only. "
+                    "Check GOOGLE_CREDENTIALS and SPREADSHEET_ID in your .env file.",
+                    e,
+                )
                 sheets_client = None
 
         llm_client = None

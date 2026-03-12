@@ -26,6 +26,11 @@ class SheetsClient:
         self._spreadsheet = None
 
     def connect(self) -> None:
+        if not self._credentials_b64 or len(self._credentials_b64) < 50:
+            raise ValueError(
+                f"GOOGLE_CREDENTIALS looks invalid (length={len(self._credentials_b64) if self._credentials_b64 else 0}). "
+                "Check your .env file — the value should be base64-encoded service account JSON."
+            )
         creds_json = base64.b64decode(self._credentials_b64).decode("utf-8")
         creds_dict = json.loads(creds_json)
         credentials = Credentials.from_service_account_info(creds_dict, scopes=self.SCOPES)

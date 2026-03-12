@@ -32,9 +32,12 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from ..core.log_setup import log_audit_event
+# Resolve .env from project root (2 levels up from src/agent/__main__.py)
+# so credentials load regardless of the process working directory.
+_project_root = Path(__file__).resolve().parents[2]
+load_dotenv(_project_root / ".env", override=True)
 
-load_dotenv(override=True)  # .env wins over stale system env vars
+from ..core.log_setup import log_audit_event
 
 
 def _print_help():

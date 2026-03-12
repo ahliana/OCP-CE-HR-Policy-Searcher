@@ -5,6 +5,14 @@ import json
 import os
 from typing import Any
 
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Resolve .env from project root (2 levels up from src/mcp/server.py)
+# so credentials load regardless of the process working directory.
+_project_root = Path(__file__).resolve().parents[2]
+load_dotenv(_project_root / ".env", override=True)
+
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import TextContent, Tool

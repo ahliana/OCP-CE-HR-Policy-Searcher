@@ -3,6 +3,7 @@
 import logging
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -11,7 +12,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from ..core.log_setup import setup_logging
 from .routes import domains, scans, policies, analysis, agent, logs
 
-load_dotenv(override=True)  # .env wins over stale system env vars
+# Resolve .env from project root (2 levels up from src/api/app.py)
+# so credentials load regardless of the process working directory.
+_project_root = Path(__file__).resolve().parents[2]
+load_dotenv(_project_root / ".env", override=True)
 
 # Structured logging: JSON to file, JSON to console (API/production mode).
 # Uses the same unified config as the CLI agent.
