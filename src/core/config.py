@@ -145,6 +145,67 @@ VALID_POLICY_TYPES = {
 }
 
 
+def _resolve_google_credentials(
+    raw_value: Optional[str],
+    placeholders: set[str],
+) -> Optional[str]:
+    """Resolve Google credentials to base64, accepting multiple formats.
+
+    Supports:
+    - File path (GOOGLE_CREDENTIALS_FILE env var, or value is a path to .json)
+    - Raw JSON (starts with '{' -- auto-encoded to base64)
+    - Pre-encoded base64 (passed through as-is)
+    - Placeholder values (returns None)
+    """
+    import base64
+
+    # Check GOOGLE_CREDENTIALS_FILE env var first (easiest for users)
+    creds_file = os.environ.get("GOOGLE_CREDENTIALS_FILE")
+    if creds_file:
+        creds_path = Path(creds_file)
+        if creds_path.exists():
+            try:
+                json_text = creds_path.read_text(encoding="utf-8").strip()
+                encoded = base64.b64encode(json_text.encode("utf-8")).decode("ascii")
+                logger.info("Loaded Google credentials from file: %s", creds_path.name)
+                return encoded
+            except Exception as e:
+                logger.warning("Failed to read credentials file %s: %s", creds_file, e)
+        else:
+            logger.warning(
+                "GOOGLE_CREDENTIALS_FILE=%s but file not found", creds_file,
+            )
+
+    if not raw_value or raw_value in placeholders:
+        return None
+
+    stripped = raw_value.strip()
+
+    # Raw JSON (user pasted the service account JSON directly)
+    if stripped.startswith("{"):
+        try:
+            encoded = base64.b64encode(stripped.encode("utf-8")).decode("ascii")
+            logger.info("Auto-encoded raw JSON credentials to base64")
+            return encoded
+        except Exception as e:
+            logger.warning("Failed to encode JSON credentials: %s", e)
+            return None
+
+    # File path (value looks like a path to a .json file)
+    if stripped.endswith(".json") and Path(stripped).exists():
+        try:
+            json_text = Path(stripped).read_text(encoding="utf-8").strip()
+            encoded = base64.b64encode(json_text.encode("utf-8")).decode("ascii")
+            logger.info("Loaded Google credentials from path in GOOGLE_CREDENTIALS")
+            return encoded
+        except Exception as e:
+            logger.warning("Failed to read credentials file %s: %s", stripped, e)
+            return None
+
+    # Already base64 — pass through
+    return stripped
+
+
 def _load_yaml(path: Path) -> dict:
     """Load a YAML file, returning empty dict if file doesn't exist."""
     if not path.exists():
@@ -233,10 +294,14 @@ class ConfigLoader:
         }
         _raw_creds = os.environ.get("GOOGLE_CREDENTIALS")
         _raw_sheet = os.environ.get("SPREADSHEET_ID", output_data.get("spreadsheet_id"))
+
+        # Resolve Google credentials: support file path, raw JSON, or base64
+        _creds_b64 = _resolve_google_credentials(_raw_creds, _placeholders)
+
         output = OutputSettings(
             spreadsheet_id=_raw_sheet if _raw_sheet not in _placeholders else None,
             staging_sheet_name=output_data.get("staging_sheet_name", "Staging"),
-            google_credentials_b64=_raw_creds if _raw_creds not in _placeholders else None,
+            google_credentials_b64=_creds_b64,
         )
         self._settings = AppSettings(
             crawl=crawl,

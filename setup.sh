@@ -12,7 +12,8 @@
 #   3. Installs the project and its dependencies
 #   4. Copies config/example.env -> .env (if .env doesn't exist)
 #   5. Prompts for your Anthropic API key
-#   6. Tells you how to run the agent
+#   6. Prompts for Google Sheets credentials (optional)
+#   7. Tells you how to run the agent
 # ============================================================================
 
 set -e
@@ -138,7 +139,72 @@ if grep -q "your-key-here\|your-real-key-here" .env 2>/dev/null; then
 fi
 
 # --------------------------------------------------------------------------
-# 5. Done!
+# 5. Google Sheets setup (optional)
+# --------------------------------------------------------------------------
+if ! grep -q "^GOOGLE_CREDENTIALS_FILE=" .env 2>/dev/null && \
+   ! grep -qP "^GOOGLE_CREDENTIALS=(?!your-)" .env 2>/dev/null; then
+    echo ""
+    echo -e "${CYAN}--------------------------------------------------------------${NC}"
+    echo -e "${CYAN}  Google Sheets export (optional)${NC}"
+    echo -e "${CYAN}  Policies are always saved locally to data/policies.json.${NC}"
+    echo -e "${CYAN}  To also export to Google Sheets, provide a service account${NC}"
+    echo -e "${CYAN}  JSON key file.${NC}"
+    echo -e "${CYAN}--------------------------------------------------------------${NC}"
+    echo ""
+    echo "  Enter the path to your Google service account JSON file"
+    echo "  (or press Enter to skip and set up later):"
+    echo ""
+    echo -n "  Path to JSON key file: "
+    read -r creds_input
+
+    # Trim whitespace and quotes
+    creds_input=$(echo "$creds_input" | xargs | tr -d "\"'")
+
+    if [ -n "$creds_input" ] && [ -f "$creds_input" ]; then
+        # Write the file path to .env
+        if grep -q "# GOOGLE_CREDENTIALS_FILE=" .env 2>/dev/null; then
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i '' "s|# GOOGLE_CREDENTIALS_FILE=.*|GOOGLE_CREDENTIALS_FILE=$creds_input|" .env
+            else
+                sed -i "s|# GOOGLE_CREDENTIALS_FILE=.*|GOOGLE_CREDENTIALS_FILE=$creds_input|" .env
+            fi
+        else
+            echo "GOOGLE_CREDENTIALS_FILE=$creds_input" >> .env
+        fi
+        info "Google credentials file path saved to .env"
+
+        # Now ask for spreadsheet ID
+        echo ""
+        echo "  Enter your Google Spreadsheet ID"
+        echo "  (the part between /d/ and /edit in the URL):"
+        echo ""
+        echo -n "  Spreadsheet ID: "
+        read -r sheet_id
+        sheet_id=$(echo "$sheet_id" | xargs)
+
+        if [ -n "$sheet_id" ] && [ ${#sheet_id} -gt 10 ]; then
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i '' "s|# SPREADSHEET_ID=.*|SPREADSHEET_ID=$sheet_id|" .env
+            else
+                sed -i "s|# SPREADSHEET_ID=.*|SPREADSHEET_ID=$sheet_id|" .env
+            fi
+            info "Spreadsheet ID saved to .env"
+        elif [ -n "$sheet_id" ]; then
+            warn "That ID looks too short. Edit .env and set SPREADSHEET_ID."
+        else
+            warn "Skipped. Edit .env and set SPREADSHEET_ID to enable Sheets export."
+        fi
+    elif [ -n "$creds_input" ]; then
+        warn "File not found: $creds_input"
+        warn "Edit .env and set GOOGLE_CREDENTIALS_FILE or GOOGLE_CREDENTIALS."
+    else
+        info "Skipped Google Sheets setup. Policies will save to data/policies.json."
+        echo "  To enable later, edit .env and set GOOGLE_CREDENTIALS_FILE"
+    fi
+fi
+
+# --------------------------------------------------------------------------
+# 6. Done!
 # --------------------------------------------------------------------------
 echo ""
 echo -e "${BOLD}Setup complete!${NC}"

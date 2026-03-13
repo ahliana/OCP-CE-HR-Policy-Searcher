@@ -11,7 +11,8 @@
 #   3. Installs the project and its dependencies
 #   4. Copies config/example.env -> .env (if .env doesn't exist)
 #   5. Prompts for your Anthropic API key
-#   6. Tells you how to run the agent
+#   6. Prompts for Google Sheets credentials (optional)
+#   7. Tells you how to run the agent
 #
 # Note: If you get "cannot be loaded because running scripts is disabled",
 #       run this first (as Administrator):
@@ -139,7 +140,64 @@ if ($envContent -match "your-key-here" -or $envContent -match "your-real-key-her
 }
 
 # --------------------------------------------------------------------------
-# 5. Done!
+# 5. Google Sheets setup (optional)
+# --------------------------------------------------------------------------
+$envContent = Get-Content ".env" -Raw
+if ($envContent -notmatch "GOOGLE_CREDENTIALS_FILE=" -and $envContent -notmatch "^GOOGLE_CREDENTIALS=(?!your-)" ) {
+    Write-Host ""
+    Write-Host "--------------------------------------------------------------" -ForegroundColor Cyan
+    Write-Host "  Google Sheets export (optional)" -ForegroundColor Cyan
+    Write-Host "  Policies are always saved locally to data/policies.json." -ForegroundColor Cyan
+    Write-Host "  To also export to Google Sheets, provide a service account" -ForegroundColor Cyan
+    Write-Host "  JSON key file." -ForegroundColor Cyan
+    Write-Host "--------------------------------------------------------------" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  Enter the path to your Google service account JSON file"
+    Write-Host "  (or press Enter to skip and set up later):"
+    Write-Host ""
+    $credsInput = Read-Host "  Path to JSON key file"
+    $credsInput = $credsInput.Trim().Trim('"').Trim("'")
+
+    if ($credsInput -and (Test-Path $credsInput)) {
+        # Write the file path to .env
+        $envContent = Get-Content ".env" -Raw
+        # Uncomment and set GOOGLE_CREDENTIALS_FILE
+        if ($envContent -match "# GOOGLE_CREDENTIALS_FILE=") {
+            $envContent = $envContent -replace "# GOOGLE_CREDENTIALS_FILE=.*", "GOOGLE_CREDENTIALS_FILE=$credsInput"
+        } else {
+            $envContent = $envContent + "`nGOOGLE_CREDENTIALS_FILE=$credsInput`n"
+        }
+        Set-Content ".env" $envContent -NoNewline
+        Write-Info "Google credentials file path saved to .env"
+
+        # Now ask for spreadsheet ID
+        Write-Host ""
+        Write-Host "  Enter your Google Spreadsheet ID"
+        Write-Host "  (the part between /d/ and /edit in the URL):"
+        Write-Host ""
+        $sheetId = Read-Host "  Spreadsheet ID"
+        $sheetId = $sheetId.Trim()
+        if ($sheetId -and $sheetId.Length -gt 10) {
+            $envContent = Get-Content ".env" -Raw
+            $envContent = $envContent -replace "# SPREADSHEET_ID=.*", "SPREADSHEET_ID=$sheetId"
+            Set-Content ".env" $envContent -NoNewline
+            Write-Info "Spreadsheet ID saved to .env"
+        } elseif ($sheetId) {
+            Write-Warn "That ID looks too short. Edit .env and set SPREADSHEET_ID."
+        } else {
+            Write-Warn "Skipped. Edit .env and set SPREADSHEET_ID to enable Sheets export."
+        }
+    } elseif ($credsInput) {
+        Write-Warn "File not found: $credsInput"
+        Write-Warn "Edit .env and set GOOGLE_CREDENTIALS_FILE or GOOGLE_CREDENTIALS."
+    } else {
+        Write-Info "Skipped Google Sheets setup. Policies will save to data/policies.json."
+        Write-Host "  To enable later, edit .env and set GOOGLE_CREDENTIALS_FILE" -ForegroundColor Gray
+    }
+}
+
+# --------------------------------------------------------------------------
+# 6. Done!
 # --------------------------------------------------------------------------
 Write-Host ""
 Write-Host "Setup complete!" -ForegroundColor White -BackgroundColor DarkGreen

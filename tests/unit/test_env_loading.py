@@ -174,6 +174,108 @@ class TestSheetsClientCredentialValidation:
 # Config loader credential plumbing
 # ---------------------------------------------------------------------------
 
+class TestResolveGoogleCredentials:
+    """_resolve_google_credentials() should auto-detect credential format."""
+
+    PLACEHOLDERS = {
+        "your-base64-encoded-credentials-here",
+        "eyJ0eXBlIjoic2VydmljZV9hY2NvdW50Ii...",
+    }
+    SAMPLE_JSON = '{"type":"service_account","project_id":"test"}'
+
+    def test_file_env_var_loads_and_encodes(self, tmp_path):
+        from src.core.config import _resolve_google_credentials
+
+        creds_file = tmp_path / "sa.json"
+        creds_file.write_text(self.SAMPLE_JSON, encoding="utf-8")
+
+        with patch.dict(os.environ, {"GOOGLE_CREDENTIALS_FILE": str(creds_file)}):
+            result = _resolve_google_credentials(None, self.PLACEHOLDERS)
+
+        expected = base64.b64encode(self.SAMPLE_JSON.encode("utf-8")).decode("ascii")
+        assert result == expected
+
+    def test_file_env_var_missing_file_falls_through(self):
+        from src.core.config import _resolve_google_credentials
+
+        with patch.dict(os.environ, {"GOOGLE_CREDENTIALS_FILE": "/no/such/file.json"}):
+            result = _resolve_google_credentials(None, self.PLACEHOLDERS)
+        assert result is None
+
+    def test_file_env_var_takes_priority_over_raw(self, tmp_path):
+        from src.core.config import _resolve_google_credentials
+
+        creds_file = tmp_path / "sa.json"
+        creds_file.write_text(self.SAMPLE_JSON, encoding="utf-8")
+
+        with patch.dict(os.environ, {"GOOGLE_CREDENTIALS_FILE": str(creds_file)}):
+            result = _resolve_google_credentials("some_b64_value", self.PLACEHOLDERS)
+
+        # Should use the file, not the raw value
+        expected = base64.b64encode(self.SAMPLE_JSON.encode("utf-8")).decode("ascii")
+        assert result == expected
+
+    def test_raw_json_auto_encoded(self):
+        from src.core.config import _resolve_google_credentials
+
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("GOOGLE_CREDENTIALS_FILE", None)
+            result = _resolve_google_credentials(self.SAMPLE_JSON, self.PLACEHOLDERS)
+
+        expected = base64.b64encode(self.SAMPLE_JSON.encode("utf-8")).decode("ascii")
+        assert result == expected
+
+    def test_json_file_path_in_value(self, tmp_path):
+        from src.core.config import _resolve_google_credentials
+
+        creds_file = tmp_path / "creds.json"
+        creds_file.write_text(self.SAMPLE_JSON, encoding="utf-8")
+
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("GOOGLE_CREDENTIALS_FILE", None)
+            result = _resolve_google_credentials(str(creds_file), self.PLACEHOLDERS)
+
+        expected = base64.b64encode(self.SAMPLE_JSON.encode("utf-8")).decode("ascii")
+        assert result == expected
+
+    def test_base64_passthrough(self):
+        from src.core.config import _resolve_google_credentials
+
+        pre_encoded = base64.b64encode(self.SAMPLE_JSON.encode()).decode("ascii")
+
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("GOOGLE_CREDENTIALS_FILE", None)
+            result = _resolve_google_credentials(pre_encoded, self.PLACEHOLDERS)
+
+        assert result == pre_encoded
+
+    def test_placeholder_returns_none(self):
+        from src.core.config import _resolve_google_credentials
+
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("GOOGLE_CREDENTIALS_FILE", None)
+            for placeholder in self.PLACEHOLDERS:
+                result = _resolve_google_credentials(placeholder, self.PLACEHOLDERS)
+                assert result is None, f"Placeholder '{placeholder}' should return None"
+
+    def test_empty_and_none_return_none(self):
+        from src.core.config import _resolve_google_credentials
+
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("GOOGLE_CREDENTIALS_FILE", None)
+            assert _resolve_google_credentials(None, self.PLACEHOLDERS) is None
+            assert _resolve_google_credentials("", self.PLACEHOLDERS) is None
+
+    def test_nonexistent_json_path_returns_none(self):
+        from src.core.config import _resolve_google_credentials
+
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("GOOGLE_CREDENTIALS_FILE", None)
+            result = _resolve_google_credentials("/no/such/creds.json", self.PLACEHOLDERS)
+        # Path doesn't exist, so not treated as file path — passed through as base64
+        assert result == "/no/such/creds.json"
+
+
 class TestConfigLoaderCredentials:
     """ConfigLoader should pass env vars through to OutputSettings."""
 
