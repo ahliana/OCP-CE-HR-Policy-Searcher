@@ -89,10 +89,14 @@ if ($Dev) {
 }
 Write-Info "Installed OCP-CE-HR-Policy-Searcher"
 
-# Install Playwright browser
+# Install Playwright browser (suppress stderr to prevent deprecation warnings from terminating the script)
 Write-Host "Installing Playwright Chromium browser..."
+$prevEAP = $ErrorActionPreference
+$ErrorActionPreference = "SilentlyContinue"
 playwright install chromium 2>$null
-if ($LASTEXITCODE -eq 0) {
+$playwrightExit = $LASTEXITCODE
+$ErrorActionPreference = $prevEAP
+if ($playwrightExit -eq 0) {
     Write-Info "Playwright Chromium installed"
 } else {
     Write-Warn "Playwright browser install failed -- JS-rendered sites will not work. Run: playwright install chromium"
