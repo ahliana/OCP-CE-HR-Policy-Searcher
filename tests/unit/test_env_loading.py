@@ -341,6 +341,150 @@ class TestConfigLoaderCredentials:
 
 
 # ---------------------------------------------------------------------------
+# Setup script credential detection logic
+# ---------------------------------------------------------------------------
+# The setup scripts (setup.sh / setup.ps1) check whether Google credentials
+# are already configured to decide whether to show the onboarding prompt.
+# These tests replicate that detection logic in Python and verify it works
+# correctly against the actual example.env content.
+#
+# This caught a real bug: the PowerShell script used a regex that matched
+# commented-out lines like "# GOOGLE_CREDENTIALS_FILE=..." and silently
+# skipped the entire Google Sheets onboarding prompt.
+
+
+def _has_uncommented_google_creds(env_content: str) -> bool:
+    """Replicate the setup script logic: check for UNCOMMENTED credential lines.
+
+    Returns True if the .env content has active (uncommented) Google
+    credentials, meaning the setup prompt should be SKIPPED.
+    Returns False if no active credentials exist (prompt should SHOW).
+
+    This mirrors the logic in setup.ps1 lines 149-150 and setup.sh lines 147-148.
+    """
+    for line in env_content.splitlines():
+        stripped = line.strip()
+        # Skip comments and empty lines
+        if stripped.startswith("#") or not stripped:
+            continue
+        if stripped.startswith("GOOGLE_CREDENTIALS_FILE="):
+            return True
+        if stripped.startswith("GOOGLE_CREDENTIALS=") and not stripped.startswith(
+            "GOOGLE_CREDENTIALS=your-"
+        ):
+            return True
+    return False
+
+
+class TestSetupScriptCredentialDetection:
+    """Verify the setup script logic correctly distinguishes commented vs active creds.
+
+    The setup scripts (setup.sh, setup.ps1) must show the Google Sheets
+    onboarding prompt when .env has only commented-out credential examples,
+    and skip it when real credentials are already configured.
+    """
+
+    def test_example_env_shows_prompt(self):
+        """The shipped example.env should trigger the Google prompt (no active creds)."""
+        example_env = Path(__file__).resolve().parents[2] / "config" / "example.env"
+        content = example_env.read_text(encoding="utf-8")
+        assert not _has_uncommented_google_creds(content), (
+            "example.env should NOT be detected as having active Google credentials. "
+            "Commented-out lines like '# GOOGLE_CREDENTIALS_FILE=...' must be ignored."
+        )
+
+    def test_example_env_after_api_key_replacement_still_shows_prompt(self):
+        """After the setup script replaces the API key, Google prompt should still show."""
+        example_env = Path(__file__).resolve().parents[2] / "config" / "example.env"
+        content = example_env.read_text(encoding="utf-8")
+        # Simulate what the setup script does: replace the API key placeholder
+        content = content.replace(
+            "ANTHROPIC_API_KEY=sk-ant-api03-your-key-here",
+            "ANTHROPIC_API_KEY=sk-ant-api03-realkey123",
+        )
+        assert not _has_uncommented_google_creds(content)
+
+    def test_uncommented_creds_file_detected(self):
+        """An uncommented GOOGLE_CREDENTIALS_FILE= line means creds are configured."""
+        content = (
+            "ANTHROPIC_API_KEY=sk-ant-real\n"
+            "GOOGLE_CREDENTIALS_FILE=/path/to/sa.json\n"
+        )
+        assert _has_uncommented_google_creds(content)
+
+    def test_uncommented_creds_value_detected(self):
+        """An uncommented GOOGLE_CREDENTIALS=<real-value> line means configured."""
+        content = (
+            "ANTHROPIC_API_KEY=sk-ant-real\n"
+            "GOOGLE_CREDENTIALS=eyJ0eXBlIjoic2VydmljZV9hY2NvdW50Ii...\n"
+        )
+        assert _has_uncommented_google_creds(content)
+
+    def test_commented_creds_file_not_detected(self):
+        """Commented lines must NOT count as configured."""
+        content = (
+            "ANTHROPIC_API_KEY=sk-ant-real\n"
+            "# GOOGLE_CREDENTIALS_FILE=path/to/service-account.json\n"
+            "# GOOGLE_CREDENTIALS={\"type\":\"service_account\"}\n"
+        )
+        assert not _has_uncommented_google_creds(content)
+
+    def test_your_placeholder_not_detected(self):
+        """GOOGLE_CREDENTIALS=your-* placeholders should not count as configured."""
+        content = "GOOGLE_CREDENTIALS=your-base64-here\n"
+        assert not _has_uncommented_google_creds(content)
+
+    def test_mixed_comments_and_active(self):
+        """Only uncommented lines count, even when comments exist too."""
+        content = (
+            "# GOOGLE_CREDENTIALS_FILE=path/to/old.json\n"
+            "GOOGLE_CREDENTIALS_FILE=/real/path.json\n"
+        )
+        assert _has_uncommented_google_creds(content)
+
+    def test_empty_env_shows_prompt(self):
+        """An empty .env should trigger the prompt."""
+        assert not _has_uncommented_google_creds("")
+
+    def test_only_api_key_shows_prompt(self):
+        """An .env with only the API key should trigger the prompt."""
+        content = "ANTHROPIC_API_KEY=sk-ant-real\n"
+        assert not _has_uncommented_google_creds(content)
+
+    def test_indented_uncommented_line_detected(self):
+        """Whitespace before key should still be detected."""
+        content = "  GOOGLE_CREDENTIALS_FILE=/path/to/sa.json\n"
+        assert _has_uncommented_google_creds(content)
+
+
+class TestSetupScriptRegexConsistency:
+    """The regex patterns in setup.sh and setup.ps1 must match our Python logic."""
+
+    @pytest.fixture(autouse=True)
+    def _project_root(self):
+        self.project_root = Path(__file__).resolve().parents[2]
+
+    def test_powershell_checks_for_uncommented_lines(self):
+        """setup.ps1 must split into lines and check start-of-line, not full-content match."""
+        source = (self.project_root / "setup.ps1").read_text(encoding="utf-8")
+        # Must NOT use simple substring match (the original bug)
+        assert '-notmatch "GOOGLE_CREDENTIALS_FILE="' not in source, (
+            "setup.ps1 must not use simple -notmatch on full content — "
+            "it matches commented lines. Use per-line matching instead."
+        )
+        # Must use line-by-line matching with start-of-line anchor
+        assert "-split" in source and "GOOGLE_CREDENTIALS_FILE=" in source
+
+    def test_bash_checks_for_uncommented_lines(self):
+        """setup.sh must use ^ anchor to skip commented lines."""
+        source = (self.project_root / "setup.sh").read_text(encoding="utf-8")
+        assert '"^GOOGLE_CREDENTIALS_FILE="' in source, (
+            "setup.sh must use ^ anchor to match only uncommented lines"
+        )
+        assert '"^GOOGLE_CREDENTIALS="' in source
+
+
+# ---------------------------------------------------------------------------
 # Dependency checks
 # ---------------------------------------------------------------------------
 
