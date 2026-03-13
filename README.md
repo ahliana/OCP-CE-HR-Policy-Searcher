@@ -12,14 +12,16 @@ Built for the [Open Compute Project](https://www.opencompute.org/) to track glob
 
 **Windows (PowerShell):**
 ```powershell
-git clone https://github.com/ahliana/OCP-CE-HR-Policy-Searcher.git; cd OCP-CE-HR-Policy-Searcher
+git clone https://github.com/ahliana/OCP-CE-HR-Policy-Searcher.git
+cd OCP-CE-HR-Policy-Searcher
 .\setup.ps1
 python -m src.agent
 ```
 
 **Linux / macOS (bash):**
 ```bash
-git clone https://github.com/ahliana/OCP-CE-HR-Policy-Searcher.git && cd OCP-CE-HR-Policy-Searcher
+git clone https://github.com/ahliana/OCP-CE-HR-Policy-Searcher.git
+cd OCP-CE-HR-Policy-Searcher
 ./setup.sh
 python -m src.agent
 ```
@@ -157,7 +159,7 @@ Found 3 policies:
            data/policies.json     (crash-resilient)
 ```
 
-The **AI agent** is the primary entry point. It uses the Anthropic API's tool use feature to orchestrate 14 tools (12 policy tools + web search + add domain) in a conversation loop. Users ask questions in natural language and the agent handles everything — including discovering new government websites via web search. All activity is logged to structured JSON files with crash-safe audit events for critical operations.
+The **AI agent** is the primary entry point. It uses the Anthropic API's tool use feature to orchestrate 15 tools (13 policy tools + web search + add domain) in a conversation loop. Users ask questions in natural language and the agent handles everything — including discovering new government websites via web search. All activity is logged to structured JSON files with crash-safe audit events for critical operations.
 
 **Why this design:** Per-page agent reasoning costs 5-10x more (~$17-35 vs ~$3.50/full scan) with negligible accuracy gain. The multi-stage funnel drops 90% of pages before any LLM call. The agent drives the system at a *strategic* level (discover sites, start scans, investigate URLs, review audit insights), while the pipeline stays deterministic for reliability and cost.
 
@@ -401,11 +403,12 @@ ws.onmessage = (event) => {
 };
 ```
 
-### Agent Tools (14 total)
+### Agent Tools (15 total)
 
 | Tool | Description |
 |------|-------------|
 | `list_domains` | Browse available domains by group, region, category |
+| `list_groups` | List all groups, regions, countries, and sub-national scan targets |
 | `get_domain_config` | Full configuration for a specific domain |
 | `start_scan` | Start a parallel scan of domain groups |
 | `get_scan_status` | Check scan progress and results |
@@ -1131,7 +1134,7 @@ OCP-CE-HR-Policy-Searcher/
 │   ├── agent/                  # AI agent (primary entry point)
 │   │   ├── __main__.py         # CLI: python -m src.agent
 │   │   ├── orchestrator.py     # Agent loop (Anthropic API tool use + rate limit retry)
-│   │   ├── tools.py            # 13 tool definitions + dispatch
+│   │   ├── tools.py            # 15 tool definitions + dispatch
 │   │   └── domain_generator.py # Auto-generate domain YAML from URLs
 │   ├── core/                   # Shared business logic
 │   │   ├── models.py           # All Pydantic data models
