@@ -224,10 +224,19 @@ class ConfigLoader:
             screening_min_confidence=analysis_data.get("screening_min_confidence", 5),
         )
         output_data = data.get("output", {})
+        # Filter out placeholder values from example.env
+        _placeholders = {
+            "your-base64-encoded-credentials-here",
+            "your-spreadsheet-id-here",
+            "eyJ0eXBlIjoic2VydmljZV9hY2NvdW50Ii...",  # old example.env placeholder
+            "1aBcDeFgHiJkLmNoPqRsTuVwXyZ",             # old example.env placeholder
+        }
+        _raw_creds = os.environ.get("GOOGLE_CREDENTIALS")
+        _raw_sheet = os.environ.get("SPREADSHEET_ID", output_data.get("spreadsheet_id"))
         output = OutputSettings(
-            spreadsheet_id=os.environ.get("SPREADSHEET_ID", output_data.get("spreadsheet_id")),
+            spreadsheet_id=_raw_sheet if _raw_sheet not in _placeholders else None,
             staging_sheet_name=output_data.get("staging_sheet_name", "Staging"),
-            google_credentials_b64=os.environ.get("GOOGLE_CREDENTIALS"),
+            google_credentials_b64=_raw_creds if _raw_creds not in _placeholders else None,
         )
         self._settings = AppSettings(
             crawl=crawl,

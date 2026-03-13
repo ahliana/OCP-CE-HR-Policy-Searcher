@@ -191,6 +191,36 @@ class TestConfigLoaderCredentials:
             config.load()
             assert config.settings.output.spreadsheet_id == "sheet_123"
 
+    def test_placeholder_credentials_treated_as_none(self):
+        """Placeholder values from example.env should be treated as absent."""
+        placeholders = [
+            "your-base64-encoded-credentials-here",
+            "eyJ0eXBlIjoic2VydmljZV9hY2NvdW50Ii...",  # old example.env
+        ]
+        for placeholder in placeholders:
+            with patch.dict(os.environ, {"GOOGLE_CREDENTIALS": placeholder}, clear=False):
+                from src.core.config import ConfigLoader
+                config = ConfigLoader(config_dir="config")
+                config.load()
+                assert config.settings.output.google_credentials_b64 is None, (
+                    f"Placeholder '{placeholder}' should be treated as None"
+                )
+
+    def test_placeholder_spreadsheet_id_treated_as_none(self):
+        """Placeholder spreadsheet IDs from example.env should be treated as absent."""
+        placeholders = [
+            "your-spreadsheet-id-here",
+            "1aBcDeFgHiJkLmNoPqRsTuVwXyZ",  # old example.env
+        ]
+        for placeholder in placeholders:
+            with patch.dict(os.environ, {"SPREADSHEET_ID": placeholder}, clear=False):
+                from src.core.config import ConfigLoader
+                config = ConfigLoader(config_dir="config")
+                config.load()
+                assert config.settings.output.spreadsheet_id is None, (
+                    f"Placeholder '{placeholder}' should be treated as None"
+                )
+
     def test_missing_credentials_default_to_none(self):
         with patch.dict(
             os.environ,
