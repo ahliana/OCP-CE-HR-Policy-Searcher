@@ -10,9 +10,17 @@ Built for the [Open Compute Project](https://www.opencompute.org/) to track glob
 
 ### Try it now
 
+**Windows (PowerShell):**
 ```powershell
+git clone https://github.com/ahliana/OCP-CE-HR-Policy-Searcher.git; cd OCP-CE-HR-Policy-Searcher
+.\setup.ps1
+python -m src.agent
+```
+
+**Linux / macOS (bash):**
+```bash
 git clone https://github.com/ahliana/OCP-CE-HR-Policy-Searcher.git && cd OCP-CE-HR-Policy-Searcher
-.\setup.ps1             # Linux/macOS: ./setup.sh
+./setup.sh
 python -m src.agent
 ```
 
