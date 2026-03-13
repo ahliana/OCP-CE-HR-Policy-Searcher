@@ -119,7 +119,7 @@ class AsyncCrawler:
         except ImportError:
             raise RuntimeError(
                 "Playwright is required for JavaScript-rendered sites. "
-                "Install with: pip install 'playwright>=1.40' && playwright install chromium"
+                "Install with: pip install '.[browser]' && playwright install chromium"
             )
         self._playwright = await async_playwright().start()
         self._pw_browser = await self._playwright.chromium.launch(headless=True)

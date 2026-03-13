@@ -139,3 +139,7 @@ Write-Host ""
 Write-Host "  2. Run the agent:"
 Write-Host "     python -m src.agent"
 Write-Host ""
+Write-Host "Optional — some sites (e.g. Virginia legislature) need a browser engine:" -ForegroundColor Yellow
+Write-Host "     pip install '.[browser]'" -ForegroundColor Yellow
+Write-Host "     playwright install chromium" -ForegroundColor Yellow
+Write-Host ""
