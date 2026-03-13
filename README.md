@@ -11,11 +11,12 @@ Built for the [Open Compute Project](https://www.opencompute.org/) to track glob
 ### Try it now
 
 ```powershell
-git clone https://github.com/ahliana/OCP-CE-HR-Policy-Searcher.git
-cd OCP-CE-HR-Policy-Searcher
+git clone https://github.com/ahliana/OCP-CE-HR-Policy-Searcher.git && cd OCP-CE-HR-Policy-Searcher
 .\setup.ps1             # Linux/macOS: ./setup.sh
 python -m src.agent
 ```
+
+> **Browser engine (optional):** Some sites like Virginia's legislature use JavaScript rendering. If a scan reports "Playwright is required", run: `pip install ".[browser]" && playwright install chromium`
 
 ```
 You: Find heat reuse policies in Germany
@@ -56,6 +57,7 @@ Found 3 policies:
 - [Running the Server](#running-the-server)
 - [API Reference](#api-reference)
 - [WebSocket Events](#websocket-events)
+- [Cost Estimation](#cost-estimation)
 - [Examples](#examples)
 - [Project Structure](#project-structure)
 - [Development](#development)
