@@ -1,5 +1,5 @@
 # ============================================================================
-# OCP CE HR Policy Searcher — One-command setup (Windows PowerShell)
+# OCP CE HR Policy Searcher -- One-command setup (Windows PowerShell)
 #
 # Usage:
 #   .\setup.ps1          # Standard install
@@ -95,7 +95,7 @@ playwright install chromium 2>$null
 if ($LASTEXITCODE -eq 0) {
     Write-Info "Playwright Chromium installed"
 } else {
-    Write-Warn "Playwright browser install failed — JS-rendered sites won't work. Run: playwright install chromium"
+    Write-Warn "Playwright browser install failed -- JS-rendered sites will not work. Run: playwright install chromium"
 }
 
 # --------------------------------------------------------------------------
