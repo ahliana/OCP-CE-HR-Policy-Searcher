@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# OCP CE HR Policy Searcher — One-command setup
+# OCP CE HR Policy Searcher -- One-command setup
 #
 # Usage:
 #   ./setup.sh          # Standard install
@@ -95,7 +95,7 @@ echo "Installing Playwright Chromium browser..."
 if playwright install chromium 2>/dev/null; then
     info "Playwright Chromium installed"
 else
-    warn "Playwright browser install failed — JS-rendered sites won't work. Run: playwright install chromium"
+    warn "Playwright browser install failed -- JS-rendered sites won't work. Run: playwright install chromium"
 fi
 
 # --------------------------------------------------------------------------

@@ -1443,6 +1443,52 @@ class TestOnboardingFlow:
         assert "console.anthropic.com" in content
         assert "python -m src.agent" in content
 
+    def test_setup_ps1_ascii_only_strings(self):
+        """setup.ps1 uses only ASCII in strings to avoid PowerShell encoding errors.
+
+        Em dashes (U+2014) and smart quotes get mangled by PowerShell's
+        encoding, causing parse failures. All user-facing strings must
+        use plain ASCII equivalents (-- instead of em dash, etc.).
+        """
+        content = Path("setup.ps1").read_text(encoding="utf-8")
+        # No em dashes (U+2014) or en dashes (U+2013) anywhere in the file
+        assert "\u2014" not in content, "Em dash found — use '--' instead"
+        assert "\u2013" not in content, "En dash found — use '-' instead"
+        # No smart quotes (U+2018/U+2019/U+201C/U+201D)
+        for char in ["\u2018", "\u2019", "\u201c", "\u201d"]:
+            assert char not in content, f"Smart quote {repr(char)} found — use plain quotes"
+
+    def test_setup_ps1_playwright_stderr_suppression(self):
+        """setup.ps1 suppresses stderr during playwright install.
+
+        Node.js deprecation warnings on stderr cause NativeCommandError
+        when ErrorActionPreference is Stop. The script must temporarily
+        set SilentlyContinue and check LASTEXITCODE manually.
+        """
+        content = Path("setup.ps1").read_text(encoding="utf-8")
+        assert "playwright install chromium" in content
+        assert "SilentlyContinue" in content, (
+            "Must suppress stderr errors during playwright install"
+        )
+        assert "$LASTEXITCODE" in content or "LASTEXITCODE" in content
+
+    def test_setup_sh_ascii_only_user_strings(self):
+        """setup.sh uses only ASCII in user-facing strings.
+
+        While bash handles Unicode fine, keeping parity with setup.ps1
+        avoids confusion if strings are copied between scripts.
+        """
+        content = Path("setup.sh").read_text(encoding="utf-8")
+        # Check lines that contain Write-/echo/warn/info calls for non-ASCII
+        for i, line in enumerate(content.split("\n"), 1):
+            # Skip comment-only lines (comments are safe)
+            stripped = line.lstrip()
+            if stripped.startswith("#"):
+                continue
+            # Check executable lines for em/en dashes
+            assert "\u2014" not in line, f"Line {i}: em dash in executable code"
+            assert "\u2013" not in line, f"Line {i}: en dash in executable code"
+
     @pytest.mark.skipif(
         not Path("/bin/bash").exists() and not Path("/usr/bin/bash").exists(),
         reason="bash not available (Windows)",
