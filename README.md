@@ -180,11 +180,11 @@ cd OCP-CE-HR-Policy-Searcher
 .\setup.ps1             # Linux/macOS: ./setup.sh
 ```
 
-The setup script automatically creates a virtual environment, installs all dependencies, and copies the example `.env` file. On Windows, if you get a script execution error, run `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` first.
+The setup script creates a virtual environment, installs all dependencies, and walks you through configuration — it prompts for your Anthropic API key and (optionally) Google Sheets credentials. On Windows, if you get a script execution error, run `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` first.
 
 ### Configure
 
-Open `.env` (created by the setup script) and add your Anthropic API key:
+The setup script prompts you for credentials interactively. If you need to change them later, edit `.env` directly:
 
 ```
 ANTHROPIC_API_KEY=sk-ant-api03-your-real-key-here
@@ -194,31 +194,52 @@ Get your key at [console.anthropic.com](https://console.anthropic.com/).
 
 The `.env` file is auto-loaded on startup — no need to manually `source` or `export`. Credentials are resolved from the project root regardless of working directory.
 
+#### Model Selection (optional)
+
+Models are validated on startup. If a model is retired, the system auto-resolves to the newest model in the same family and logs a warning. To override the defaults, add to `.env`:
+
+```
+ANALYSIS_MODEL=claude-sonnet-4-6
+SCREENING_MODEL=claude-haiku-4-5-20251001
+```
+
 ### Google Sheets Setup
 
-To export discovered policies to Google Sheets, add two more variables to `.env`:
+To export discovered policies to Google Sheets (in addition to `data/policies.json`):
 
 1. **Create a Google Cloud service account** with Sheets API access
-2. **Download the JSON key file** and base64-encode it:
+2. **Download the JSON key file**
+3. **Provide credentials** — the setup script accepts either format:
 
-```bash
-# Linux/macOS
-base64 -i service-account.json | tr -d '\n'
+   **Option A: File path** (easiest)
+   ```
+   GOOGLE_CREDENTIALS_FILE=path/to/service-account.json
+   ```
 
-# PowerShell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("service-account.json"))
-```
+   **Option B: Base64-encoded string**
+   ```bash
+   # Linux/macOS
+   base64 -i service-account.json | tr -d '\n'
 
-3. **Add to `.env`:**
+   # PowerShell
+   [Convert]::ToBase64String([IO.File]::ReadAllBytes("service-account.json"))
+   ```
+   ```
+   GOOGLE_CREDENTIALS=<paste the base64 string as one unbroken line>
+   ```
 
-```
-GOOGLE_CREDENTIALS=<paste the base64 string as one unbroken line>
-SPREADSHEET_ID=1aBcDeFgHiJkLmNoPqRsTuVwXyZ
-```
+   **Option C: Raw JSON** (auto-detected)
+   ```
+   GOOGLE_CREDENTIALS={"type":"service_account","project_id":"..."}
+   ```
 
-The spreadsheet ID is the long string in your Google Sheet URL between `/d/` and `/edit`.
+4. **Add your spreadsheet ID:**
+   ```
+   SPREADSHEET_ID=1aBcDeFgHiJkLmNoPqRsTuVwXyZ
+   ```
+   The spreadsheet ID is the long string in your Google Sheet URL between `/d/` and `/edit`.
 
-4. **Share the spreadsheet** with the service account email (found in the JSON key file under `client_email`)
+5. **Share the spreadsheet** with the service account email (found in the JSON key file under `client_email`)
 
 Without these variables, policies are saved to `data/policies.json` only.
 
@@ -813,12 +834,15 @@ Late-connecting clients receive full event history on connect.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `ANTHROPIC_API_KEY` | — | **Required** for LLM analysis |
+| `ANALYSIS_MODEL` | `claude-sonnet-4-6` | Model for full policy analysis. Auto-validated on startup |
+| `SCREENING_MODEL` | `claude-haiku-4-5-20251001` | Cheapest model for initial page filtering. Auto-validated on startup |
 | `OCP_HOST` | `0.0.0.0` | Server bind address |
 | `OCP_PORT` | `8000` | Server port |
 | `OCP_MAX_CONCURRENT` | `5` | Default parallel workers |
 | `OCP_CONFIG_DIR` | `config` | Configuration directory |
 | `OCP_DATA_DIR` | `data` | Data/cache directory |
-| `GOOGLE_CREDENTIALS` | — | Base64-encoded Google service account JSON (for Sheets export). See [Google Sheets Setup](#google-sheets-setup) |
+| `GOOGLE_CREDENTIALS_FILE` | — | Path to Google service account JSON key file. See [Google Sheets Setup](#google-sheets-setup) |
+| `GOOGLE_CREDENTIALS` | — | Base64-encoded or raw JSON service account key (alternative to file path) |
 | `SPREADSHEET_ID` | — | Google Spreadsheet ID from the sheet URL (for Sheets export) |
 
 ### Settings (config/settings.yaml)
@@ -845,8 +869,8 @@ Late-connecting clients receive full event history on connect.
 | `min_relevance_score` | `5` | Minimum LLM relevance (1-10) |
 | `min_keyword_matches` | `2` | Minimum distinct keyword matches |
 | `enable_llm_analysis` | `true` | Enable Claude analysis |
-| `analysis_model` | `claude-sonnet-4-20250514` | Model for full analysis |
-| `screening_model` | `claude-haiku-4-5-20251001` | Model for screening |
+| `analysis_model` | `claude-sonnet-4-6` | Model for full analysis (override via `ANALYSIS_MODEL` env var) |
+| `screening_model` | `claude-haiku-4-5-20251001` | Model for screening (override via `SCREENING_MODEL` env var) |
 | `enable_two_stage` | `true` | Haiku screening before Sonnet |
 | `screening_min_confidence` | `5` | Minimum screening confidence (1-10) |
 
@@ -1337,8 +1361,12 @@ The `GOOGLE_CREDENTIALS` value in `.env` is not valid base64. Common causes:
 - Extra whitespace or line breaks were introduced — the value must be a single unbroken line
 - The `.env` file wasn't found because the process started from a different directory
 
-To re-encode your credentials:
+**Easiest fix:** Use a file path instead of base64:
+```
+GOOGLE_CREDENTIALS_FILE=path/to/service-account.json
+```
 
+Or re-encode your credentials:
 ```bash
 # Linux/macOS
 base64 -i service-account.json | tr -d '\n'
@@ -1351,7 +1379,11 @@ Paste the result as a single line in `.env` after `GOOGLE_CREDENTIALS=`.
 
 ### "GOOGLE_CREDENTIALS looks invalid (length=0)"
 
-The `.env` file exists but `GOOGLE_CREDENTIALS` is empty or missing. Add your base64-encoded service account JSON to `.env`. See [Google Sheets Setup](#google-sheets-setup).
+The `.env` file exists but Google credentials are empty or missing. Set one of:
+- `GOOGLE_CREDENTIALS_FILE=path/to/service-account.json` (easiest)
+- `GOOGLE_CREDENTIALS=<base64 or raw JSON>`
+
+See [Google Sheets Setup](#google-sheets-setup).
 
 ### JavaScript pages return empty content (keyword score 0.0)
 
