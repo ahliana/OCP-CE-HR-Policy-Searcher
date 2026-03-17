@@ -12,7 +12,7 @@ Built for the [Open Compute Project](https://www.opencompute.org/) to track glob
 
 **Windows (PowerShell):**
 ```powershell
-git clone https://github.com/ahliana/OCP-CE-HR-Policy-Searcher.git
+git clone https://github.com/opencomputeproject/OCP-CE-HR-Policy-Searcher.git
 cd OCP-CE-HR-Policy-Searcher
 .\setup.ps1
 python -m src.agent
@@ -20,7 +20,7 @@ python -m src.agent
 
 **Linux / macOS (bash):**
 ```bash
-git clone https://github.com/ahliana/OCP-CE-HR-Policy-Searcher.git
+git clone https://github.com/opencomputeproject/OCP-CE-HR-Policy-Searcher.git
 cd OCP-CE-HR-Policy-Searcher
 ./setup.sh
 python -m src.agent
@@ -175,7 +175,7 @@ The **AI agent** is the primary entry point. It uses the Anthropic API's tool us
 ### Install
 
 ```powershell
-git clone https://github.com/ahliana/OCP-CE-HR-Policy-Searcher.git
+git clone https://github.com/opencomputeproject/OCP-CE-HR-Policy-Searcher.git
 cd OCP-CE-HR-Policy-Searcher
 .\setup.ps1             # Linux/macOS: ./setup.sh
 ```
@@ -1225,7 +1225,7 @@ OCP-CE-HR-Policy-Searcher/
 ### Setup
 
 ```powershell
-git clone https://github.com/ahliana/OCP-CE-HR-Policy-Searcher.git
+git clone https://github.com/opencomputeproject/OCP-CE-HR-Policy-Searcher.git
 cd OCP-CE-HR-Policy-Searcher
 .\setup.ps1 -Dev        # Linux/macOS: ./setup.sh --dev
 ```
@@ -1419,7 +1419,7 @@ Contributions are welcome! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the fu
 **Quick start:**
 
 ```bash
-git clone https://github.com/ahliana/OCP-CE-HR-Policy-Searcher.git
+git clone https://github.com/opencomputeproject/OCP-CE-HR-Policy-Searcher.git
 cd OCP-CE-HR-Policy-Searcher
 .\setup.ps1 -Dev        # Linux/macOS: ./setup.sh --dev
 pytest                   # All tests must pass
