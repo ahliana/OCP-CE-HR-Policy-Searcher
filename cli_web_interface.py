@@ -3,6 +3,7 @@
 import asyncio
 import json
 import os
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -47,12 +48,13 @@ async def websocket_endpoint(websocket: WebSocket):
 
             # Run the CLI agent as a subprocess
             try:
-                # Run: python -m src.agent "user_message"
-                cmd = [sys.executable, "-m", "src.agent", user_message]
+                # Run the message like terminal input, e.g. --discover EU.
+                cmd = [sys.executable, "-m", "src.agent", *shlex.split(user_message)]
 
                 # Set environment to include the project root
                 env = os.environ.copy()
                 env["PYTHONPATH"] = str(project_root)
+                env["PYTHONIOENCODING"] = "utf-8"
 
                 # Run the command and capture output
                 process = await asyncio.create_subprocess_exec(
@@ -67,13 +69,13 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 # Send the output back to frontend
                 if process.returncode == 0:
-                    response = stdout.decode().strip()
+                    response = stdout.decode("utf-8", errors="replace").strip()
                     if response:
                         await websocket.send_text(response)
                     else:
                         await websocket.send_text("Agent completed successfully (no output)")
                 else:
-                    error_msg = stderr.decode().strip()
+                    error_msg = stderr.decode("utf-8", errors="replace").strip()
                     await websocket.send_text(f"Error: {error_msg}")
 
             except Exception as e:
