@@ -8,8 +8,6 @@ import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
 const TOP_LEVEL_IDS = new Set([
-  'section:scan_groups',
-  'section:regions',
   'section:categories',
   'section:tags',
   'section:domains',
@@ -57,93 +55,31 @@ function buildCountLabel(label, count) {
   return count ? `${label} (${count})` : label;
 }
 
-function buildRegionItems(domains, regionLabels) {
+function buildGroupRegionItems(groupId, domains, regionLabels) {
   const regionCounts = countDomainsByValue(domains, (domain) => domain.region || []);
 
   return sortByLabel(
     [...regionCounts.entries()].map(([region, count]) => ({
-      id: `region:${region}`,
-      value: region,
+      id: `group:${groupId}:region:${region}`,
+      value: `group:${groupId}:region:${region}`,
       label: buildCountLabel(regionLabels[region] || formatLabel(region), count),
     })),
   );
 }
 
-function buildMetadataItems({ domains, categories, tags }) {
-  const categoryCounts = countDomainsByValue(domains, (domain) => (
-    domain.category ? [domain.category] : []
-  ));
-  const tagCounts = countDomainsByValue(domains, (domain) => domain.tags || []);
-
-  const categoryItems = sortByLabel(
-    [...categoryCounts.entries()].map(([category, count]) => ({
-      id: `category:${category}`,
-      value: `category:${category}`,
-      label: buildCountLabel(categories[category] || formatLabel(category), count),
-    })),
-  );
-
-  const tagItems = sortByLabel(
-    [...tagCounts.entries()].map(([tag, count]) => ({
-      id: `tag:${tag}`,
-      value: `tag:${tag}`,
-      label: buildCountLabel(tags[tag] || formatLabel(tag), count),
-    })),
-  );
-
-  return { categoryItems, tagItems };
-}
-
-function buildDomainItems(domains) {
-  return sortByLabel(
-    domains.map((domain) => ({
-      id: `domain:${domain.id}`,
-      value: domain.id,
-      label: domain.name || formatLabel(domain.id),
-    })),
-  );
-}
-
-function buildTreeData({ domains, groups, regions, categories, tags }) {
+function buildTreeData({ groups, groupDomains, regions }) {
   const groupItems = sortByLabel(
     Object.entries(groups).map(([id, description]) => ({
       id: `group:${id}`,
-      value: id,
+      value: `group:${id}`,
       label: description && description !== 'No description'
         ? `${formatLabel(id)} - ${description}`
         : formatLabel(id),
+      children: buildGroupRegionItems(id, groupDomains[id] || [], regions),
     })),
   );
 
-  const { categoryItems, tagItems } = buildMetadataItems({ domains, categories, tags });
-
-  return [
-    {
-      id: 'section:scan_groups',
-      label: 'Scan groups',
-      children: groupItems,
-    },
-    {
-      id: 'section:regions',
-      label: 'Regions',
-      children: buildRegionItems(domains, regions),
-    },
-   /* {
-      id: 'section:categories',
-      label: 'Categories',
-      children: categoryItems,
-    },/*
-    /*{
-      id: 'section:tags',
-      label: 'Tags',
-      children: tagItems,
-    },
-    /*{
-      id: 'section:domains',
-      label: 'Domains',
-      children: buildDomainItems(domains),
-    },*/
-  ].filter((item) => item.children.length > 0);
+  return groupItems;
 }
 
 async function fetchJson(path, signal) {
@@ -152,6 +88,18 @@ async function fetchJson(path, signal) {
     throw new Error(`Failed to fetch ${path}: ${response.status}`);
   }
   return response.json();
+}
+
+async function fetchGroupDomains(groups, signal) {
+  const entries = await Promise.all(
+    Object.keys(groups).map(async (groupId) => {
+      const params = new URLSearchParams({ group: groupId });
+      const response = await fetchJson(`/api/domains?${params.toString()}`, signal);
+      return [groupId, response.domains || []];
+    }),
+  );
+
+  return Object.fromEntries(entries);
 }
 
 // 1. Create a Custom Tree Item with your specific styling
@@ -217,20 +165,16 @@ export default function RegionTreeView({ selectedItems, onSelectionChange }) {
         setStatus('loading');
         setError('');
 
-        const [domainResponse, groups, regions, categories, tags] = await Promise.all([
-          fetchJson('/api/domains', controller.signal),
+        const [groups, regions] = await Promise.all([
           fetchJson('/api/groups', controller.signal),
           fetchJson('/api/regions', controller.signal),
-          fetchJson('/api/categories', controller.signal),
-          fetchJson('/api/tags', controller.signal),
         ]);
+        const groupDomains = await fetchGroupDomains(groups, controller.signal);
 
         setTreeData(buildTreeData({
-          domains: domainResponse.domains || [],
           groups,
+          groupDomains,
           regions,
-          categories,
-          tags,
         }));
         setStatus('ready');
       } catch (loadError) {
@@ -249,10 +193,18 @@ export default function RegionTreeView({ selectedItems, onSelectionChange }) {
 
   const handleSelectedItemsChange = React.useCallback(
     (event, itemIds) => {
+      const selectedParents = new Set(
+        itemIds.filter((id) => itemValueById.has(id) && itemIds.some(
+          (candidateId) => candidateId.startsWith(`${id}:`),
+        )),
+      );
       const selectableItems = [
         ...new Set(
           itemIds
             .filter((id) => !TOP_LEVEL_IDS.has(id))
+            .filter((id) => ![...selectedParents].some((parentId) => (
+              id !== parentId && id.startsWith(`${parentId}:`)
+            )))
             .map((id) => itemValueById.get(id) || id),
         ),
       ];

@@ -53,15 +53,28 @@ function AgentPanel() {
     };
 
     const buildScanRequest = () => {
+        const normalizeTarget = (item) => {
+            if (item.startsWith('group:') && item.includes(':region:')) {
+                return item.slice(item.lastIndexOf(':region:') + ':region:'.length);
+            }
+            if (item.startsWith('group:')) {
+                return item.slice('group:'.length);
+            }
+            if (item.startsWith('region:')) {
+                return item.slice('region:'.length);
+            }
+            return item;
+        };
+
         const categories = selectedRegions
             .filter((item) => item.startsWith('category:'))
             .map((item) => item.slice('category:'.length));
         const tags = selectedRegions
             .filter((item) => item.startsWith('tag:'))
             .map((item) => item.slice('tag:'.length));
-        const targets = selectedRegions.filter(
-            (item) => !item.startsWith('category:') && !item.startsWith('tag:'),
-        );
+        const targets = selectedRegions
+            .filter((item) => !item.startsWith('category:') && !item.startsWith('tag:'))
+            .map(normalizeTarget);
 
         return {
             request: {
