@@ -1,6 +1,10 @@
 'use client';
 import * as React from 'react';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
 import {
   ChatComposer,
   ChatComposerSendButton,
@@ -11,7 +15,6 @@ import { ChatConversation } from '@mui/x-chat/ChatConversation';
 import { ChatMessageList } from '@mui/x-chat/ChatMessageList';
 import {
   ChatMessage,
-  ChatMessageAvatar,
   ChatMessageContent,
   ChatMessageGroup,
 } from '@mui/x-chat/ChatMessage';
@@ -85,6 +88,127 @@ function getMessageText(message) {
     .join('') ?? '';
 }
 
+// --- Custom Part Renderers for Agentic Features ---
+
+const ReasoningBlock = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.grey[50],
+  border: `1px solid ${theme.palette.grey[200]}`,
+  borderRadius: theme.shape.borderRadius,
+  padding: theme.spacing(1.5),
+  margin: theme.spacing(1, 0),
+  fontStyle: 'italic',
+  color: theme.palette.text.secondary,
+}));
+
+const ToolBlock = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.blue[50],
+  border: `1px solid ${theme.palette.blue[200]}`,
+  borderRadius: theme.shape.borderRadius,
+  padding: theme.spacing(1.5),
+  margin: theme.spacing(1, 0),
+  fontFamily: 'monospace',
+  fontSize: '0.875rem',
+}));
+
+function ReasoningPart({ part }) {
+  return (
+    <ReasoningBlock>
+      <Typography variant="body2" component="div">
+        Reasoning: {part.text}
+      </Typography>
+    </ReasoningBlock>
+  );
+}
+
+const messageSx = {
+  gridTemplateColumns: '1fr',
+  gridTemplateAreas: '"content" "actions"',
+  paddingInline: 2,
+  paddingBlock: '0 16px',
+  '& .MuiChatMessage-content': {
+    width: '100%',
+  },
+  '& .MuiChatMessage-bubble': {
+    width: '100%',
+    padding: 0,
+    borderRadius: 0,
+    backgroundColor: 'transparent',
+    color: 'text.primary',
+    fontSize: '0.95rem',
+    lineHeight: 1.65,
+  },
+  '& .MuiChatMessage-bubble p': {
+    marginBottom: 1,
+  },
+  '& .MuiChatMessage-bubble p:last-child': {
+    marginBottom: 0,
+  },
+  '&.MuiChatMessage-roleUser .MuiChatMessage-content': {
+    alignItems: 'flex-end',
+  },
+  '&.MuiChatMessage-roleUser .MuiChatMessage-bubble': {
+    width: 'fit-content',
+    maxWidth: 'min(78%, 680px)',
+    padding: '10px 14px',
+    borderRadius: '16px',
+    borderTopRightRadius: 4,
+    backgroundColor: 'primary.main',
+    color: 'primary.contrastText',
+    lineHeight: 1.45,
+    whiteSpace: 'pre-wrap',
+  },
+  '&.MuiChatMessage-roleAssistant .MuiChatMessage-content': {
+    alignItems: 'stretch',
+  },
+  '&.MuiChatMessage-roleAssistant .MuiChatMessage-bubble': {
+    maxWidth: '100%',
+  },
+};
+
+function ToolPart({ part, onApprove, onDeny }) {
+  const { toolInvocation } = part;
+  const { toolName, input, output, state } = toolInvocation;
+
+  return (
+    <ToolBlock>
+      <Typography variant="subtitle2" gutterBottom>
+        Tool: {toolName}
+      </Typography>
+      <Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap' }}>
+        Input: {JSON.stringify(input, null, 2)}
+      </Typography>
+      {output && (
+        <Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap', marginTop: 1 }}>
+          Output: {JSON.stringify(output, null, 2)}
+        </Typography>
+      )}
+      {state === 'approval-requested' && (
+        <Box sx={{ marginTop: 1 }}>
+          <Button
+            size="small"
+            variant="contained"
+            color="success"
+            onClick={() => onApprove?.(toolInvocation.toolCallId)}
+            sx={{ marginRight: 1 }}
+          >
+            Approve
+          </Button>
+          <Button
+            size="small"
+            variant="outlined"
+            color="error"
+            onClick={() => onDeny?.(toolInvocation.toolCallId)}
+          >
+            Deny
+          </Button>
+        </Box>
+      )}
+    </ToolBlock>
+  );
+}
+
+// --- Scripted chunk builder for new messages ---------------------------------
+
 function enqueueTextResponse(controller, messageId, text) {
   controller.enqueue({ type: 'start', messageId });
   controller.enqueue({ type: 'text-start', id: `${messageId}-text` });
@@ -154,10 +278,28 @@ function createWebSocketResponseStream({ ws, text, signal, onRunningChange }) {
             enqueueDelta(payload.content || '');
             break;
           case 'tool_call':
-            enqueueDelta(`\n[tool_call ${payload.name}] ${JSON.stringify(payload.input)}\n`);
+            // Add simulated reasoning before tool calls
+            controller.enqueue({
+              type: 'reasoning-delta',
+              id: `${messageId}-reasoning-${Date.now()}`,
+              delta: `I need to use the ${payload.name} tool to help with this task.`,
+            });
+            // Transform simple tool_call into agentic dynamic-tool message
+            controller.enqueue({
+              type: 'tool-input-available',
+              toolCallId: `tool-${payload.name}-${Date.now()}`,
+              toolName: payload.name,
+              input: payload.input,
+              dynamic: true,
+            });
             break;
           case 'tool_result':
-            enqueueDelta(`\n[tool_result ${payload.name}] ${JSON.stringify(payload.result)}\n`);
+            // Transform simple tool_result into agentic tool output
+            controller.enqueue({
+              type: 'tool-output-available',
+              toolCallId: `tool-${payload.name}-${Date.now()}`,
+              output: payload.result,
+            });
             break;
           case 'complete':
             if (payload.response) {
@@ -281,9 +423,17 @@ const ChatbotInner = React.forwardRef(function ChatbotInner(
   const renderItem = React.useCallback(
     (params) => (
       <ChatMessageGroup key={params.id} messageId={params.id}>
-        <ChatMessage messageId={params.id}>
-          <ChatMessageAvatar />
-          <ChatMessageContent />
+        <ChatMessage messageId={params.id} sx={messageSx}>
+          <ChatMessageContent partRenderers={{
+            reasoning: ({ part }) => <ReasoningPart part={part} />,
+            'dynamic-tool': ({ part }) => (
+              <ToolPart
+                part={part}
+                onApprove={() => {}} // No-op since backend doesn't support approvals
+                onDeny={() => {}}
+              />
+            ),
+          }} />
         </ChatMessage>
       </ChatMessageGroup>
     ),

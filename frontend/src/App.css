@@ -167,6 +167,7 @@
 
 .scan-button {
   margin-top: 20px;
+  margin-right: 10px;
   padding: 12px 22px;
   border: none;
   border-radius: 6px;
@@ -177,6 +178,22 @@
 }
 
 .scan-button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+.stop-scan-button {
+  margin-top: 20px;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 6px;
+  background-color: #ef4444;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.stop-scan-button:disabled {
   background-color: #999;
   cursor: not-allowed;
 }
