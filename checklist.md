@@ -1,8 +1,12 @@
 # Checklist and planning
 
 ## Administration
-- [] Connecting with API key
+- [] Settings window for connecting with API key
+- [x] Cost estimate for scans
 - [] Cost approximation for prompts
+- [] Enter API key on first time launch
+- [] Can't scan without being connected
+- [] Info text stating that cost estimate is just an estimate
 
 ## Chat section
 - [] API Backend connection
@@ -26,6 +30,7 @@
 - [] Policies filterable
 - [] Policies sortable
 - [] Policies searchable
+- [] Multiple filters at the sasme time
 
 ## Other
 - [] File for labels?
