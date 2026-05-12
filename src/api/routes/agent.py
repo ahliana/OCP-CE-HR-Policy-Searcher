@@ -93,6 +93,8 @@ async def agent_websocket(ws: WebSocket):
         await ws.close()
         return
 
+    agent: PolicyAgent | None = None
+
     try:
         while True:
             data = await ws.receive_json()
@@ -103,11 +105,12 @@ async def agent_websocket(ws: WebSocket):
                 await ws.send_json({"type": "error", "content": "No message provided"})
                 continue
 
-            agent = PolicyAgent(
-                api_key=api_key,
-                model=model,
-                data_dir=os.environ.get("OCP_DATA_DIR", "data"),
-            )
+            if agent is None:
+                agent = PolicyAgent(
+                    api_key=api_key,
+                    model=model,
+                    data_dir=os.environ.get("OCP_DATA_DIR", "data"),
+                )
 
             async def on_text(text: str):
                 await ws.send_json({"type": "text", "content": text})
@@ -136,10 +139,11 @@ async def agent_websocket(ws: WebSocket):
                 await ws.send_json({"type": "complete", "response": response})
             except Exception as e:
                 await ws.send_json({"type": "error", "content": str(e)})
-            finally:
-                await agent.close()
 
     except WebSocketDisconnect:
         pass
     except Exception as e:
         logger.error(f"Agent WebSocket error: {e}")
+    finally:
+        if agent is not None:
+            await agent.close()
