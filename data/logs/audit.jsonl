@@ -22,3 +22,8 @@
 {"event": "policy_found", "scan_id": "881367fd", "domain_id": "riksdagense", "policy_name": "Lag (2025:570) om offentligg\u00f6rande av information om datacenters energiprestanda", "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-2025570-om-offentliggorande-av-information_sfs-2025-570/", "relevance": 6, "timestamp": "2026-05-11T15:08:41.596420+00:00"}
 {"event": "scan_started", "scan_id": "9093303a", "domain_count": 8, "domain_group": "sweden", "timestamp": "2026-05-11T21:13:19.953411+00:00"}
 {"event": "policy_found", "scan_id": "9093303a", "domain_id": "riksdagense", "policy_name": "Lag (2025:570) om offentligg\u00f6rande av information om datacenters energiprestanda", "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-2025570-om-offentliggorande-av-information_sfs-2025-570/", "relevance": 6, "timestamp": "2026-05-11T21:13:32.555044+00:00"}
+{"event": "scan_started", "scan_id": "2a6d2234", "domain_count": 2, "domain_group": "alberta", "timestamp": "2026-05-15T13:21:52.097362+00:00"}
+{"event": "scan_started", "scan_id": "70585fc1", "domain_count": 2, "domain_group": "alberta", "timestamp": "2026-05-15T13:27:52.916187+00:00"}
+{"event": "scan_started", "scan_id": "d55a420b", "domain_count": 2, "domain_group": "alberta", "timestamp": "2026-05-15T13:29:14.664130+00:00"}
+{"event": "scan_started", "scan_id": "0683001b", "domain_count": 2, "domain_group": "alberta", "timestamp": "2026-05-15T13:32:09.303941+00:00"}
+{"event": "scan_completed", "scan_id": "0683001b", "domain_group": "alberta", "domains_scanned": 2, "policies_found": 0, "cost_usd": 0.0763, "duration_s": 751.170374, "timestamp": "2026-05-15T13:44:40.474315+00:00"}

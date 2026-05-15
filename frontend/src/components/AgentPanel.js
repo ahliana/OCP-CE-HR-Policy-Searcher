@@ -19,6 +19,7 @@ function AgentPanel() {
     const [chatNotice, setChatNotice] = useState(null);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isHelpOpen, setIsHelpOpen] = useState(false);
+    const [hasApiKey, setHasApiKey] = useState(false);
     const wsRef = useRef(null);
     const scanWsRef = useRef(null);
     const isScanRunning = Boolean(activeScanId);
@@ -125,6 +126,17 @@ function AgentPanel() {
             estimated_cost_usd: 0,
         },
     );
+
+    const fetchApiKeyStatus = async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/settings/api-key`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            setHasApiKey(data.exists);
+        } catch {
+            setHasApiKey(false);
+        }
+    } ;
 
     useEffect(() => {
         let isCurrent = true;
@@ -262,17 +274,25 @@ function AgentPanel() {
 
         scanWs.onerror = () => {
             pushNotice('error', 'Scan progress connection error.');
+            scanWs.close();
         };
 
         scanWs.onclose = () => {
             if (scanWsRef.current === scanWs) {
                 scanWsRef.current = null;
             }
+
+            setActiveScanId((current) => {
+                if (current === scanId) {
+                    return null;
+                }
+                return current;
+            });
         };
     };
 
     const scanSelectedRegion = async () => {
-        if (isBusy || selectedRegions.length === 0) return;
+        if (isBusy || selectedRegions.length === 0 || !hasApiKey) return;
 
         const { request, ignoredTargets } = buildScanRequest();
 
@@ -357,6 +377,10 @@ function AgentPanel() {
         };
     }, [connectWebSocket]);
 
+    useEffect(() => {
+    fetchApiKeyStatus();
+    }, []);
+
     return (
         <div className="app-panel">
             <section className="settings-panel" aria-label="Policy Scanner">
@@ -399,7 +423,7 @@ function AgentPanel() {
                         type="button"
                         className="scan-button"
                         onClick={scanSelectedRegion}
-                        disabled={isBusy || selectedRegions.length === 0}
+                        disabled={isBusy || selectedRegions.length === 0 || !hasApiKey}
                     >
                         {isScanRequestRunning || isScanRunning ? 'Scan running' : 'Scan'}
                     </button>
@@ -422,9 +446,12 @@ function AgentPanel() {
                 />
 
                 <ApiKeySettingsModal
-                    open={isSettingsOpen}
-                    onClose={() => setIsSettingsOpen(false)}
-                />
+                        open={isSettingsOpen}
+                        onClose={() => {
+                            setIsSettingsOpen(false);
+                            fetchApiKeyStatus();
+                        }}
+                    />
 
                 <Chatbot
                     wsRef={wsRef}
