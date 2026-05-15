@@ -1,9 +1,9 @@
 # Checklist and planning
 
 ## Administration
-- [] Connecting with API key in the UI
+- [x] Connecting with API key in the UI
 - [x] Cost approximation for prompts
-- [] Settings window for connecting with API key
+- [x] Settings window for connecting with API key
 - [x] Cost estimate for scans
 - [] Cost approximation for prompts
 - [] Enter API key on first time launch
@@ -21,7 +21,6 @@
 - [x] List for regions
 - [] Proper sorting of lists
 - [x] Non-hardcoded regions
-- [] Pre made prompts don't look like code
 - [] 
 
 ## Policy filters
@@ -32,10 +31,11 @@
 - [x] Policies filterable
 - [] Policies sortable
 - [] Policies searchable
-- [] Multiple filters at the sasme time
+- [] Multiple filters at the same time
 
 ## Other
 - [] File for labels?
 - [] Copyright stuff for MUI
 - [] Remove ToDos
 - [] Clean and add comments
+- [] Remove Components views
