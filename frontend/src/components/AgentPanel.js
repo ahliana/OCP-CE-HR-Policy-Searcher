@@ -4,6 +4,72 @@ import AgentChatPanel from './AgentChatPanel';
 import DomainScanPanel from './DomainScanPanel';
 import PolicyScannerHeader from './PolicyScannerHeader';
 
+function splitSelection(items) {
+    return {
+        categories: items
+            .filter((item) => item.startsWith('category:'))
+            .map((item) => item.slice('category:'.length)),
+        tags: items
+            .filter((item) => item.startsWith('tag:'))
+            .map((item) => item.slice('tag:'.length)),
+        targets: items.filter(
+            (item) => !item.startsWith('category:') && !item.startsWith('tag:'),
+        ),
+    };
+}
+
+function normalizeTarget(item) {
+    if (item.startsWith('group:') && item.includes(':region:')) {
+        return item.slice(item.lastIndexOf(':region:') + ':region:'.length);
+    }
+    if (item.startsWith('group:')) {
+        return item.slice('group:'.length);
+    }
+    if (item.startsWith('region:')) {
+        return item.slice('region:'.length);
+    }
+    return item;
+}
+
+function parseDomainTarget(item) {
+    if (!item.startsWith('group:') || !item.includes(':region:')) {
+        return { group: normalizeTarget(item), region: null };
+    }
+
+    const regionMarker = ':region:';
+    const markerIndex = item.lastIndexOf(regionMarker);
+    return {
+        group: item.slice('group:'.length, markerIndex),
+        region: item.slice(markerIndex + regionMarker.length),
+    };
+}
+
+async function resolveDomainsForTargets(targets) {
+    const domainById = new Map();
+
+    await Promise.all(targets.map(async (target) => {
+        const { group, region } = parseDomainTarget(target);
+        const response = await fetch(
+            apiUrl(`/api/domains?group=${encodeURIComponent(group)}`),
+        );
+
+        if (!response.ok) {
+            throw new Error(`Could not resolve domains for ${group} (${response.status})`);
+        }
+
+        const data = await response.json();
+        (data.domains || [])
+            .filter((domain) => !region || (domain.region || []).includes(region))
+            .forEach((domain) => {
+                if (domain.id) {
+                    domainById.set(domain.id, domain);
+                }
+            });
+    }));
+
+    return [...domainById.values()];
+}
+
 function AgentPanel() {
     const [selectedRegions, setSelectedRegions] = useState([]);
     const [mode, setMode] = useState('standard');
@@ -55,30 +121,17 @@ function AgentPanel() {
         };
     }, []);
 
-    const buildScanRequests = () => {
-        const normalizeTarget = (item) => {
-            if (item.startsWith('group:') && item.includes(':region:')) {
-                return item.slice(item.lastIndexOf(':region:') + ':region:'.length);
-            }
-            if (item.startsWith('group:')) {
-                return item.slice('group:'.length);
-            }
-            if (item.startsWith('region:')) {
-                return item.slice('region:'.length);
-            }
-            return item;
-        };
-
-        const categories = selectedRegions
-            .filter((item) => item.startsWith('category:'))
-            .map((item) => item.slice('category:'.length));
-        const tags = selectedRegions
-            .filter((item) => item.startsWith('tag:'))
-            .map((item) => item.slice('tag:'.length));
-        const targets = selectedRegions
-            .filter((item) => !item.startsWith('category:') && !item.startsWith('tag:'))
-            .map(normalizeTarget);
-        const scanTargets = targets.length > 0 ? targets : ['all'];
+    const buildScanRequests = async () => {
+        const { categories, tags, targets } = splitSelection(selectedRegions);
+        const domainMatchesFilters = (domain) => (
+            (!categories[0] || domain.category === categories[0])
+            && (tags.length === 0 || tags.some((tag) => (domain.tags || []).includes(tag)))
+        );
+        const scanTargets = scanOptions.discover
+            ? targets.map(normalizeTarget)
+            : (await resolveDomainsForTargets(targets))
+                .filter(domainMatchesFilters)
+                .map((domain) => domain.id);
         const baseRequest = {
             max_concurrent: scanOptions.deep ? 10 : 5,
             skip_llm: false,
@@ -90,7 +143,7 @@ function AgentPanel() {
         };
 
         return {
-            requests: scanTargets.map((target) => ({
+            requests: (scanTargets.length > 0 ? scanTargets : ['all']).map((target) => ({
                 ...baseRequest,
                 domains: target,
             })),
@@ -142,21 +195,7 @@ function AgentPanel() {
 
     useEffect(() => {
         let isCurrent = true;
-        const normalizeTarget = (item) => {
-            if (item.startsWith('group:') && item.includes(':region:')) {
-                return item.slice(item.lastIndexOf(':region:') + ':region:'.length);
-            }
-            if (item.startsWith('group:')) {
-                return item.slice('group:'.length);
-            }
-            if (item.startsWith('region:')) {
-                return item.slice('region:'.length);
-            }
-            return item;
-        };
-
-        const categories = selectedRegions.filter((item) => item.startsWith('category:'));
-        const tags = selectedRegions.filter((item) => item.startsWith('tag:'));
+        const { categories, tags, targets } = splitSelection(selectedRegions);
 
         if (!isStandardMode) {
             setCostEstimate(null);
@@ -165,10 +204,6 @@ function AgentPanel() {
                 isCurrent = false;
             };
         }
-
-        const targets = selectedRegions.filter(
-            (item) => !item.startsWith('category:') && !item.startsWith('tag:'),
-        ).map(normalizeTarget);
 
         if (targets.length === 0) {
             setCostEstimate(null);
@@ -180,12 +215,13 @@ function AgentPanel() {
 
         setCostStatus('loading');
 
-        Promise.all(targets.map((target) => getCostEstimate(target)))
+        resolveDomainsForTargets(targets)
+            .then((domains) => Promise.all(domains.map((domain) => getCostEstimate(domain.id))))
             .then((estimates) => {
                 if (!isCurrent) return;
                 setCostEstimate({
                     ...sumCostEstimates(estimates),
-                    target_count: targets.length,
+                    target_count: estimates.length,
                     has_filters: categories.length > 0 || tags.length > 0,
                 });
                 setCostStatus('ready');
@@ -404,7 +440,14 @@ function AgentPanel() {
     const scanSelectedRegion = async () => {
         if (isBusy || selectedRegions.length === 0 || !hasApiKey) return;
 
-        const { requests } = buildScanRequests();
+        let requests;
+        try {
+            ({ requests } = await buildScanRequests());
+        } catch (error) {
+            pushNotice('error', `Could not resolve selected domains: ${error.message}`);
+            return;
+        }
+
         if (requests.length > 1) {
             pushNotice('system', `Starting sequential scan queue for ${requests.length} targets.`);
         }

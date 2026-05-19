@@ -60,13 +60,26 @@ function buildCountLabel(label, count) {
 
 function buildGroupRegionItems(groupId, domains, regionLabels) {
   const regionCounts = countDomainsByValue(domains, (domain) => domain.region || []);
+  const parentDomainIds = new Set(domains.map((domain) => domain.id).filter(Boolean));
 
   return sortByLabel(
-    [...regionCounts.entries()].map(([region, count]) => ({
-      id: `group:${groupId}:region:${region}`,
-      value: `group:${groupId}:region:${region}`,
-      label: buildCountLabel(regionLabels[region] || formatLabel(region), count),
-    })),
+    [...regionCounts.entries()]
+      .filter(([region]) => {
+        const childDomainIds = new Set(
+          domains
+            .filter((domain) => (domain.region || []).includes(region))
+            .map((domain) => domain.id)
+            .filter(Boolean),
+        );
+
+        return childDomainIds.size !== parentDomainIds.size
+          || [...childDomainIds].some((id) => !parentDomainIds.has(id));
+      })
+      .map(([region, count]) => ({
+        id: `group:${groupId}:region:${region}`,
+        value: `group:${groupId}:region:${region}`,
+        label: buildCountLabel(regionLabels[region] || formatLabel(region), count),
+      })),
   );
 }
 
@@ -140,10 +153,15 @@ const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
 }));
 
 // 2. Build the actual Component
-function renderTreeItems(items) {
+function renderTreeItems(items, onItemMouseDown) {
   return items.map((item) => (
-    <StyledTreeItem key={item.id} itemId={item.id} label={item.label}>
-      {item.children ? renderTreeItems(item.children) : null}
+    <StyledTreeItem
+      key={item.id}
+      itemId={item.id}
+      label={item.label}
+      onMouseDownCapture={(event) => onItemMouseDown(event, item.id)}
+    >
+      {item.children ? renderTreeItems(item.children, onItemMouseDown) : null}
     </StyledTreeItem>
   ));
 }
@@ -155,10 +173,18 @@ function flattenTreeItems(items) {
   ]);
 }
 
+function getDescendantIds(item) {
+  return (item.children || []).flatMap((child) => [
+    child.id,
+    ...getDescendantIds(child),
+  ]);
+}
+
 export default function RegionSelector({ selectedItems, onSelectionChange }) {
   const [treeData, setTreeData] = React.useState([]);
   const [status, setStatus] = React.useState('loading');
   const [error, setError] = React.useState('');
+  const clickedItemRef = React.useRef(null);
 
   const itemValueById = React.useMemo(() => {
     const entries = flattenTreeItems(treeData)
@@ -178,6 +204,11 @@ export default function RegionSelector({ selectedItems, onSelectionChange }) {
     () => (selectedItems || []).map((value) => itemIdByValue.get(value) || value),
     [itemIdByValue, selectedItems],
   );
+
+  const descendantIdsById = React.useMemo(() => {
+    const entries = flattenTreeItems(treeData).map((item) => [item.id, getDescendantIds(item)]);
+    return new Map(entries);
+  }, [treeData]);
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -215,25 +246,32 @@ export default function RegionSelector({ selectedItems, onSelectionChange }) {
 
   const handleSelectedItemsChange = React.useCallback(
     (event, itemIds) => {
-      const selectedParents = new Set(
-        itemIds.filter((id) => itemValueById.has(id) && itemIds.some(
-          (candidateId) => candidateId.startsWith(`${id}:`),
-        )),
-      );
+      const clickedItemId = clickedItemRef.current;
+      clickedItemRef.current = null;
+      const descendantIds = descendantIdsById.get(clickedItemId) || [];
+      const shouldClearBranch = descendantIds.length > 0
+        && treeSelectedItems.some((id) => descendantIds.includes(id));
+      const nextItemIds = shouldClearBranch
+        ? itemIds.filter((id) => id !== clickedItemId && !descendantIds.includes(id))
+        : itemIds;
       const selectableItems = [
         ...new Set(
-          itemIds
+          nextItemIds
             .filter((id) => !TOP_LEVEL_IDS.has(id))
-            .filter((id) => ![...selectedParents].some((parentId) => (
-              id !== parentId && id.startsWith(`${parentId}:`)
-            )))
             .map((id) => itemValueById.get(id) || id),
         ),
       ];
       onSelectionChange?.(event, selectableItems);
     },
-    [itemValueById, onSelectionChange],
+    [descendantIdsById, itemValueById, onSelectionChange, treeSelectedItems],
   );
+
+  const handleItemMouseDown = React.useCallback((event, itemId) => {
+    const closestTreeItem = event.target.closest?.('[role="treeitem"]');
+    if (closestTreeItem === event.currentTarget) {
+      clickedItemRef.current = itemId;
+    }
+  }, []);
 
   if (status === 'loading') {
     return (
@@ -259,12 +297,12 @@ export default function RegionSelector({ selectedItems, onSelectionChange }) {
     <Box sx={{ minHeight: 200, flexGrow: 1, width: '100%' }}>
       <SimpleTreeView
         checkboxSelection
-        selectionPropagation
+        selectionPropagation={{ descendants: true, parents: true }}
         multiSelect
         selectedItems={treeSelectedItems}
         onSelectedItemsChange={handleSelectedItemsChange}
       >
-        {renderTreeItems(treeData)}
+        {renderTreeItems(treeData, handleItemMouseDown)}
       </SimpleTreeView>
     </Box>
   );
