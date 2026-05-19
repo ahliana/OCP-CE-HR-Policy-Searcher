@@ -571,6 +571,7 @@ const ChatbotInner = React.forwardRef(function ChatbotInner(
       <ChatComposer
         disabled={inputDisabled}
         sx={{
+          flex: '0 0 auto',
           '&:focus-within:not([data-disabled])': {
             borderColor: CHAT_GREEN,
             boxShadow: `0 0 0 1px ${CHAT_GREEN}`,
@@ -581,6 +582,7 @@ const ChatbotInner = React.forwardRef(function ChatbotInner(
           placeholder="Type your command here..."
           disabled={inputDisabled}
           sx={{
+            maxHeight: '120px',
             caretColor: CHAT_GREEN,
             '&::selection': {
               backgroundColor: CHAT_GREEN_BORDER,
@@ -657,6 +659,7 @@ const Chatbot = React.forwardRef(function Chatbot(
           flexDirection: 'column',
           width: '100%',
           height: '100%',
+          maxHeight: '800px',
           minHeight: 0,
           border: '1px solid',
           borderColor: 'divider',
@@ -666,6 +669,9 @@ const Chatbot = React.forwardRef(function Chatbot(
           '& .MuiChatConversation-root': {
             flex: 1,
             minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
           },
           '& .MuiChatMessageList-root': {
             flex: 1,
