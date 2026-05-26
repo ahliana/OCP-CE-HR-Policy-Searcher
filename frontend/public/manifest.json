@@ -8,12 +8,12 @@
       "type": "image/png"
     },
     {
-      "src": "policypulseicon.png",
+      "src": "policypulseicon-192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "policypulseicon.png",
+      "src": "policypulseicon-512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
