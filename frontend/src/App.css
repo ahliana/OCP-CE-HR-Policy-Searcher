@@ -31,7 +31,7 @@ select,
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   color: #1f2937;
   padding: 20px;
 }
@@ -165,19 +165,28 @@ select,
 
 .Agent-scanner {
   display: flex;
+  height: min(80vh, 720px);
   min-height: 520px;
 }
 
 .domain-scan {
   display: flex;
+  height: min(80vh, 720px);
   min-height: 520px;
-  max-height: 80vh;
   flex-direction: column;
   background-color: #ffffff;
   border: 1px solid #d7dee8;
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.domain-scan > div:first-child {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
 }
 
 .panel-heading {
@@ -201,8 +210,9 @@ select,
 
 .region-selector-scroll {
   border-radius: 6px;
-  max-height: 40vh;
-  min-height: 40vh;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
   overflow-y: auto;
   padding-right: 6px;
   margin-bottom: 1em;
@@ -232,14 +242,6 @@ select,
 .cost-estimate.filters_only,
 .cost-estimate.standard_only {
   color: #555;
-}
-
-.cost-estimate.standard_only {
-  min-width: 0;
-  padding: 0;
-  border: none;
-  background: transparent;
-  font-size: 13px;
 }
 
 .cost-estimate.error {
