@@ -13,9 +13,10 @@ Built for the Open Compute Project (OCP) Heat Reuse subproject.
 ## Commands
 - `python -m src.agent` — run CLI agent (interactive mode)
 - `python -m src.agent "message"` — single command mode
-- `pytest` — run all tests (514+, must all pass before commits)
+- `pytest` — run all tests (679+, must all pass before commits)
 - `ruff check src/ tests/` — lint (must pass before commits)
-- `python -m src.api` — run FastAPI server
+- `uvicorn src.api.app:app --port 8000` — run FastAPI server (there is no src.api __main__)
+- `npm run dev` — run backend + React frontend together
 
 ## Architecture
 ```

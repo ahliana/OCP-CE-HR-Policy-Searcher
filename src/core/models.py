@@ -4,7 +4,7 @@ from datetime import datetime, date
 from enum import Enum
 from typing import Optional, Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 # ---------------------------------------------------------------------------
@@ -172,6 +172,9 @@ class PolicyAnalysis(BaseModel):
     confidence: int = 5
     referenced_policies: list[str] = Field(default_factory=list)
     referenced_urls: list[str] = Field(default_factory=list)
+    # Index/listing pages describe several policies; the primary one uses
+    # the fields above, the rest arrive here.
+    additional_policies: list["PolicyAnalysis"] = Field(default_factory=list)
 
 
 # --- Policy (final output) ---
@@ -261,6 +264,13 @@ class DomainProgress(BaseModel):
     status: DomainScanStatus = DomainScanStatus.PENDING
     pages_crawled: int = 0
     pages_filtered: int = 0
+    # Rejection breakdown: pages_filtered alone lumps every drop reason
+    # into one opaque number, hiding recall loss.
+    filtered_short_content: int = 0
+    filtered_excluded: int = 0
+    filtered_keywords: int = 0
+    filtered_screening: int = 0
+    near_misses: int = 0
     keywords_matched: int = 0
     policies_found: int = 0
     llm_skipped: int = 0
@@ -315,9 +325,17 @@ class ScanRequest(BaseModel):
     max_concurrent: int = Field(default=5, ge=1, le=20)
     skip_llm: bool = False
     dry_run: bool = False
+    deep: bool = False
+    discover: bool = False
     category: Optional[str] = None
     tags: Optional[list[str]] = None
     policy_type: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_scan_mode(self) -> "ScanRequest":
+        if self.deep and self.discover:
+            raise ValueError("Choose one scan mode: standard, deep, or discover")
+        return self
 
 
 class AnalyzeRequest(BaseModel):

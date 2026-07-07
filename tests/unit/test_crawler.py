@@ -79,15 +79,151 @@ class TestExtractLinks:
         <html><body>
             <a href="/doc.pdf">PDF</a>
             <a href="/image.jpg">Image</a>
+            <a href="/archive.zip">Zip</a>
             <a href="/page">Page</a>
         </body></html>
         """
         links = crawler._extract_links(
             html, "https://example.gov/", "https://example.gov",
         )
-        assert not any(link.endswith(".pdf") for link in links)
+        # PDFs carry the actual statutes and must be followed
+        assert any(link.endswith(".pdf") for link in links)
         assert not any(link.endswith(".jpg") for link in links)
+        assert not any(link.endswith(".zip") for link in links)
         assert "https://example.gov/page" in links
+
+    def test_nav_links_are_followed(self):
+        """Statute tables of contents live inside <nav>/<aside> on
+        legislation sites; link discovery must not strip them."""
+        crawler = AsyncCrawler()
+        html = """
+        <html><body>
+            <nav><a href="/law/section-11">Section 11</a></nav>
+            <aside role="navigation"><a href="/law/section-12">Section 12</a></aside>
+            <p><a href="/law/full-text">Full text</a></p>
+        </body></html>
+        """
+        links = crawler._extract_links(
+            html, "https://example.gov/law", "https://example.gov",
+        )
+        assert "https://example.gov/law/section-11" in links
+        assert "https://example.gov/law/section-12" in links
+        assert "https://example.gov/law/full-text" in links
+
+    def test_subdomain_links_followed(self):
+        """Gov sites put document stores on sibling subdomains."""
+        crawler = AsyncCrawler()
+        html = """
+        <html><body>
+            <a href="https://efiling.energy.ca.gov/doc/1">Filing</a>
+            <a href="https://energy.ca.gov/page">Apex</a>
+            <a href="https://othersite.com/x">External</a>
+        </body></html>
+        """
+        links = crawler._extract_links(
+            html, "https://www.energy.ca.gov/", "https://www.energy.ca.gov",
+        )
+        assert any("efiling.energy.ca.gov" in link for link in links)
+        assert any(link.startswith("https://energy.ca.gov/page") for link in links)
+        assert not any("othersite.com" in link for link in links)
+
+    def test_url_priority_prefers_law_paths(self):
+        crawler = AsyncCrawler()
+        assert crawler._url_priority("https://a.gov/laws/energy-heat-act") > \
+            crawler._url_priority("https://a.gov/press/photo-gallery")
+        assert crawler._url_priority("https://a.gov/statute.pdf") > \
+            crawler._url_priority("https://a.gov/about-us")
+
+    @pytest.mark.asyncio
+    async def test_crawl_fetches_promising_links_first(self):
+        """With a tight page budget, law-like URLs must win over press."""
+        crawler = AsyncCrawler(delay_seconds=0, max_retries=1, max_pages=2, max_depth=2)
+        seed_html = """
+        <html><body>
+            <a href="/press/gallery">Gallery</a>
+            <a href="/laws/heat-act">Heat Act</a>
+        </body></html>
+        """
+        fetched = []
+
+        async def fake_fetch(client, url):
+            from src.core.models import CrawlResult, PageStatus
+            if url.endswith("sitemap.xml"):
+                return CrawlResult(url=url, status=PageStatus.NOT_FOUND)
+            fetched.append(url)
+            return CrawlResult(
+                url=url, status=PageStatus.SUCCESS,
+                content=seed_html if len(fetched) == 1 else "<html><body>content text here</body></html>",
+                content_type="text/html", content_length=10,
+            )
+
+        with patch.object(crawler, "_fetch_with_retry", side_effect=fake_fetch), \
+                patch.object(crawler, "_ensure_client", AsyncMock(return_value=MagicMock())):
+            await crawler.crawl_domain(
+                base_url="https://example.gov",
+                start_paths=["/"],
+                domain_id="d1",
+            )
+        assert len(fetched) == 2
+        assert fetched[1].endswith("/laws/heat-act")
+
+    @pytest.mark.asyncio
+    async def test_sitemap_seeds_deep_urls(self):
+        """sitemap.xml enumerates deep law URLs the BFS would never reach."""
+        from src.core.models import CrawlResult, PageStatus
+
+        crawler = AsyncCrawler(delay_seconds=0, max_retries=1, max_pages=5, max_depth=2)
+        fetched = []
+
+        async def fake_fetch(client, url):
+            fetched.append(url)
+            if url.endswith("sitemap.xml"):
+                return CrawlResult(
+                    url=url, status=PageStatus.SUCCESS, content_type="application/xml",
+                    content=(
+                        "<urlset><url><loc>https://example.gov/laws/deep-heat-statute"
+                        "</loc></url><url><loc>https://example.gov/press/x</loc></url>"
+                        "</urlset>"
+                    ),
+                    content_length=10,
+                )
+            return CrawlResult(
+                url=url, status=PageStatus.SUCCESS, content="<html><body>page</body></html>",
+                content_type="text/html", content_length=10,
+            )
+
+        with patch.object(crawler, "_fetch_with_retry", side_effect=fake_fetch), \
+                patch.object(crawler, "_ensure_client", AsyncMock(return_value=MagicMock())):
+            await crawler.crawl_domain(
+                base_url="https://example.gov", start_paths=["/"], domain_id="d1",
+            )
+        assert any(u.endswith("/laws/deep-heat-statute") for u in fetched)
+
+    @pytest.mark.asyncio
+    async def test_playwright_fallback_on_empty_page(self):
+        """A JS shell served over httpx must trigger a Playwright retry."""
+        from src.core.models import CrawlResult, PageStatus
+
+        crawler = AsyncCrawler(delay_seconds=0, max_retries=1, max_pages=1, max_depth=1)
+        shell = CrawlResult(
+            url="https://example.gov/", status=PageStatus.SUCCESS,
+            content='<html><body><div id="root"></div></body></html>',
+            content_type="text/html", content_length=48,
+        )
+        rendered = CrawlResult(
+            url="https://example.gov/", status=PageStatus.SUCCESS,
+            content="<html><body>" + ("Real policy content about heat. " * 30) + "</body></html>",
+            content_type="text/html", content_length=1000, used_playwright=True,
+        )
+
+        with patch.object(crawler, "_fetch_with_retry", AsyncMock(return_value=shell)), \
+                patch.object(crawler, "_fetch_playwright", AsyncMock(return_value=rendered)), \
+                patch.object(crawler, "_ensure_client", AsyncMock(return_value=MagicMock())):
+            results = await crawler.crawl_domain(
+                base_url="https://example.gov", start_paths=["/"], domain_id="d1",
+            )
+        assert results[0].used_playwright
+        assert "Real policy content" in results[0].content
 
     def test_blocked_patterns_filtered(self):
         crawler = AsyncCrawler()
@@ -119,7 +255,9 @@ class TestExtractLinks:
         assert "https://example.gov/policy/heat" in links
         assert not any("about" in link for link in links)
 
-    def test_removes_nav_links(self):
+    def test_keeps_nav_links(self):
+        """Nav links are kept: statute ToCs render as navigation, and the
+        priority queue deprioritizes generic nav noise instead."""
         crawler = AsyncCrawler()
         html = """
         <html><body>
@@ -131,8 +269,7 @@ class TestExtractLinks:
             html, "https://example.gov/", "https://example.gov",
         )
         assert "https://example.gov/content" in links
-        # Nav links should be removed
-        assert "https://example.gov/home" not in links
+        assert "https://example.gov/home" in links
 
     def test_deduplicates_links(self):
         crawler = AsyncCrawler()
@@ -174,12 +311,13 @@ class TestExtractLinks:
 
 # --- AsyncCrawler fetch and crawl (async tests using mocked httpx) ---
 
-def _mock_response(status_code=200, text="", headers=None):
+def _mock_response(status_code=200, text="", headers=None, content=None):
     """Create a mock httpx.Response."""
     resp = MagicMock(spec=httpx.Response)
     resp.status_code = status_code
     resp.text = text
     resp.headers = headers or {}
+    resp.content = content if content is not None else text.encode()
     return resp
 
 
@@ -195,6 +333,37 @@ class TestAsyncCrawlerFetch:
         result = await crawler._fetch_with_retry(mock_client, "https://example.gov/page")
         assert result.status.value == "success"
         assert "Hello" in result.content
+
+    @pytest.mark.asyncio
+    async def test_fetch_pdf_extracts_text(self):
+        from tests.unit.test_pdf import _minimal_pdf
+
+        crawler = AsyncCrawler(delay_seconds=0, max_retries=1)
+        mock_client = AsyncMock()
+        mock_client.get = AsyncMock(return_value=_mock_response(
+            200, headers={"content-type": "application/pdf"},
+            content=_minimal_pdf("District Heating Act 2026"),
+        ))
+        result = await crawler._fetch_with_retry(
+            mock_client, "https://example.gov/statute.pdf",
+        )
+        assert result.status.value == "success"
+        assert "District Heating Act 2026" in result.content
+        assert result.content_type == "application/pdf"
+
+    @pytest.mark.asyncio
+    async def test_fetch_corrupt_pdf_is_error_not_garbage(self):
+        crawler = AsyncCrawler(delay_seconds=0, max_retries=1)
+        mock_client = AsyncMock()
+        mock_client.get = AsyncMock(return_value=_mock_response(
+            200, headers={"content-type": "application/pdf"},
+            content=b"\x00\x01 not a pdf",
+        ))
+        result = await crawler._fetch_with_retry(
+            mock_client, "https://example.gov/broken.pdf",
+        )
+        assert result.status.value != "success"
+        assert result.content is None
 
     @pytest.mark.asyncio
     async def test_fetch_404(self):
@@ -416,12 +585,13 @@ class TestCrawlDomainPlaywright:
         page = _mock_pw_page(200, "<html><body>JS content</body></html>")
         crawler._pw_browser = _mock_pw_browser(page)
 
-        results = await crawler.crawl_domain(
-            base_url="https://spa.gov",
-            start_paths=["/app"],
-            domain_id="test_spa",
-            requires_playwright=True,
-        )
+        with patch.object(crawler, "_sitemap_urls", AsyncMock(return_value=[])):
+            results = await crawler.crawl_domain(
+                base_url="https://spa.gov",
+                start_paths=["/app"],
+                domain_id="test_spa",
+                requires_playwright=True,
+            )
 
         assert len(results) == 1
         assert results[0].used_playwright is True
@@ -447,19 +617,24 @@ class TestCrawlDomainPlaywright:
         assert results[0].used_playwright is False
 
     @pytest.mark.asyncio
-    async def test_crawl_domain_does_not_create_httpx_client_for_playwright(self):
+    async def test_playwright_domain_pages_never_fetched_over_httpx(self):
+        """On Playwright domains httpx serves only sitemap seeding (and
+        PDFs); page fetches must go through the browser."""
         crawler = AsyncCrawler(delay_seconds=0, max_depth=0, max_pages=1)
         page = _mock_pw_page(200, "<html>js</html>")
         crawler._pw_browser = _mock_pw_browser(page)
+        httpx_fetch = AsyncMock()
 
-        await crawler.crawl_domain(
-            base_url="https://spa.gov",
-            start_paths=["/app"],
-            requires_playwright=True,
-        )
+        with patch.object(crawler, "_sitemap_urls", AsyncMock(return_value=[])), \
+                patch.object(crawler, "_fetch_with_retry", httpx_fetch):
+            results = await crawler.crawl_domain(
+                base_url="https://spa.gov",
+                start_paths=["/app"],
+                requires_playwright=True,
+            )
 
-        # httpx client should NOT have been created
-        assert crawler._client is None
+        httpx_fetch.assert_not_awaited()
+        assert results[0].used_playwright is True
 
 
 class TestClosePlaywright:

@@ -6,12 +6,15 @@
 # HOW TO USE:
 # 1. Create a group by adding an entry below
 # 2. List the domain IDs you want included (from any domains/*.yaml file)
-# 3. Run with: python -m src.main --domains your_group_name
+# 3. Run with: python -m src.agent "Scan the your_group_name group"
 #
 # EXAMPLES:
-#   python -m src.main --domains eu          # All European domains
-#   python -m src.main --domains quick       # Fast 2-domain test
-#   python -m src.main --domains my_custom   # Your custom group
+#   python -m src.agent "Scan the eu group"      # All European domains
+#   python -m src.agent "Scan the quick group"   # Fast 2-domain test
+#
+# NOTE: named groups list only their explicit members. The special group
+# `all` is the only group guaranteed to cover every enabled domain —
+# scheduled full scans should always use `all`.
 #
 # TIP: You can create groups for any combination of domains!
 # =============================================================================
@@ -62,6 +65,20 @@ groups:
       - njt_hu
       - energie_ro
       - monitoruloficial_ro
+      # Sweden (added by Uppsala student team, 2026-05)
+      - regeringen
+      - ei
+      - energimyndigheten
+      - riksdagense
+      - riksrevisionen
+      # Legislation databases (added 2026-07-07, coverage audit)
+      - legifrance_search
+      - wetten_overheid_nl
+      - ris_at
+      - irishstatutebook_ie
+      - finlex_fi
+      - riigiteataja_ee
+      - legilux_lu
 
   nordic:
     description: "Nordic countries - leaders in heat reuse"
@@ -74,10 +91,17 @@ groups:
       - retsinformation_dk
       - energiavirasto_fi
       - tem_fi
+      - finlex_fi
       - oed_no
       - enova_no
       - lovdata_no
       - orkustofnun_is
+      # Sweden (added by Uppsala student team, 2026-05)
+      - regeringen
+      - ei
+      - energimyndigheten
+      - riksdagense
+      - riksrevisionen
 
   germany:
     description: "Germany - federal + 8 Länder"
@@ -120,15 +144,19 @@ groups:
       - bmwk_de
       - bfe_ch
       - bmk_at
+      - ris_at
       - ecologie_fr
       - ademe_fr
+      - legifrance_search
 
   eu_west:
     description: "Netherlands, Belgium, Ireland"
     domains:
       - rvo_nl
+      - wetten_overheid_nl
       - energy_be
       - seai_ie
+      - irishstatutebook_ie
 
   eu_south:
     description: "Spain, Italy, Portugal, Greece"
@@ -230,6 +258,13 @@ groups:
       - ct_deep
       - ct_pura
       - ct_legislature
+      # Legislature bill-search domains (added 2026-07-07, coverage audit)
+      - ny_legislature
+      - wa_legislature
+      - ga_legislature
+      - oh_legislature
+      - az_legislature
+      - il_legislature
 
   apac:
     description: "Asia-Pacific region"
@@ -238,7 +273,9 @@ groups:
       - ema_sg
       - meti_jp
       - enecho_jp
+      - elaws_jp
       - motie_kr
+      - law_kr
       - energy_au
 
   # ---------------------------------------------------------------------------
@@ -300,6 +337,13 @@ groups:
       - mn_legislature
       - nc_legislature
       - tx_legislature
+      # Legislature bill-search domains (added 2026-07-07, coverage audit)
+      - ny_legislature
+      - wa_legislature
+      - ga_legislature
+      - oh_legislature
+      - az_legislature
+      - il_legislature
       # EU legislative sources
       - eur_lex
       - eurlex_eed_2023

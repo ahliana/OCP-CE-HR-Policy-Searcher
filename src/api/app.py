@@ -10,16 +10,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from ..core.log_setup import setup_logging
-from .routes import domains, scans, policies, analysis, agent, logs
+from .routes import domains, scans, policies, analysis, agent, logs, settings
 
 # Resolve .env from project root (2 levels up from src/api/app.py)
 # so credentials load regardless of the process working directory.
 _project_root = Path(__file__).resolve().parents[2]
 load_dotenv(_project_root / ".env", override=True)
 
+if not os.environ.get("OCP_DATA_DIR"):
+    os.environ["OCP_DATA_DIR"] = str(_project_root / "data")
+
 # Structured logging: JSON to file, JSON to console (API/production mode).
 # Uses the same unified config as the CLI agent.
-data_dir = os.environ.get("OCP_DATA_DIR", "data")
+data_dir = os.environ["OCP_DATA_DIR"]
 setup_logging(data_dir, json_console=True, console_level=logging.INFO)
 
 
@@ -63,6 +66,7 @@ app.include_router(policies.router)
 app.include_router(analysis.router)
 app.include_router(agent.router)
 app.include_router(logs.router)
+app.include_router(settings.router)
 
 
 @app.get("/")

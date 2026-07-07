@@ -18,21 +18,30 @@ logger = logging.getLogger(__name__)
 
 # --- Prompts ---
 
-SCREENING_PROMPT = """Quick relevance check. Does this page describe government POLICY about:
-- Data center waste heat reuse/recovery
-- Data center energy efficiency requirements
-- District heating involving data centers
-- Heat recovery mandates or incentives for data centers
-- Energy performance reporting requirements for data centers
-- Cost-benefit analysis requirements for waste heat utilization
-- Tax incentives or exemptions for heat recovery or district heating
-- Energy efficiency directives applicable to data centers (e.g. EU EED)
+SCREENING_PROMPT = """You are a RECALL-FIRST relevance screener. Goal: never discard a page
+that could plausibly AFFECT data center waste-heat reuse, even indirectly.
+When in doubt, keep it (relevant=true with lower confidence).
 
-Note: Content may be in any language (EN, DE, FR, SV, DA, NO, FI, IS, etc.).
+Mark relevant=true if the page is, or references, government policy touching ANY of:
+- Data center waste heat reuse/recovery, energy efficiency, or reporting requirements
+- District heating / heat networks: expansion plans, connection mandates, feed-in
+  tariffs, or waste-heat feed-in rules - WHETHER OR NOT data centers are named
+- Energy efficiency directives or laws with any heat-recovery or waste-heat article
+  (e.g. EU EED, Article 26, national transpositions like EnEfG)
+- Building or construction codes requiring heat recovery or waste-heat use
+- Tax incentives, exemptions, or grants for waste heat, heat recovery, or heat networks
+- Cost-benefit analysis requirements for waste heat utilization
+- Grid, utility, or heat-network regulation, tariffs, or third-party access rules
+- Planning, zoning, or permitting rules for data centers, large energy users, or
+  heat sources that mention heat, cooling, or energy reuse
+- Index or listing pages that LINK to any of the above
+
+This is a broad net on purpose: a page need not mention data centers to be relevant.
+Content may be in any language (EN, DE, FR, SV, DA, NO, FI, IS, NL, PL, JA, KO, etc.).
 
 URL: {url}
 
-CONTENT (first 5000 chars):
+CONTENT (excerpt):
 {content}
 
 RESPOND WITH JSON ONLY (no explanation):
@@ -61,8 +70,14 @@ TASK:
 
    The content may be in any language. Look for policy substance regardless of language.
 
-2. If relevant, extract:
-   - Policy name/title (in original language if not English)
+2. If relevant, extract EVERY distinct policy the page describes.
+   Listing/index pages often contain several. Put the most significant
+   policy in the top-level fields and each further one in
+   additional_policies. For each policy:
+   - Policy name/title (in original language if not English). If the page
+     is relevant but states no clear title, write a short descriptive
+     label (e.g. "Dutch waste heat feed-in regulation") — never leave the
+     name empty for a relevant policy.
    - Jurisdiction (country/region)
    - Type (law/regulation/directive/incentive/grant/plan)
    - Brief summary (2-3 sentences)
@@ -92,9 +107,52 @@ RESPOND WITH JSON ONLY:
     "key_requirements": "Key points or null",
     "bill_number": "Number or null",
     "referenced_policies": ["Related law/directive names or empty list"],
-    "referenced_urls": ["URLs to related policy documents or empty list"]
+    "referenced_urls": ["URLs to related policy documents or empty list"],
+    "additional_policies": [
+        {{
+            "is_relevant": true,
+            "relevance_score": 1-10,
+            "policy_name": "Name (never empty)",
+            "jurisdiction": "Country/region",
+            "policy_type": "law|regulation|directive|incentive|grant|plan|unknown",
+            "summary": "2-3 sentences",
+            "effective_date": "YYYY-MM-DD or null",
+            "key_requirements": "Key points or null",
+            "bill_number": "Number or null"
+        }}
+    ]
 }}
 """
+
+
+# Screening excerpt sizing: head window plus an anchor window so that long
+# documents whose relevant article sits past the head still get screened on it.
+SCREENING_HEAD_CHARS = 8000
+SCREENING_ANCHOR_WINDOW = 2000
+SCREENING_MAX_CHARS = 12500
+
+
+def screening_excerpt(content: str, anchor_terms: list[str] | None) -> str:
+    """Build the text window the screening model sees.
+
+    Head-only truncation loses statutes whose heat article appears late in
+    the document. If any anchor term (matched keyword) first occurs beyond
+    the head window, append a window of text around that occurrence.
+    """
+    if len(content) <= SCREENING_HEAD_CHARS:
+        return content
+
+    excerpt = content[:SCREENING_HEAD_CHARS]
+    lowered = content.lower()
+    for term in anchor_terms or []:
+        pos = lowered.find(term.lower())
+        if pos > SCREENING_HEAD_CHARS:
+            start = max(0, pos - SCREENING_ANCHOR_WINDOW // 2)
+            end = min(len(content), pos + SCREENING_ANCHOR_WINDOW)
+            excerpt = excerpt + "\n[...]\n" + content[start:end]
+            break
+
+    return excerpt[:SCREENING_MAX_CHARS]
 
 
 # --- Errors ---
@@ -224,6 +282,15 @@ def _coerce_types(data: dict) -> dict:
         elif isinstance(val, list):
             result[list_key] = [item for item in val if item and item not in _NULL_VALUES]
 
+    # Coerce each nested additional policy through the same rules
+    extras = result.get("additional_policies")
+    if not isinstance(extras, list):
+        result["additional_policies"] = []
+    else:
+        result["additional_policies"] = [
+            _coerce_types(item) for item in extras if isinstance(item, dict)
+        ]
+
     return result
 
 
@@ -336,7 +403,7 @@ class ClaudeClient:
         )
 
     async def screen_relevance(
-        self, content: str, url: str, min_confidence: int = 5,
+        self, content: str, url: str, anchor_terms: list[str] | None = None,
     ) -> ScreeningResult:
         """Quick relevance screening using Haiku.
 
@@ -345,15 +412,20 @@ class ClaudeClient:
         which worsens rate limit pressure and costs.  Only falls open on
         non-retryable errors (connection issues, parse failures).
 
+        The confidence gate (drop only when the model is confident the page
+        is irrelevant) is applied by the caller — see DomainScanner.
+
         Args:
             content: Full page text.
             url: Source URL (for logging and prompt context).
-            min_confidence: Unused (reserved for future threshold filtering).
+            anchor_terms: Matched keywords; if one first occurs beyond the
+                head window, the excerpt includes text around it so long
+                statutes are not screened on their preamble alone.
 
         Returns:
             ScreeningResult with relevant=True/False and confidence 1-10.
         """
-        screening_content = content[:5000]
+        screening_content = screening_excerpt(content, anchor_terms)
         prompt = SCREENING_PROMPT.format(url=url, content=screening_content)
         delay = self.BASE_DELAY
 
@@ -564,9 +636,21 @@ class ClaudeClient:
         self, analysis: PolicyAnalysis, url: str, language: str,
         domain_id: str = "", scan_id: str = "",
     ) -> Optional[Policy]:
-        """Convert PolicyAnalysis to Policy model."""
-        if not analysis.is_relevant or not analysis.policy_name:
+        """Convert a single PolicyAnalysis to a Policy model.
+
+        A relevant policy without a stated title gets a synthesized
+        descriptive name instead of being dropped.
+        """
+        if not analysis.is_relevant:
             return None
+
+        policy_name = analysis.policy_name
+        if not policy_name:
+            jurisdiction = analysis.jurisdiction or "Unknown jurisdiction"
+            kind = analysis.policy_type if analysis.policy_type not in (
+                "", "unknown", "not_relevant",
+            ) else "policy"
+            policy_name = f"Untitled {kind} ({jurisdiction})"
 
         effective_date = None
         if analysis.effective_date:
@@ -582,7 +666,7 @@ class ClaudeClient:
 
         return Policy(
             url=url,
-            policy_name=analysis.policy_name,
+            policy_name=policy_name,
             jurisdiction=analysis.jurisdiction or "Unknown",
             policy_type=policy_type,
             summary=analysis.summary or "",
@@ -595,6 +679,25 @@ class ClaudeClient:
             referenced_policies=analysis.referenced_policies,
             referenced_urls=analysis.referenced_urls,
         )
+
+    def to_policies(
+        self, analysis: PolicyAnalysis, url: str, language: str,
+        domain_id: str = "", scan_id: str = "",
+    ) -> list[Policy]:
+        """Convert an analysis (primary + additional policies) to Policy models.
+
+        Index and listing pages describe several policies; all of them
+        share the page URL as their source.
+        """
+        policies = []
+        primary = self.to_policy(analysis, url, language, domain_id, scan_id)
+        if primary:
+            policies.append(primary)
+        for extra in analysis.additional_policies:
+            policy = self.to_policy(extra, url, language, domain_id, scan_id)
+            if policy:
+                policies.append(policy)
+        return policies
 
     def update_cost_estimate(self):
         """Update USD cost estimate based on token usage."""

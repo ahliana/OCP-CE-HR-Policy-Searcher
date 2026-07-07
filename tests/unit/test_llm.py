@@ -192,12 +192,59 @@ class TestToPolicy:
         )
         assert client.to_policy(analysis, "https://a.gov", "en") is None
 
-    def test_returns_none_when_no_name(self, client):
+    def test_unnamed_relevant_policy_gets_synthesized_name(self, client):
+        """A relevant policy without a crisp title must not be dropped."""
         analysis = PolicyAnalysis(
             is_relevant=True,
             policy_name="",
+            policy_type="regulation",
+            jurisdiction="Netherlands",
+            relevance_score=7,
+            summary="Waste heat feed-in rules",
         )
-        assert client.to_policy(analysis, "https://a.gov", "en") is None
+        policy = client.to_policy(analysis, "https://a.gov/x", "nl")
+        assert policy is not None
+        assert policy.policy_name  # synthesized, never empty
+        assert "Netherlands" in policy.policy_name
+
+    def test_to_policies_extracts_all_policies_on_page(self, client):
+        """Index pages listing several laws must yield several records."""
+        analysis = PolicyAnalysis(
+            is_relevant=True,
+            relevance_score=8,
+            policy_type="law",
+            policy_name="Heat Act",
+            jurisdiction="Denmark",
+            summary="Primary law",
+            additional_policies=[
+                PolicyAnalysis(
+                    is_relevant=True, relevance_score=7, policy_type="regulation",
+                    policy_name="Heat Supply Order", jurisdiction="Denmark",
+                    summary="Order under the act",
+                ),
+                PolicyAnalysis(
+                    is_relevant=True, relevance_score=6, policy_type="incentive",
+                    policy_name="Waste Heat Tax Relief", jurisdiction="Denmark",
+                    summary="Tax measure",
+                ),
+            ],
+        )
+        policies = client.to_policies(analysis, "https://a.gov/laws", "da", "dom1", "s1")
+        assert len(policies) == 3
+        names = {p.policy_name for p in policies}
+        assert names == {"Heat Act", "Heat Supply Order", "Waste Heat Tax Relief"}
+        assert all(p.url == "https://a.gov/laws" for p in policies)
+
+    def test_to_policies_skips_irrelevant_additionals(self, client):
+        analysis = PolicyAnalysis(
+            is_relevant=True, relevance_score=8, policy_type="law",
+            policy_name="Heat Act", jurisdiction="DK", summary="x",
+            additional_policies=[
+                PolicyAnalysis(is_relevant=False, policy_name="Noise"),
+            ],
+        )
+        policies = client.to_policies(analysis, "https://a.gov", "en")
+        assert len(policies) == 1
 
     def test_invalid_policy_type_becomes_unknown(self, client):
         analysis = PolicyAnalysis(
@@ -322,6 +369,57 @@ class TestPromptContent:
     def test_analysis_mentions_tax_incentives(self):
         assert "tax incentiv" in ANALYSIS_PROMPT.lower()
 
+    def test_screening_is_recall_first(self):
+        """Screening must cover policies that AFFECT heat reuse without
+        requiring the page to mention data centers."""
+        lowered = SCREENING_PROMPT.lower()
+        assert "district heating" in lowered
+        assert "building" in lowered  # building/construction codes
+        assert "permit" in lowered  # planning/permitting rules
+        assert "need not mention" in lowered or "whether or not" in lowered
+
+    def test_screening_tells_model_to_keep_borderline(self):
+        lowered = SCREENING_PROMPT.lower()
+        assert "in doubt" in lowered or "unsure" in lowered
+
+    def test_analysis_asks_for_every_policy_on_page(self):
+        lowered = ANALYSIS_PROMPT.lower()
+        assert "additional_policies" in lowered
+        assert "every" in lowered or "each" in lowered or "all distinct" in lowered
+
+    def test_analysis_forbids_empty_name_for_relevant(self):
+        lowered = ANALYSIS_PROMPT.lower()
+        assert "descriptive label" in lowered or "never leave" in lowered
+
+
+class TestScreeningExcerpt:
+    """Long documents must not be screened on their head alone."""
+
+    def test_short_content_passes_through(self):
+        from src.core.llm import screening_excerpt
+        text = "short policy text"
+        assert screening_excerpt(text, ["policy"]) == text
+
+    def test_head_kept_for_long_content(self):
+        from src.core.llm import screening_excerpt
+        text = "H" * 20000
+        excerpt = screening_excerpt(text, [])
+        assert excerpt.startswith("H" * 100)
+        assert len(excerpt) <= 13000
+
+    def test_anchor_beyond_head_included(self):
+        from src.core.llm import screening_excerpt
+        text = ("x" * 10000) + " Fernwärme Abwärmenutzung mandate " + ("y" * 5000)
+        excerpt = screening_excerpt(text, ["Fernwärme"])
+        assert "Fernwärme" in excerpt
+        assert "Abwärmenutzung" in excerpt  # window around the anchor, not just the term
+
+    def test_anchor_match_is_case_insensitive(self):
+        from src.core.llm import screening_excerpt
+        text = ("x" * 10000) + " FERNWÄRME statute " + ("y" * 5000)
+        excerpt = screening_excerpt(text, ["fernwärme"])
+        assert "FERNWÄRME" in excerpt
+
     def test_analysis_mentions_eed(self):
         assert "EED" in ANALYSIS_PROMPT
 
@@ -364,7 +462,6 @@ class TestScreeningRateLimitRetry:
 
     def _build_client(self):
         """Create a ClaudeClient with mocked async client (skips validation)."""
-        from src.core.models import DEFAULT_ANALYSIS_MODEL, DEFAULT_SCREENING_MODEL
         client = ClaudeClient.__new__(ClaudeClient)
         client.screening_model = DEFAULT_SCREENING_MODEL
         client.analysis_model = DEFAULT_ANALYSIS_MODEL

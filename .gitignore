@@ -15,12 +15,15 @@ dist/
 build/
 .eggs/
 
+# Node
+node_modules/
+
 # Virtual environments
 .venv/
 venv/
 env/
 
-# Runtime data
+# Runtime data (sample dataset for tests lives in tests/fixtures/)
 data/
 
 # IDE
@@ -35,6 +38,10 @@ data/
 .coverage
 htmlcov/
 .tox/
+# MagicMock used as a filesystem path creates junk dirs (see CLAUDE.md gotchas)
+MagicMock/
+# Stale nested checkout, kept out of version control
+OCP-CE-HR-Policy-Searcher/
 
 # OS
 .DS_Store
@@ -44,3 +51,4 @@ desktop.ini
 # Misc
 *.log
 .ruff_cache/
+explorer/

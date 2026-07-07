@@ -23,7 +23,7 @@ from ..core.keywords import KeywordMatcher
 from ..core.llm import ClaudeClient
 from ..core.models import (
     Policy, ScanJob, ScanStatus, ScanProgress, DomainProgress,
-    DomainScanStatus, ScanEvent, SheetsExportStatus,
+    DomainScanStatus, ScanEvent,
 )
 from ..core.scanner import DomainScanner
 from ..core.verifier import Verifier
@@ -73,6 +73,7 @@ class ScanManager:
         max_concurrent: int = 5,
         skip_llm: bool = False,
         dry_run: bool = False,
+        deep: bool = False,
         category: Optional[str] = None,
         tags: Optional[list[str]] = None,
         policy_type: Optional[str] = None,
@@ -96,6 +97,8 @@ class ScanManager:
                 d for d in domains
                 if policy_type in d.get("policy_types", [])
             ]
+        if deep:
+            domains = [self._with_deep_scan_defaults(d) for d in domains]
 
         job = ScanJob(
             scan_id=scan_id,
@@ -117,6 +120,7 @@ class ScanManager:
                 "max_concurrent": max_concurrent,
                 "skip_llm": skip_llm,
                 "dry_run": dry_run,
+                "deep": deep,
             },
         )
 
@@ -134,6 +138,27 @@ class ScanManager:
         )
         self._tasks[scan_id] = task
         return job
+
+    @staticmethod
+    def _with_deep_scan_defaults(domain: dict) -> dict:
+        """Apply CLI --deep defaults without mutating shared config."""
+        domain = dict(domain)
+        domain.setdefault("max_depth", 5)
+        domain.setdefault("max_pages", 500)
+        domain.setdefault("min_keyword_score", 2.0)
+        return domain
+
+    @staticmethod
+    def _with_keyword_score_default(domain: dict, settings) -> dict:
+        """Default the keyword gate to settings.analysis.min_keyword_score.
+
+        Domains without an explicit min_keyword_score otherwise fall back to
+        the stricter keywords.yaml threshold inside KeywordMatcher, silently
+        ignoring the documented settings value.
+        """
+        domain = dict(domain)
+        domain.setdefault("min_keyword_score", settings.analysis.min_keyword_score)
+        return domain
 
     async def _run_scan(
         self,
@@ -232,6 +257,7 @@ class ScanManager:
 
         async def scan_domain(domain: dict) -> list[Policy]:
             async with semaphore:
+                domain = self._with_keyword_score_default(domain, settings)
                 # Bind domain context for log correlation
                 structlog.contextvars.bind_contextvars(
                     domain_id=domain["id"],
@@ -262,6 +288,7 @@ class ScanManager:
                     scan_id=scan_id,
                     skip_llm=skip_llm,
                     on_event=self.broadcaster.broadcast,
+                    screening_min_confidence=settings.analysis.screening_min_confidence,
                 )
 
                 try:
@@ -273,6 +300,11 @@ class ScanManager:
                             dp.status = scanner.progress.status
                             dp.pages_crawled = scanner.progress.pages_crawled
                             dp.pages_filtered = scanner.progress.pages_filtered
+                            dp.filtered_short_content = scanner.progress.filtered_short_content
+                            dp.filtered_excluded = scanner.progress.filtered_excluded
+                            dp.filtered_keywords = scanner.progress.filtered_keywords
+                            dp.filtered_screening = scanner.progress.filtered_screening
+                            dp.near_misses = scanner.progress.near_misses
                             dp.keywords_matched = scanner.progress.keywords_matched
                             dp.policies_found = scanner.progress.policies_found
                             dp.errors = scanner.progress.errors

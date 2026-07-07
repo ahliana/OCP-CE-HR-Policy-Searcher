@@ -15,6 +15,7 @@ dependencies = [
     "pydantic-settings>=2.1.0",
     "pyyaml>=6.0.0",
     "langdetect>=1.0.9",
+    "pypdf>=4.0.0",
     "mcp>=1.0.0",
     "python-dotenv>=1.0.0",
     "gspread>=5.12.0",
@@ -47,3 +48,8 @@ testpaths = ["tests"]
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+
+[tool.ruff.lint.per-file-ignores]
+# Entry points load .env before importing modules that read env at import time
+"src/agent/__main__.py" = ["E402"]
+"src/mcp/server.py" = ["E402"]

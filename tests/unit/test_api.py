@@ -1,6 +1,6 @@
 """Tests for FastAPI API routes."""
 
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import MagicMock, AsyncMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -211,9 +211,91 @@ class TestPolicyRoutes:
         assert "total" in data
 
 
+# --- Analysis ---
+
+class TestAnalysisRoutes:
+    def test_analyze_route_is_registered(self, client):
+        # An invalid body must fail validation (422), not routing (404).
+        response = client.post("/api/analyze", json={})
+        assert response.status_code == 422
+
+    def test_analyze_url_fetch_failure_returns_status(self, client):
+        with patch("src.api.routes.analysis.AsyncCrawler") as crawler_cls:
+            crawler = crawler_cls.return_value
+            crawler.crawl_domain = AsyncMock(return_value=[])
+            crawler.close = AsyncMock()
+            response = client.post(
+                "/api/analyze", json={"url": "https://example.gov/policy"}
+            )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["crawl_status"] == "fetch_failed"
+
+    def test_root_listing_matches_registered_routes(self, client):
+        """Every endpoint advertised at / must actually be registered."""
+        from src.api.app import app
+
+        registered = set(app.openapi()["paths"])
+        advertised = client.get("/").json()["endpoints"]
+        for name, path in advertised.items():
+            base = path.split("?")[0]
+            assert any(
+                r == base or r.startswith(base) for r in registered
+            ), f"advertised endpoint '{name}' ({base}) is not registered"
+
+
 # --- Scans ---
 
 class TestScanRoutes:
+    def test_start_scan_passes_deep_flag(self, client, mock_manager):
+        job = ScanJob(
+            scan_id="s1",
+            status=ScanStatus.RUNNING,
+            domain_count=1,
+            options={"deep": True},
+        )
+        mock_manager.start_scan = AsyncMock(return_value=job)
+
+        response = client.post("/api/scans", json={"domains": "quick", "deep": True})
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["scan_id"] == "s1"
+        assert data["options"]["deep"] is True
+        mock_manager.start_scan.assert_awaited_once()
+        assert mock_manager.start_scan.await_args.kwargs["deep"] is True
+
+    def test_start_scan_discover_runs_agent_prompt(self, client, monkeypatch):
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+
+        with patch("src.api.routes.scans.PolicyAgent") as agent_cls:
+            agent = agent_cls.return_value
+            agent.run = AsyncMock(return_value="discovery complete")
+            agent.close = AsyncMock()
+
+            response = client.post(
+                "/api/scans",
+                json={"domains": "Poland", "discover": True},
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["scan_id"] is None
+        assert data["discover"] is True
+        assert data["deep"] is False
+        assert data["response"] == "discovery complete"
+        agent.run.assert_awaited_once()
+        prompt = agent.run.await_args.args[0]
+        assert "Discover new coverage for Poland" in prompt
+
+    def test_start_scan_rejects_multiple_modes(self, client):
+        response = client.post(
+            "/api/scans",
+            json={"domains": "Poland", "discover": True, "deep": True},
+        )
+
+        assert response.status_code == 422
+
     def test_list_scans_empty(self, client):
         response = client.get("/api/scans")
         assert response.status_code == 200

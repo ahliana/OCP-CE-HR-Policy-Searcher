@@ -103,7 +103,7 @@ class TestDomainScannerScan:
             summary="A law about heat recovery",
         )
         llm_client.analyze_policy = AsyncMock(return_value=analysis)
-        llm_client.to_policy.return_value = Policy(
+        llm_client.to_policies.return_value = [Policy(
             url="https://example.gov/page",
             policy_name="Heat Recovery Act",
             jurisdiction="US",
@@ -112,7 +112,7 @@ class TestDomainScannerScan:
             relevance_score=8,
             domain_id="test_domain",
             scan_id="scan_1",
-        )
+        )]
 
         # Verifier returns no flags
         verifier.verify_batch.return_value = {}
@@ -158,6 +158,7 @@ class TestDomainScannerScan:
         policies = await scanner.scan()
         assert len(policies) == 0
         assert scanner.progress.pages_filtered == 1
+        assert scanner.progress.filtered_short_content == 1
 
     @pytest.mark.asyncio
     async def test_filters_excluded_content(self, scanner_deps):
@@ -168,6 +169,7 @@ class TestDomainScannerScan:
         policies = await scanner.scan()
         assert len(policies) == 0
         assert scanner.progress.pages_filtered == 1
+        assert scanner.progress.filtered_excluded == 1
 
     @pytest.mark.asyncio
     async def test_filters_low_keyword_score(self, scanner_deps):
@@ -176,6 +178,43 @@ class TestDomainScannerScan:
         scanner = DomainScanner(domain=_make_domain(), scan_id="s1", **scanner_deps)
         policies = await scanner.scan()
         assert len(policies) == 0
+        assert scanner.progress.filtered_keywords == 1
+
+    @pytest.mark.asyncio
+    async def test_keyword_rejection_is_logged_visibly(self, scanner_deps, caplog):
+        """A dropped page must leave a trace at INFO, the default log level."""
+        import logging as _logging
+
+        scanner_deps["keyword_matcher"].is_relevant.return_value = False
+        scanner_deps["keyword_matcher"].check_near_miss.return_value = False
+        scanner = DomainScanner(domain=_make_domain(), scan_id="s1", **scanner_deps)
+        with caplog.at_level(_logging.INFO, logger="src.core.scanner"):
+            await scanner.scan()
+        assert any(
+            "keyword gate" in r.message.lower() and "example.gov" in r.message
+            for r in caplog.records
+        )
+
+    @pytest.mark.asyncio
+    async def test_near_miss_counted_and_logged(self, scanner_deps, caplog):
+        import logging as _logging
+
+        scanner_deps["keyword_matcher"].is_relevant.return_value = False
+        scanner_deps["keyword_matcher"].check_near_miss.return_value = True
+        scanner = DomainScanner(domain=_make_domain(), scan_id="s1", **scanner_deps)
+        with caplog.at_level(_logging.INFO, logger="src.core.scanner"):
+            await scanner.scan()
+        assert scanner.progress.near_misses == 1
+        assert any("near miss" in r.message.lower() for r in caplog.records)
+
+    @pytest.mark.asyncio
+    async def test_screening_rejection_counted(self, scanner_deps):
+        scanner_deps["llm_client"].screen_relevance = AsyncMock(
+            return_value=ScreeningResult(relevant=False, confidence=9),
+        )
+        scanner = DomainScanner(domain=_make_domain(), scan_id="s1", **scanner_deps)
+        await scanner.scan()
+        assert scanner.progress.filtered_screening == 1
 
     @pytest.mark.asyncio
     async def test_skips_llm_when_disabled(self, scanner_deps):
@@ -199,6 +238,108 @@ class TestDomainScannerScan:
         policies = await scanner.scan()
         assert len(policies) == 0
         scanner_deps["llm_client"].analyze_policy.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_low_confidence_rejection_escalates_to_analysis(self, scanner_deps):
+        """A barely-confident Haiku rejection must not be final: below
+        screening_min_confidence the page escalates to Sonnet analysis."""
+        scanner_deps["llm_client"].screen_relevance = AsyncMock(
+            return_value=ScreeningResult(relevant=False, confidence=3),
+        )
+        scanner = DomainScanner(domain=_make_domain(), scan_id="s1", **scanner_deps)
+        policies = await scanner.scan()
+        scanner_deps["llm_client"].analyze_policy.assert_awaited_once()
+        assert len(policies) == 1
+
+    @pytest.mark.asyncio
+    async def test_screening_min_confidence_is_configurable(self, scanner_deps):
+        scanner_deps["llm_client"].screen_relevance = AsyncMock(
+            return_value=ScreeningResult(relevant=False, confidence=3),
+        )
+        scanner = DomainScanner(
+            domain=_make_domain(), scan_id="s1",
+            screening_min_confidence=2, **scanner_deps,
+        )
+        policies = await scanner.scan()
+        assert len(policies) == 0
+        scanner_deps["llm_client"].analyze_policy.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_multiple_policies_from_one_page(self, scanner_deps):
+        """An index page listing several laws yields several records."""
+        def _policy(name):
+            return Policy(
+                url="https://example.gov/page", policy_name=name,
+                jurisdiction="US", policy_type=PolicyType.LAW,
+                summary="x", relevance_score=7,
+            )
+        scanner_deps["llm_client"].to_policies.return_value = [
+            _policy("Act One"), _policy("Act Two"), _policy("Act Three"),
+        ]
+        scanner = DomainScanner(domain=_make_domain(), scan_id="s1", **scanner_deps)
+        policies = await scanner.scan()
+        assert len(policies) == 3
+        assert scanner.progress.policies_found == 3
+
+    @pytest.mark.asyncio
+    async def test_referenced_urls_are_followed(self, scanner_deps):
+        """Same-site referenced_urls from analysis feed back into the scan."""
+        scanner_deps["llm_client"].to_policies.return_value = [Policy(
+            url="https://example.gov/page", policy_name="Heat Recovery Act",
+            jurisdiction="US", policy_type=PolicyType.LAW, summary="x",
+            relevance_score=8,
+            referenced_urls=[
+                "https://example.gov/related-act",   # same site: follow
+                "https://elsewhere.org/other",        # cross-site: skip
+            ],
+        )]
+        followup = _make_crawl_result(url="https://example.gov/related-act")
+        scanner_deps["crawler"].fetch_url = AsyncMock(return_value=followup)
+
+        scanner = DomainScanner(domain=_make_domain(), scan_id="s1", **scanner_deps)
+        await scanner.scan()
+
+        fetched = [c.args[0] for c in scanner_deps["crawler"].fetch_url.await_args_list]
+        assert "https://example.gov/related-act" in fetched
+        assert not any("elsewhere.org" in u for u in fetched)
+
+    @pytest.mark.asyncio
+    async def test_llm_error_on_one_page_does_not_abort_domain(self, scanner_deps):
+        """Rate-limit exhaustion on one page must not lose the rest of the
+        domain's pages."""
+        from src.core.llm import LLMRateLimitError
+
+        page1 = _make_crawl_result(url="https://example.gov/fails")
+        page2 = _make_crawl_result(url="https://example.gov/works")
+        scanner_deps["crawler"].crawl_domain = AsyncMock(return_value=[page1, page2])
+        scanner_deps["llm_client"].analyze_policy = AsyncMock(
+            side_effect=[
+                LLMRateLimitError("rate limit after retries"),
+                PolicyAnalysis(
+                    is_relevant=True, relevance_score=8, policy_type="law",
+                    policy_name="Heat Recovery Act", jurisdiction="US",
+                    summary="A law about heat recovery",
+                ),
+            ],
+        )
+        scanner = DomainScanner(domain=_make_domain(), scan_id="s1", **scanner_deps)
+        policies = await scanner.scan()
+        assert len(policies) == 1
+        assert scanner.progress.errors == 1
+        assert scanner.progress.status.value == "completed"
+
+    @pytest.mark.asyncio
+    async def test_auth_error_still_aborts_domain(self, scanner_deps):
+        """An invalid API key affects every page: continuing is pointless."""
+        from src.core.llm import LLMAuthError
+
+        scanner_deps["llm_client"].analyze_policy = AsyncMock(
+            side_effect=LLMAuthError("bad key"),
+        )
+        scanner = DomainScanner(domain=_make_domain(), scan_id="s1", **scanner_deps)
+        policies = await scanner.scan()
+        assert len(policies) == 0
+        assert scanner.progress.status.value == "failed"
 
     @pytest.mark.asyncio
     async def test_cache_hit_skips_llm(self, scanner_deps):
