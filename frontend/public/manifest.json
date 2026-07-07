@@ -3,9 +3,9 @@
   "name": "Policy Pulse",
   "icons": [
     {
-      "src": "policypulseicon.png",
+      "src": "favicon.svg",
       "sizes": "any",
-      "type": "image/png"
+      "type": "image/svg+xml"
     },
     {
       "src": "policypulseicon-192.png",
@@ -20,6 +20,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#8dc63f",
   "background_color": "#ffffff"
 }
