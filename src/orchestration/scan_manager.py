@@ -288,6 +288,7 @@ class ScanManager:
                     scan_id=scan_id,
                     skip_llm=skip_llm,
                     on_event=self.broadcaster.broadcast,
+                    screening_min_confidence=settings.analysis.screening_min_confidence,
                 )
 
                 try:

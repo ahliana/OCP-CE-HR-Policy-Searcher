@@ -201,6 +201,31 @@ class TestDomainScannerScan:
         scanner_deps["llm_client"].analyze_policy.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def test_low_confidence_rejection_escalates_to_analysis(self, scanner_deps):
+        """A barely-confident Haiku rejection must not be final: below
+        screening_min_confidence the page escalates to Sonnet analysis."""
+        scanner_deps["llm_client"].screen_relevance = AsyncMock(
+            return_value=ScreeningResult(relevant=False, confidence=3),
+        )
+        scanner = DomainScanner(domain=_make_domain(), scan_id="s1", **scanner_deps)
+        policies = await scanner.scan()
+        scanner_deps["llm_client"].analyze_policy.assert_awaited_once()
+        assert len(policies) == 1
+
+    @pytest.mark.asyncio
+    async def test_screening_min_confidence_is_configurable(self, scanner_deps):
+        scanner_deps["llm_client"].screen_relevance = AsyncMock(
+            return_value=ScreeningResult(relevant=False, confidence=3),
+        )
+        scanner = DomainScanner(
+            domain=_make_domain(), scan_id="s1",
+            screening_min_confidence=2, **scanner_deps,
+        )
+        policies = await scanner.scan()
+        assert len(policies) == 0
+        scanner_deps["llm_client"].analyze_policy.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def test_cache_hit_skips_llm(self, scanner_deps):
         # Pre-populate cache
         scanner_deps["cache"].set(

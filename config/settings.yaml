@@ -92,9 +92,11 @@ analysis:
   # Haiku costs ~$0.25/MTok vs Sonnet ~$3/MTok (12x cheaper)
   screening_model: "claude-haiku-4-5-20251001"
 
-  # Minimum confidence from screening to proceed to full analysis
-  # 1-10 scale. Lower = more permissive, higher = more strict
-  # Recommended: 4-6 (screen out obvious non-relevant, allow borderline)
+  # A screening REJECTION only sticks when the screener's confidence is at
+  # least this value; less-confident rejections escalate to full analysis.
+  # 1-10 scale. Lower = stricter (more rejections stick), higher = more
+  # borderline pages escalate to the expensive model.
+  # Recommended: 4-6 (screen out obvious non-relevant, escalate borderline)
   screening_min_confidence: 5
 
 # -----------------------------------------------------------------------------

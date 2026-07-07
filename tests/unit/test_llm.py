@@ -322,6 +322,48 @@ class TestPromptContent:
     def test_analysis_mentions_tax_incentives(self):
         assert "tax incentiv" in ANALYSIS_PROMPT.lower()
 
+    def test_screening_is_recall_first(self):
+        """Screening must cover policies that AFFECT heat reuse without
+        requiring the page to mention data centers."""
+        lowered = SCREENING_PROMPT.lower()
+        assert "district heating" in lowered
+        assert "building" in lowered  # building/construction codes
+        assert "permit" in lowered  # planning/permitting rules
+        assert "need not mention" in lowered or "whether or not" in lowered
+
+    def test_screening_tells_model_to_keep_borderline(self):
+        lowered = SCREENING_PROMPT.lower()
+        assert "in doubt" in lowered or "unsure" in lowered
+
+
+class TestScreeningExcerpt:
+    """Long documents must not be screened on their head alone."""
+
+    def test_short_content_passes_through(self):
+        from src.core.llm import screening_excerpt
+        text = "short policy text"
+        assert screening_excerpt(text, ["policy"]) == text
+
+    def test_head_kept_for_long_content(self):
+        from src.core.llm import screening_excerpt
+        text = "H" * 20000
+        excerpt = screening_excerpt(text, [])
+        assert excerpt.startswith("H" * 100)
+        assert len(excerpt) <= 13000
+
+    def test_anchor_beyond_head_included(self):
+        from src.core.llm import screening_excerpt
+        text = ("x" * 10000) + " Fernwärme Abwärmenutzung mandate " + ("y" * 5000)
+        excerpt = screening_excerpt(text, ["Fernwärme"])
+        assert "Fernwärme" in excerpt
+        assert "Abwärmenutzung" in excerpt  # window around the anchor, not just the term
+
+    def test_anchor_match_is_case_insensitive(self):
+        from src.core.llm import screening_excerpt
+        text = ("x" * 10000) + " FERNWÄRME statute " + ("y" * 5000)
+        excerpt = screening_excerpt(text, ["fernwärme"])
+        assert "FERNWÄRME" in excerpt
+
     def test_analysis_mentions_eed(self):
         assert "EED" in ANALYSIS_PROMPT
 

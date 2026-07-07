@@ -37,6 +37,7 @@ class DomainScanner:
         scan_id: str = "",
         skip_llm: bool = False,
         on_event: Optional[Callable[[ScanEvent], Awaitable[None]]] = None,
+        screening_min_confidence: int = 5,
     ):
         self.domain = domain
         self.crawler = crawler
@@ -48,6 +49,7 @@ class DomainScanner:
         self.scan_id = scan_id
         self.skip_llm = skip_llm
         self.on_event = on_event
+        self.screening_min_confidence = screening_min_confidence
 
         self.domain_id = domain.get("id", "")
         self.progress = DomainProgress(
@@ -199,13 +201,22 @@ class DomainScanner:
         # Stage 5a: Haiku screening
         screening = await self.llm_client.screen_relevance(
             extracted.text, result.url,
+            anchor_terms=[m.term for m in kw_result.matches],
         )
         if not screening.relevant:
-            self.cache.set(
-                result.url, is_relevant=False,
-                relevance_score=0, content_hash=content_hash,
+            if screening.confidence >= self.screening_min_confidence:
+                self.cache.set(
+                    result.url, is_relevant=False,
+                    relevance_score=0, content_hash=content_hash,
+                )
+                return None
+            # Borderline rejection: the screener is not confident enough to
+            # make the final call — escalate to full analysis instead.
+            logger.info(
+                "Borderline screening rejection for %s (confidence=%d < %d) "
+                "— escalating to analysis",
+                result.url, screening.confidence, self.screening_min_confidence,
             )
-            return None
 
         # Stage 5b: Sonnet analysis
         analysis = await self.llm_client.analyze_policy(
