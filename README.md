@@ -1,10 +1,10 @@
 # OCP CE HR Policy Searcher
 
-**Automated discovery of government data center heat reuse policies across 360+ domains in 40+ countries.**
+**Automated discovery of government data center heat reuse policies across 380+ domains in 40+ countries.**
 
-OCP CE HR Policy Searcher crawls government websites, extracts policy content, scores it with multi-language keyword matching, and uses Claude AI for structured policy analysis. Talk to it in natural language, and it handles everything — discovering websites, scanning pages, and delivering organized results.
+OCP CE HR Policy Searcher crawls government websites and legislation databases (HTML and PDF), extracts policy content, scores it with multi-language keyword matching, and uses Claude AI for structured policy analysis. Talk to it in natural language through the CLI agent or the web interface, and it handles everything — discovering websites, scanning pages, and delivering organized results.
 
-Built for the [Open Compute Project](https://www.opencompute.org/) to track global policy developments around data center waste heat recovery, energy efficiency mandates, and district heating integration.
+Built for the [Open Compute Project](https://www.opencompute.org/) to track global policy developments around data center waste heat recovery, energy efficiency mandates, and district heating integration. The web front end originated as an Uppsala University bachelor's thesis by Valdemar Jeirud, Elliot Loewenhielm, David Fors, and Alexander Stephanson.
 
 > **⚙️ Everything is configurable.** Crawl depth, keyword weights, scoring thresholds, AI models, per-domain overrides — all controlled through simple YAML files in `config/`. No code changes needed. See [Configuration](#configuration) for the full list of knobs.
 
@@ -24,6 +24,12 @@ git clone https://github.com/opencomputeproject/OCP-CE-HR-Policy-Searcher.git
 cd OCP-CE-HR-Policy-Searcher
 ./setup.sh
 python -m src.agent
+```
+
+**Web interface** (after setup, requires Node.js):
+```bash
+npm run dev
+# Frontend: http://localhost:3000   Backend API: http://localhost:8000
 ```
 
 > **Browser engine:** Setup automatically installs Playwright Chromium for JavaScript-rendered sites. If it fails, run manually: `playwright install chromium`
@@ -81,32 +87,39 @@ Found 3 policies:
 ## Key Features
 
 - **Natural language AI agent** — ask questions in plain English, the agent handles scanning, discovery, and analysis
+- **Web interface** — React front end with chat, region-based scanning, a filterable policy list, and API key management (`npm run dev`)
 - **Web search + auto-discovery** — finds new government websites via web search and permanently adds them to the database
-- **360+ government domains** across 40+ countries (EU, US 50 states, UK devolved nations, German Länder, Nordic, Canada, India, APAC, Middle East, South America, Africa)
+- **380+ government domains** across 40+ countries, including searchable legislation databases (EUR-Lex, Legifrance, wetten.overheid.nl, RIS, Finlex, Riigi Teataja, e-Gov Japan, law.go.kr, and US state legislatures)
+- **PDF ingestion** — statutes published as PDFs are fetched and text-extracted, not skipped
+- **Recall-first screening** — policies that merely AFFECT heat reuse (district heating mandates, building codes, EED transpositions, permitting rules) are kept, not only pages that name data centers; low-confidence rejections escalate to the stronger model
+- **Priority crawling** — law-like URLs are fetched first so the page budget reaches legislation instead of press pages
+- **Rejection observability** — every dropped page is counted by stage and logged with score and matched terms; near misses are tracked for tuning
 - **Parallel scanning** — scan multiple domains concurrently with configurable workers
-- **Multi-language keyword matching** — 7 categories across 20 languages (EN, DE, FR, NL, SV, DA, IT, ES, NO, FI, IS, PL, PT, CS, EL, HU, RO, JA, KO, AR) with compound word support for Germanic, Nordic, Hungarian, CJK, and Arabic languages
+- **Multi-language keyword matching** — 7 categories across 20 languages (EN, DE, FR, NL, SV, DA, IT, ES, NO, FI, IS, PL, PT, CS, EL, HU, RO, JA, KO, AR) including statute vocabulary (EED, EnEfG, Warmtewet, Varmeforsyningsloven) and compound word support
 - **⚙️ Fully configurable** — crawl depth, keyword weights, scoring thresholds, AI models, and per-domain overrides via YAML files ([details](#configuration))
 - **Two-stage AI analysis** — cheap Haiku screening filters irrelevant pages before expensive Sonnet extraction
 - **Real-time progress** — WebSocket events stream scan progress to your frontend
 - **Deterministic verification** — catches jurisdiction mismatches, impossible dates, generic names, and duplicates without LLM calls
 - **Post-scan auditor** — one bounded LLM call per scan generates strategic recommendations
 - **JavaScript SPA support** — Playwright headless Chromium renders JavaScript-heavy sites (e.g., Virginia LIS) that httpx can't handle
-- **URL caching** — 30-day TTL with content-hash change detection avoids redundant API calls
-- **Cost-aware** — full scan of all domains costs ~$3.50; cost estimation before you run
+- **URL caching** — full-content change detection; positive verdicts cached 30 days, negative verdicts 7 days so screening improvements take effect quickly
+- **Cost-aware** — cost estimation before you run; the recall improvements route more pages to the AI models, so budget the first full scan accordingly
 - **Google Sheets export** — automatically writes discovered policies to a Google Spreadsheet after each scan
-- **Three entry points** — interactive CLI, REST API for frontends, MCP server for Claude Desktop
+- **Three entry points** — interactive CLI + web UI, REST API for frontends, MCP server for Claude Desktop
 
 ---
 
 ## Geographic Coverage
 
-361 government domains across 40+ countries, organized by depth of coverage:
+381 government domains across 40+ countries, organized by depth of coverage:
 
 | Coverage | Countries / Regions | Domains |
 |----------|-------------------|---------|
 | **Deep** | EU (22 institutions + member states), UK (incl. Scotland, Wales, NI), US (all 50 states + federal), Germany (federal + 8 Länder), Switzerland (federal + Zurich), Nordic (5 countries), Canada (federal + 4 provinces) | ~300 |
 | **Moderate** | India (national + 4 states), Australia (national + 2 states), UAE (federal + Abu Dhabi, Dubai), Brazil, Saudi Arabia | ~25 |
-| **Basic** | Austria, Belgium, Ireland, Singapore, Japan, South Korea, Mexico, South Africa, plus most individual EU member states | ~35 |
+| **Basic** | Austria, Belgium, Ireland, Singapore, Japan, South Korea, Mexico, South Africa, Estonia, Luxembourg, plus most individual EU member states | ~40 |
+
+**Legislation databases** (search-endpoint seeded, added 2026-07): EUR-Lex, Legifrance (FR), wetten.overheid.nl (NL), RIS (AT), Irish Statute Book, Finlex (FI), Riigi Teataja (EE), Legilux (LU), e-Gov laws (JP), law.go.kr (KR), retsinformation (DK), lovdata (NO), and bill search for the NY, WA, GA, OH, AZ, IL, VA, TX legislatures.
 
 **Not seeing your country?** Use the `discover` workflow — the agent will web-search for government websites, generate domain configs, and add them permanently. Keywords work in 20 languages.
 
