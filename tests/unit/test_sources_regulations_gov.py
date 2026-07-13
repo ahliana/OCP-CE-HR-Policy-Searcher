@@ -8,9 +8,11 @@ from src.sources.regulations_gov import RegulationsGovSource
 
 
 class _FakeResponse:
-    def __init__(self, json_data=None, json_exc=None):
+    def __init__(self, json_data=None, json_exc=None, status_code=200, headers=None):
         self._json_data = json_data
         self._json_exc = json_exc
+        self.status_code = status_code
+        self.headers = headers or {}
 
     def raise_for_status(self):
         pass
@@ -128,3 +130,24 @@ class TestCap:
                 {"source_params": {"terms": ["x"], "max_documents": 1}}
             )
         assert len(results) == 1
+
+
+class TestRateLimit:
+    @pytest.mark.asyncio
+    async def test_429_stops_fetch_without_trying_more_terms(self):
+        """On a 429 the client must stop, not keep hammering the API with
+        the remaining search terms (api.data.gov: 1000 GET/hour)."""
+        first = _doc("A", title="A", documentType="Rule", postedDate="2026-01-01")
+        responses = [
+            _FakeResponse(json_data={"data": [first]}),          # term 1 ok
+            _FakeResponse(status_code=429, headers={"Retry-After": "60"}),  # term 2 throttled
+            _FakeResponse(json_data={"data": [_doc("C", title="C")]}),  # must NOT be reached
+        ]
+        fake_client = _FakeAsyncClient(responses)
+        with patch("httpx.AsyncClient", return_value=fake_client):
+            results = await RegulationsGovSource().fetch(
+                {"source_params": {"terms": ["t1", "t2", "t3"], "max_documents": 25}}
+            )
+        # Kept the first term's result; stopped at the 429 (2 calls, not 3)
+        assert len(results) == 1
+        assert len(fake_client.calls) == 2

@@ -5,6 +5,17 @@ regulations.gov document detail page. Open comment periods are surfaced
 as lifecycle_stage="consultation" (with the deadline folded into content)
 so downstream analysis sees the window before it closes. Disabled
 entirely (returns []) until REGULATIONSGOV_API_KEY is set.
+
+API terms (https://open.gsa.gov/api/regulationsgov/):
+- Key sent in the X-Api-Key header (done below).
+- api.data.gov default limit is 1000 GET/hour per key; on HTTP 429 the
+  fetch stops rather than burning the remaining terms.
+- Page size 25, far under the v4 maximum of 250.
+- ATTRIBUTION REQUIREMENT (interface, not fulfilled here): before any
+  public UI displays regulations.gov data, it MUST link to the
+  Regulations.gov terms of participation and privacy notice
+  (https://www.regulations.gov/user-notice). Tracked in the API key
+  tracker as a pre-public-release obligation.
 """
 
 import logging
@@ -67,16 +78,25 @@ class RegulationsGovSource(PolicySource):
             for term in terms:
                 if len(results) >= max_documents:
                     break
-                for item in await self._search(client, term):
+                items, rate_limited = await self._search(client, term)
+                for item in items:
                     if len(results) >= max_documents:
                         break
                     result = self._to_crawl_result(item, seen_urls)
                     if result:
                         results.append(result)
+                if rate_limited:
+                    # api.data.gov allows 1000 GET/hour per key; on a 429
+                    # stop rather than burn the remaining terms into more
+                    # throttled calls. The weekly cadence recovers next run.
+                    break
 
         return results
 
-    async def _search(self, client: httpx.AsyncClient, term: str) -> list[dict]:
+    async def _search(
+        self, client: httpx.AsyncClient, term: str,
+    ) -> tuple[list[dict], bool]:
+        """Return (documents, rate_limited). rate_limited=True on HTTP 429."""
         params = {
             "filter[searchTerm]": term,
             "sort": "-postedDate",
@@ -84,14 +104,21 @@ class RegulationsGovSource(PolicySource):
         }
         try:
             resp = await client.get(DOCUMENTS_URL, params=params)
+            if getattr(resp, "status_code", 200) == 429:
+                retry_after = resp.headers.get("Retry-After", "?")
+                logger.warning(
+                    "Regulations.gov rate limit hit (429, Retry-After=%s); "
+                    "stopping this run", retry_after,
+                )
+                return [], True
             resp.raise_for_status()
             data = resp.json()
         except (httpx.HTTPError, ValueError) as e:
             logger.warning("Regulations.gov search failed for term %r: %s", term, e)
-            return []
+            return [], False
 
         items = data.get("data") if isinstance(data, dict) else None
-        return items if isinstance(items, list) else []
+        return (items if isinstance(items, list) else []), False
 
     def _to_crawl_result(self, item: dict, seen_urls: set[str]) -> CrawlResult | None:
         if not isinstance(item, dict):
