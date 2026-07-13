@@ -77,9 +77,11 @@ class ScanManager:
         category: Optional[str] = None,
         tags: Optional[list[str]] = None,
         policy_type: Optional[str] = None,
+        channels: Optional[list[str]] = None,
     ) -> ScanJob:
         """Start a new parallel scan. Returns immediately with scan_id."""
         scan_id = str(uuid.uuid4())[:8]
+        channels = channels or ["crawl"]
 
         # Resolve domains
         domains = self.config.get_enabled_domains(domains_group)
@@ -97,6 +99,9 @@ class ScanManager:
                 d for d in domains
                 if policy_type in d.get("policy_types", [])
             ]
+        # Channel scoping — "news" has its own runner and matches no
+        # domain here, so channels=["news"] naturally yields 0 domains.
+        domains = [d for d in domains if self._domain_channel(d) in channels]
         if deep:
             domains = [self._with_deep_scan_defaults(d) for d in domains]
 
@@ -121,6 +126,7 @@ class ScanManager:
                 "skip_llm": skip_llm,
                 "dry_run": dry_run,
                 "deep": deep,
+                "channels": channels,
             },
         )
 
@@ -138,6 +144,21 @@ class ScanManager:
         )
         self._tasks[scan_id] = task
         return job
+
+    @staticmethod
+    def _domain_channel(domain: dict) -> str:
+        """Classify a domain into a scan channel based on its source_type.
+
+        'news' is never produced here — it has its own runner outside
+        scan_manager, so requesting channels=['news'] alone filters out
+        every domain (0 domains, handled by the normal empty-scan path).
+        """
+        source_type = domain.get("source_type", "crawl")
+        if source_type == "crawl":
+            return "crawl"
+        if source_type == "eurlex_nim":
+            return "transposition"
+        return "law_apis"
 
     @staticmethod
     def _with_deep_scan_defaults(domain: dict) -> dict:

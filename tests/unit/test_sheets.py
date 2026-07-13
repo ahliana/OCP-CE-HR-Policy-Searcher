@@ -13,7 +13,7 @@ class TestPolicySheetHeaders:
 
     def test_header_count(self):
         headers = Policy.sheet_headers()
-        assert len(headers) == 19
+        assert len(headers) == 20
 
     def test_header_order(self):
         headers = Policy.sheet_headers()
@@ -25,6 +25,7 @@ class TestPolicySheetHeaders:
         assert headers[16] == "Verification Flags"
         assert headers[17] == "Referenced Policies"
         assert headers[18] == "Referenced URLs"
+        assert headers[19] == "Lifecycle Stage"
 
     def test_headers_are_strings(self):
         for h in Policy.sheet_headers():
@@ -56,7 +57,7 @@ class TestPolicyToSheetRow:
         )
         row = policy.to_sheet_row()
 
-        assert len(row) == 19
+        assert len(row) == 20
         assert row[0] == "https://example.gov/policy"
         assert row[1] == "Test Act"
         assert row[2] == "Germany"
@@ -88,7 +89,7 @@ class TestPolicyToSheetRow:
         )
         row = policy.to_sheet_row()
 
-        assert len(row) == 19
+        assert len(row) == 20
         assert row[7] == ""   # effective_date
         assert row[8] == ""   # bill_number
         assert row[9] == ""   # key_requirements

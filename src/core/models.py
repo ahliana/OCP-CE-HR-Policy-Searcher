@@ -334,6 +334,11 @@ class ScanJob(BaseModel):
 
 # --- API Request/Response Schemas ---
 
+# Channels a scan can be scoped to. "news" has its own runner (not
+# scan_manager) and never appears as a domain's classified channel.
+VALID_SCAN_CHANNELS = {"crawl", "law_apis", "transposition", "news"}
+
+
 class ScanRequest(BaseModel):
     domains: str = "quick"
     max_concurrent: int = Field(default=5, ge=1, le=20)
@@ -344,11 +349,22 @@ class ScanRequest(BaseModel):
     category: Optional[str] = None
     tags: Optional[list[str]] = None
     policy_type: Optional[str] = None
+    channels: list[str] = Field(default_factory=lambda: ["crawl"])
 
     @model_validator(mode="after")
     def validate_scan_mode(self) -> "ScanRequest":
         if self.deep and self.discover:
             raise ValueError("Choose one scan mode: standard, deep, or discover")
+        return self
+
+    @model_validator(mode="after")
+    def validate_channels(self) -> "ScanRequest":
+        invalid = sorted(set(self.channels) - VALID_SCAN_CHANNELS)
+        if invalid:
+            raise ValueError(
+                f"Invalid channel(s): {invalid}. "
+                f"Valid values: {sorted(VALID_SCAN_CHANNELS)}"
+            )
         return self
 
 
