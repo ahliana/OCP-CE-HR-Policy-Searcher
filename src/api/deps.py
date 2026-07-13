@@ -36,6 +36,13 @@ def get_lead_store():
 
 
 @lru_cache()
+def get_cost_settings_store():
+    from ..storage.cost_settings import CostSettingsStore
+    data_dir = os.environ.get("OCP_DATA_DIR", "data")
+    return CostSettingsStore(data_dir=data_dir)
+
+
+@lru_cache()
 def get_scan_manager() -> ScanManager:
     config = get_config()
     broadcaster = get_broadcaster()

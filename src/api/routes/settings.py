@@ -1,14 +1,16 @@
-"""Settings endpoints for local .env API key management."""
+"""Settings endpoints for local .env API key management and cost controls."""
 
 import os
 import re
 from pathlib import Path
+from typing import Literal, Optional
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
-from ..deps import get_scan_manager
+from ..deps import get_config, get_cost_settings_store, get_scan_manager
+from ...storage.cost_settings import CostSettings
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 
@@ -113,6 +115,47 @@ def save_api_key(payload: ApiKeyRequest):
         "exists": True,
         "masked": mask_key(api_key),
         "env_file_exists": True,
+    }
+
+
+class CostSettingsUpdate(BaseModel):
+    """Partial update — omitted fields keep their current values."""
+
+    cost_level: Optional[Literal["low", "standard", "high"]] = None
+    ask_enabled: Optional[bool] = None
+    ask_rate_per_minute: Optional[int] = Field(default=None, ge=1, le=60)
+    ask_daily_limit: Optional[int] = Field(default=None, ge=0, le=10000)
+
+
+@router.get("/costs")
+def get_cost_settings(cost_store=Depends(get_cost_settings_store)):
+    """Current cost level, reader-question limits, and resolved models."""
+    settings = cost_store.get()
+    return {
+        **settings.model_dump(),
+        "models": cost_store.resolved_models(),
+    }
+
+
+@router.put("/costs")
+def update_cost_settings(
+    payload: CostSettingsUpdate,
+    cost_store=Depends(get_cost_settings_store),
+    config=Depends(get_config),
+):
+    """Update cost controls (admin-gated by the middleware).
+
+    Applies the chosen level's models to the live config immediately,
+    so the next scan — API, agent chat, or cron-triggered — runs at
+    the new cost level without a restart.
+    """
+    current = cost_store.get()
+    changes = payload.model_dump(exclude_none=True)
+    updated = cost_store.update(CostSettings(**{**current.model_dump(), **changes}))
+    cost_store.apply_to_config(config)
+    return {
+        **updated.model_dump(),
+        "models": cost_store.resolved_models(),
     }
 
 

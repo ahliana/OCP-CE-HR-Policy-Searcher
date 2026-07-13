@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined';
 import './App.css';
 import AgentPanel from './components/AgentPanel';
+import AskPolicyBox from './components/AskPolicyBox';
 import LogoImage from './assets/ocp-logo.svg';
 import LeadsInbox from './components/LeadsInbox';
 import PolicyList from './components/PolicyList';
@@ -96,6 +97,7 @@ function App() {
           />
         </section>
         <section className="app-stage" aria-label="Discovered policies">
+          <AskPolicyBox />
           <LeadsInbox adminRequired={adminRequired} hasAdminToken={hasAdminToken} />
           <PolicyList />
         </section>

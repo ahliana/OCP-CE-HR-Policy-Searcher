@@ -13,7 +13,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from ..core.log_setup import setup_logging
-from .routes import domains, scans, policies, analysis, agent, leads, logs, settings
+from .routes import domains, scans, policies, analysis, agent, ask, leads, logs, settings
 
 # Resolve .env from project root (2 levels up from src/api/app.py)
 # so credentials load regardless of the process working directory.
@@ -33,6 +33,10 @@ setup_logging(data_dir, json_console=True, console_level=logging.INFO)
 async def lifespan(app: FastAPI):
     """Startup/shutdown lifecycle."""
     logging.getLogger("ocp").info("OCP CE HR Policy Searcher starting")
+    # Apply the admin's saved cost level so scans started after a restart
+    # (including cron-triggered ones) run on the chosen models.
+    from .deps import get_config, get_cost_settings_store
+    get_cost_settings_store().apply_to_config(get_config())
     yield
     logging.getLogger("ocp").info("OCP CE HR Policy Searcher shutting down")
 
@@ -54,8 +58,9 @@ def admin_token_configured() -> bool:
 
 
 # Non-GET routes that stay open when admin mode is active:
-# community lead submission is the point of the reader-facing app.
-_ADMIN_EXEMPT = {("POST", "/api/leads")}
+# community lead submission and reader questions are the point of the
+# reader-facing app. /api/ask has its own rate and daily spend limits.
+_ADMIN_EXEMPT = {("POST", "/api/leads"), ("POST", "/api/ask")}
 
 
 class AdminGateMiddleware(BaseHTTPMiddleware):
@@ -107,6 +112,7 @@ app.include_router(scans.router)
 app.include_router(policies.router)
 app.include_router(analysis.router)
 app.include_router(agent.router)
+app.include_router(ask.router)
 app.include_router(leads.router)
 app.include_router(logs.router)
 app.include_router(settings.router)

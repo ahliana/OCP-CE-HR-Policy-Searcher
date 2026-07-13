@@ -97,6 +97,8 @@ Found 3 policies:
 - **Lifecycle stages** — every policy is tagged proposed / consultation / in committee / passed / enacted / transposition notified, filterable in the UI as Upcoming vs Enacted
 - **Scan channels** — choose which source families a scan consults: website crawling (the main cost driver), law databases, EU transposition, news signals
 - **Admin/reader mode** — set ADMIN_TOKEN and scans, chat, and review actions require the token while browsing stays open to everyone; unset means unchanged single-user behavior
+- **Ask about policies (public natural language)** — every visitor gets an "Ask about policies" box that answers questions from the stored policy library in their own language, citing official URLs. It uses a restricted read-only agent (cannot scan, search the web, or add domains), and spend is bounded by per-IP rate limiting plus an admin-set daily question cap
+- **Cost levels** — the admin picks low / standard / high in Settings; it selects the models used by scans, discovery, and reader answers, and applies immediately to API-, chat-, and cron-triggered jobs
 - **Priority crawling** — law-like URLs are fetched first so the page budget reaches legislation instead of press pages
 - **Rejection observability** — every dropped page is counted by stage and logged with score and matched terms; near misses are tracked for tuning
 - **Parallel scanning** — scan multiple domains concurrently with configurable workers
