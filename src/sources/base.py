@@ -30,6 +30,11 @@ class PolicySource(ABC):
     #: Registry key; also the value of `source_type` in domain YAML.
     id: str = ""
 
+    #: Name of the environment variable holding this source's API key, or
+    #: None for keyless sources. Lets the diagnostic report readiness
+    #: without each client leaking its own key-loading details.
+    api_key_env: str | None = None
+
     @abstractmethod
     async def fetch(self, domain: dict) -> list[CrawlResult]:
         """Fetch candidate documents for a domain config.

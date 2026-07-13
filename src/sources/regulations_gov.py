@@ -45,6 +45,7 @@ class RegulationsGovSource(PolicySource):
     """Fetches US federal rulemaking documents from api.regulations.gov."""
 
     id = "regulations_gov"
+    api_key_env = API_KEY_ENV
 
     async def fetch(self, domain: dict) -> list[CrawlResult]:
         api_key = os.environ.get(API_KEY_ENV)

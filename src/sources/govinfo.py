@@ -30,6 +30,7 @@ class GovinfoSource(PolicySource):
     """Fetches US federal bill text from api.govinfo.gov's BILLS collection."""
 
     id = "govinfo"
+    api_key_env = API_KEY_ENV
 
     async def fetch(self, domain: dict) -> list[CrawlResult]:
         api_key = os.environ.get(API_KEY_ENV)

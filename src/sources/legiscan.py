@@ -85,6 +85,7 @@ class LegiscanSource(PolicySource):
     """Fetches US state bills from api.legiscan.com, citing the official state link."""
 
     id = "legiscan"
+    api_key_env = API_KEY_ENV
 
     async def fetch(self, domain: dict) -> list[CrawlResult]:
         api_key = os.environ.get(API_KEY_ENV)

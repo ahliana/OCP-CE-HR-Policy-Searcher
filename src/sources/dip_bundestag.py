@@ -39,6 +39,7 @@ class DipBundestagSource(PolicySource):
     """Fetches German federal legislative proceedings from search.dip.bundestag.de."""
 
     id = "dip"
+    api_key_env = API_KEY_ENV
 
     async def fetch(self, domain: dict) -> list[CrawlResult]:
         api_key = os.environ.get(API_KEY_ENV)
