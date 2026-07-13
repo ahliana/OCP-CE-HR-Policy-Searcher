@@ -38,3 +38,15 @@ __all__ = [
     "register_source",
     "get_source",
 ]
+
+from . import riksdagen  # noqa: E402, F401
+from . import uk_bills  # noqa: E402, F401
+from . import legisinfo  # noqa: E402, F401
+from . import folketing  # noqa: E402, F401
+from . import eurlex_nim  # noqa: E402, F401
+
+# Client modules self-register via @register_source on import.
+from . import legiscan  # noqa: E402,F401
+from . import govinfo  # noqa: E402,F401
+from . import regulations_gov  # noqa: E402,F401
+from . import dip_bundestag  # noqa: E402,F401
