@@ -85,8 +85,10 @@ class LegisInfoSource(PolicySource):
     ) -> CrawlResult | None:
         if not isinstance(bill, dict):
             return None
-        long_title = bill.get("LongTitle") or ""
-        short_title = bill.get("ShortTitle") or ""
+        # Live payload uses language-suffixed fields (LongTitleEn);
+        # keep the unsuffixed names as fallbacks.
+        long_title = bill.get("LongTitleEn") or bill.get("LongTitle") or ""
+        short_title = bill.get("ShortTitleEn") or bill.get("ShortTitle") or ""
         haystack = f"{long_title} {short_title}".lower()
         if not any(term in haystack for term in terms):
             return None
@@ -97,7 +99,8 @@ class LegisInfoSource(PolicySource):
         seen_urls.add(url)
 
         stage_name = (
-            bill.get("LatestCompletedMajorStageName")
+            bill.get("CurrentStatusEn")
+            or bill.get("LatestCompletedMajorStageName")
             or bill.get("latestCompletedMajorStageName")
             or ""
         )

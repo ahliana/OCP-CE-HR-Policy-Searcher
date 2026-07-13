@@ -62,6 +62,29 @@ class TestLegisInfoSource:
         assert results[0].lifecycle_stage == "proposed"
 
     @pytest.mark.asyncio
+    async def test_live_payload_shape(self):
+        """The real API uses language-suffixed fields (LongTitleEn,
+        BillNumberFormatted, CurrentStatusEn) — verified live 2026-07-12."""
+        bills = [{
+            "BillNumberFormatted": "S-4",
+            "LongTitleEn": "An Act to amend the Energy Efficiency Act",
+            "ShortTitleEn": "",
+            "CurrentStatusEn": "At second reading in the Senate",
+            "ParliamentNumber": 45,
+            "SessionNumber": 1,
+        }]
+        resp = _mock_response(json_data=bills)
+        client = _mock_client([resp])
+
+        with patch("httpx.AsyncClient", return_value=client):
+            source = LegisInfoSource()
+            results = await source.fetch({"source_params": {"terms": ["energy"]}})
+
+        assert len(results) == 1
+        assert results[0].url == "https://www.parl.ca/legisinfo/en/bill/45-1/s-4"
+        assert "Energy Efficiency Act" in results[0].content
+
+    @pytest.mark.asyncio
     async def test_fallback_url_when_fields_missing(self):
         bills = [
             {
