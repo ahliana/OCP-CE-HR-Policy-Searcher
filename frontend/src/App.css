@@ -305,6 +305,165 @@ select,
   color: #7e8084;
   font-size: 14px;
 }
+.admin-readonly-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid #d7dee8;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.channels-group {
+  margin-top: 16px;
+}
+
+.channels-heading {
+  margin-bottom: 4px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.channels-group .MuiFormControlLabel-label {
+  font-size: 14px;
+}
+
+.leads-inbox {
+  margin-bottom: 20px;
+  border: 1px solid #d7dee8;
+  border-radius: 8px;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.leads-inbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  background-color: #f8fafc;
+  color: #020617;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 650;
+  text-align: left;
+}
+
+.leads-count-badge {
+  min-width: 22px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background-color: #8dc63f;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.leads-inbox-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.leads-suggest-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.leads-suggest-input {
+  flex: 1 1 200px;
+  min-width: 160px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.leads-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.leads-card {
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #f8fafc;
+}
+
+.leads-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.leads-card-title {
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.leads-card-title:hover {
+  text-decoration: underline;
+}
+
+.leads-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.leads-chip {
+  padding: 2px 8px;
+  border-radius: 20px;
+  background-color: #e0e7ff;
+  color: #3730a3;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.leads-chip-origin {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.leads-snippet {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.leads-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.leads-dismiss-button {
+  background-color: #e2e8f0;
+  color: #111827;
+}
+
+.leads-dismiss-button:not(:disabled):hover {
+  background-color: #cbd5e1;
+}
+
 .logo-image {
   /* Official OCP horizontal lockup, 315x128 viewBox */
   height: 52px;

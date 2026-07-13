@@ -3,21 +3,25 @@ import { apiUrl } from '../config/api';
 import useAgentSocket from '../hooks/useAgentSocket';
 import useCostEstimate from '../hooks/useCostEstimate';
 import useScanQueue from '../hooks/useScanQueue';
-import { buildScanRequests } from '../utils/scanTargets';
+import { DEFAULT_CHANNELS, buildScanRequests } from '../utils/scanTargets';
 import AgentChatPanel from './AgentChatPanel';
+import ApiKeySettingsModal from './ApiKeySettingsModal';
 import DomainScanPanel from './DomainScanPanel';
 import PolicyScannerHeader from './PolicyScannerHeader';
 
-function AgentPanel() {
+function AgentPanel({ adminRequired = false, hasAdminToken = false, onAdminTokenChange }) {
     const [selectedRegions, setSelectedRegions] = useState([]);
     const [mode, setMode] = useState('standard');
+    const [channels, setChannels] = useState(DEFAULT_CHANNELS);
     const [chatNotice, setChatNotice] = useState(null);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [hasApiKey, setHasApiKey] = useState(false);
     const isStandardMode = mode === 'standard';
+    const isReadOnly = adminRequired && !hasAdminToken;
     const scanOptions = {
         discover: mode === 'discover',
         deep: mode === 'deep',
+        channels,
     };
 
     const pushNotice = useCallback((type, text) => {
@@ -84,32 +88,46 @@ function AgentPanel() {
     return (
         <section className="Policy-scanner" aria-label="Policy Scanner">
             <PolicyScannerHeader onOpenSettings={() => setIsSettingsOpen(true)} />
-            <DomainScanPanel
-                selectedRegions={selectedRegions}
-                onSelectionChange={(event, itemIds) => setSelectedRegions(itemIds)}
-                mode={mode}
-                onModeChange={setMode}
-                costStatus={costStatus}
-                costEstimateText={costEstimateText}
-                isBusy={isBusy}
-                hasApiKey={hasApiKey}
-                isQueueRunning={isQueueRunning}
-                queuedScanCount={queuedScanCount}
-                isScanRequestRunning={isScanRequestRunning}
-                isScanRunning={isScanRunning}
-                onScan={scanSelectedRegion}
-                onStop={stopActiveScan}
-            />
-            <AgentChatPanel
-                isSettingsOpen={isSettingsOpen}
-                onCloseSettings={() => {
+            <ApiKeySettingsModal
+                open={isSettingsOpen}
+                onClose={() => {
                     setIsSettingsOpen(false);
                     fetchApiKeyStatus();
                 }}
-                wsRef={wsRef}
-                notice={chatNotice}
-                onRunningChange={setIsChatRunning}
+                adminRequired={adminRequired}
+                onAdminTokenChange={onAdminTokenChange}
             />
+            {isReadOnly ? (
+                <p className="admin-readonly-note" role="status">
+                    This is a read-only view of the policy library. Administrators can sign in from Settings.
+                </p>
+            ) : (
+                <>
+                    <DomainScanPanel
+                        selectedRegions={selectedRegions}
+                        onSelectionChange={(event, itemIds) => setSelectedRegions(itemIds)}
+                        mode={mode}
+                        onModeChange={setMode}
+                        channels={channels}
+                        onChannelsChange={setChannels}
+                        costStatus={costStatus}
+                        costEstimateText={costEstimateText}
+                        isBusy={isBusy}
+                        hasApiKey={hasApiKey}
+                        isQueueRunning={isQueueRunning}
+                        queuedScanCount={queuedScanCount}
+                        isScanRequestRunning={isScanRequestRunning}
+                        isScanRunning={isScanRunning}
+                        onScan={scanSelectedRegion}
+                        onStop={stopActiveScan}
+                    />
+                    <AgentChatPanel
+                        wsRef={wsRef}
+                        notice={chatNotice}
+                        onRunningChange={setIsChatRunning}
+                    />
+                </>
+            )}
         </section>
     );
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { apiUrl } from '../config/api';
+import { adminHeaders, getAdminToken, setAdminToken } from '../utils/adminAuth';
 
 const styles = {
   backdrop: {
@@ -126,9 +127,10 @@ function buttonStyle(variant, disabled) {
   };
 }
 
-function ApiKeySettingsModal({ open, onClose }) {
+function ApiKeySettingsModal({ open, onClose, adminRequired = false, onAdminTokenChange }) {
   const [status, setStatus] = useState(null);
   const [apiKey, setApiKey] = useState('');
+  const [adminTokenValue, setAdminTokenValue] = useState('');
   const [message, setMessage] = useState('');
   const [isBusy, setIsBusy] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
@@ -146,6 +148,7 @@ function ApiKeySettingsModal({ open, onClose }) {
 
     setMessage('');
     setApiKey('');
+    setAdminTokenValue(getAdminToken());
     setIsConfirmingDelete(false);
     loadStatus().catch((error) => setMessage(error.message));
   }, [open]);
@@ -157,7 +160,7 @@ function ApiKeySettingsModal({ open, onClose }) {
     try {
       const response = await fetch(apiUrl('/api/settings/api-key'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...adminHeaders() },
         body: JSON.stringify({ api_key: apiKey }),
       });
 
@@ -184,6 +187,7 @@ function ApiKeySettingsModal({ open, onClose }) {
     try {
       const response = await fetch(apiUrl('/api/settings/api-key'), {
         method: 'DELETE',
+        headers: adminHeaders(),
       });
 
       if (!response.ok) {
@@ -198,6 +202,13 @@ function ApiKeySettingsModal({ open, onClose }) {
     } finally {
       setIsBusy(false);
     }
+  };
+
+  const handleAdminTokenChange = (event) => {
+    const value = event.target.value;
+    setAdminTokenValue(value);
+    setAdminToken(value);
+    onAdminTokenChange?.();
   };
 
   if (!open) return null;
@@ -284,6 +295,26 @@ function ApiKeySettingsModal({ open, onClose }) {
             >
               Add an API key
             </button>
+          </div>
+        )}
+
+        {adminRequired && (
+          <div style={styles.body}>
+            <label style={styles.label} htmlFor="admin-token-input">
+              Administrator token
+            </label>
+            <input
+              id="admin-token-input"
+              type="password"
+              value={adminTokenValue}
+              onChange={handleAdminTokenChange}
+              placeholder="Admin token"
+              autoComplete="off"
+              style={styles.input}
+            />
+            <p style={styles.message}>
+              Required to run scans or use the chat on this server.
+            </p>
           </div>
         )}
 

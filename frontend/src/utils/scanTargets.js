@@ -66,6 +66,14 @@ export async function resolveDomainsForTargets(targets) {
     return [...domainById.values()];
 }
 
+export const DEFAULT_CHANNELS = ['crawl', 'law_apis', 'transposition'];
+
+export function buildChannels(selectedChannels) {
+    return Array.isArray(selectedChannels) && selectedChannels.length > 0
+        ? selectedChannels
+        : ['crawl'];
+}
+
 export async function buildScanRequests(selectedItems, scanOptions) {
     const { categories, tags, targets } = splitSelection(selectedItems);
     const domainMatchesFilters = (domain) => (
@@ -85,6 +93,7 @@ export async function buildScanRequests(selectedItems, scanOptions) {
         discover: scanOptions.discover,
         category: categories[0] || null,
         tags: tags.length > 0 ? tags : null,
+        channels: buildChannels(scanOptions.channels),
     };
 
     return (scanTargets.length > 0 ? scanTargets : ['all']).map((target) => ({
