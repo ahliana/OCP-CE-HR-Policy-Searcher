@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from ..deps import get_config, get_lead_store, get_policy_store
 from ...core.config import ConfigLoader
+from ...core.url_safety import is_public_http_url
 from ...storage.leads import Lead, LeadStore
 from ...storage.store import PolicyStore
 from .analysis import run_url_analysis
@@ -41,12 +42,16 @@ def submit_lead(
     store: LeadStore = Depends(get_lead_store),
 ):
     """Community submission: a URL someone believes points at a policy."""
-    parsed = urlparse(submission.url)
-    if parsed.scheme not in ("http", "https") or not parsed.netloc:
-        raise HTTPException(status_code=422, detail="url must be http(s)")
+    # SSRF guard: only accept public http(s) URLs. Blocks localhost,
+    # private ranges, and cloud metadata endpoints from entering the
+    # queue, so a later chase cannot be steered at internal services.
+    if not is_public_http_url(submission.url):
+        raise HTTPException(
+            status_code=422, detail="url must be a public http(s) address"
+        )
 
     lead = Lead(
-        title=submission.note[:200] or parsed.netloc,
+        title=submission.note[:200] or urlparse(submission.url).netloc,
         source_url=submission.url,
         snippet=submission.note,
         origin="community",
@@ -82,6 +87,14 @@ async def chase_lead(
     lead = lead_store.get(lead_id)
     if lead is None:
         raise HTTPException(status_code=404, detail=f"Lead '{lead_id}' not found")
+
+    # Re-check at fetch time: news leads bypass the submission guard, and a
+    # host's address can change between submission and chase.
+    if not is_public_http_url(lead.source_url):
+        raise HTTPException(
+            status_code=400,
+            detail="Lead URL is not a public http(s) address; refusing to fetch.",
+        )
 
     result = await run_url_analysis(lead.source_url, config, policy_store)
 

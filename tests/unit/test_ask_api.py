@@ -104,6 +104,43 @@ class TestAskAnswers:
         assert "boom" not in response.json()["detail"]
 
 
+class TestClientIp:
+    def test_prefers_forwarded_for_leftmost(self):
+        from src.api.routes.ask import _client_ip
+
+        class _Req:
+            headers = {"x-forwarded-for": "203.0.113.7, 10.0.0.1, 10.0.0.2"}
+            class client:  # noqa: N801
+                host = "10.0.0.1"
+
+        assert _client_ip(_Req()) == "203.0.113.7"
+
+    def test_falls_back_to_client_host(self):
+        from src.api.routes.ask import _client_ip
+
+        class _Req:
+            headers = {}
+            class client:  # noqa: N801
+                host = "198.51.100.9"
+
+        assert _client_ip(_Req()) == "198.51.100.9"
+
+    def test_distinct_forwarded_ips_get_separate_buckets(self, client, cost_store):
+        """Behind a proxy, two real users must not share one rate bucket."""
+        cost_store.update(CostSettings(ask_rate_per_minute=1, ask_daily_limit=100))
+        with patch("src.api.routes.ask.answer_question", new=_mock_answer()):
+            r1 = client.post(
+                "/api/ask", json={"question": "German policies?"},
+                headers={"X-Forwarded-For": "203.0.113.1"},
+            )
+            r2 = client.post(
+                "/api/ask", json={"question": "German policies?"},
+                headers={"X-Forwarded-For": "203.0.113.2"},
+            )
+        assert r1.status_code == 200
+        assert r2.status_code == 200  # different client, not throttled
+
+
 class TestAskLimits:
     def test_per_minute_rate_limit(self, client, cost_store):
         cost_store.update(CostSettings(ask_rate_per_minute=2, ask_daily_limit=100))

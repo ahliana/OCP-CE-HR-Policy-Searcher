@@ -32,10 +32,11 @@ class TestLeadRoutes:
         assert response.status_code == 200
         assert response.json()["count"] == 0
 
+    # Literal public IPs exercise the real SSRF guard without DNS.
     def test_submit_and_list(self, client):
         response = client.post(
             "/api/leads",
-            json={"url": "https://ministry.example.gov/heat-law", "note": "New Danish rule"},
+            json={"url": "https://8.8.8.8/heat-law", "note": "New Danish rule"},
         )
         assert response.status_code == 200
         assert client.get("/api/leads").json()["count"] == 1
@@ -44,13 +45,22 @@ class TestLeadRoutes:
         response = client.post("/api/leads", json={"url": "javascript:alert(1)"})
         assert response.status_code == 422
 
+    def test_submit_rejects_private_and_metadata_urls(self, client):
+        for bad in (
+            "http://169.254.169.254/latest/meta-data/",  # cloud metadata
+            "http://127.0.0.1/admin",
+            "http://10.0.0.5/internal",
+        ):
+            response = client.post("/api/leads", json={"url": bad})
+            assert response.status_code == 422, bad
+
     def test_duplicate_submission_conflicts(self, client):
-        client.post("/api/leads", json={"url": "https://a.gov/x"})
-        response = client.post("/api/leads", json={"url": "https://a.gov/x"})
+        client.post("/api/leads", json={"url": "https://8.8.8.8/x"})
+        response = client.post("/api/leads", json={"url": "https://8.8.8.8/x"})
         assert response.status_code == 409
 
     def test_dismiss(self, client, lead_store):
-        lead = Lead(title="t", source_url="https://a.gov/y")
+        lead = Lead(title="t", source_url="https://8.8.8.8/y")
         lead_store.add_leads([lead])
         response = client.post(f"/api/leads/{lead.lead_id}/dismiss")
         assert response.status_code == 200
@@ -60,18 +70,27 @@ class TestLeadRoutes:
         assert client.post("/api/leads/nope/dismiss").status_code == 404
 
     def test_chase_runs_analysis_and_records(self, client, lead_store):
-        lead = Lead(title="t", source_url="https://a.gov/z")
+        lead = Lead(title="t", source_url="https://8.8.8.8/z")
         lead_store.add_leads([lead])
         with patch(
             "src.api.routes.leads.run_url_analysis",
-            AsyncMock(return_value={"policy": {"url": "https://a.gov/z"}}),
+            AsyncMock(return_value={"policy": {"url": "https://8.8.8.8/z"}}),
         ) as run:
             response = client.post(f"/api/leads/{lead.lead_id}/chase")
         assert response.status_code == 200
         run.assert_awaited_once()
         chased = lead_store.get(lead.lead_id)
         assert chased.status == "chased"
-        assert chased.policy_url == "https://a.gov/z"
+        assert chased.policy_url == "https://8.8.8.8/z"
+
+    def test_chase_refuses_private_url_without_fetching(self, client, lead_store):
+        # A news lead (bypasses the submission guard) pointed inward.
+        lead = Lead(title="t", source_url="http://169.254.169.254/latest/meta-data/")
+        lead_store.add_leads([lead])
+        with patch("src.api.routes.leads.run_url_analysis", AsyncMock()) as run:
+            response = client.post(f"/api/leads/{lead.lead_id}/chase")
+        assert response.status_code == 400
+        run.assert_not_awaited()
 
 
 class TestAdminGate:
@@ -111,7 +130,7 @@ class TestAdminGate:
     def test_community_submission_exempt(self, client, monkeypatch):
         monkeypatch.setenv("ADMIN_TOKEN", "secret123")
         response = client.post(
-            "/api/leads", json={"url": "https://open.example.gov/policy"},
+            "/api/leads", json={"url": "https://8.8.8.8/policy"},
         )
         assert response.status_code == 200
 

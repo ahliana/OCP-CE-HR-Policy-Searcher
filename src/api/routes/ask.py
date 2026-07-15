@@ -101,6 +101,24 @@ def _get_limiter() -> _AskLimiter:
     return _limiter
 
 
+def _client_ip(request) -> str:
+    """Best-effort real client IP.
+
+    Behind a reverse proxy (the deployment runs behind Caddy),
+    request.client.host is the proxy's address, which would collapse every
+    visitor into one rate-limit bucket. Prefer the leftmost X-Forwarded-For
+    entry (the original client) when present. A spoofed header can only
+    dodge the per-minute burst limit, never the global daily cap, so cost
+    stays bounded regardless.
+    """
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if forwarded:
+        first = forwarded.split(",")[0].strip()
+        if first:
+            return first
+    return request.client.host if request.client else "unknown"
+
+
 def reset_limits_for_tests(data_dir: str, keep_usage_file: bool = False) -> None:
     """Reinitialize limiter state (unit tests only)."""
     global _limiter
@@ -135,7 +153,7 @@ async def ask(
         )
 
     limiter = _get_limiter()
-    ip = request.client.host if request.client else "unknown"
+    ip = _client_ip(request)
 
     wait = limiter.check_rate(ip, settings.ask_rate_per_minute)
     if wait is not None:
