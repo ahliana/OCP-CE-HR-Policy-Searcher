@@ -215,38 +215,14 @@ class Policy(BaseModel):
 
     @staticmethod
     def sheet_headers() -> list[str]:
-        return [
-            "URL", "Policy Name", "Jurisdiction", "Policy Type",
-            "Summary", "Relevance Score", "Source Language",
-            "Effective Date", "Bill Number", "Key Requirements",
-            "Discovered At", "Crawl Status", "Error Details", "Review Status",
-            "Scan ID", "Domain ID", "Verification Flags",
-            "Referenced Policies", "Referenced URLs", "Lifecycle Stage",
-        ]
+        """Staging headers, aligned with the Heat Reuse Policies Database tab."""
+        from .policy_schema import STAGING_HEADERS
+        return list(STAGING_HEADERS)
 
     def to_sheet_row(self) -> list:
-        return [
-            self.url,
-            self.policy_name,
-            self.jurisdiction,
-            self.policy_type.value,
-            self.summary,
-            self.relevance_score,
-            self.source_language,
-            self.effective_date.isoformat() if self.effective_date else "",
-            self.bill_number or "",
-            self.key_requirements or "",
-            self.discovered_at.isoformat(),
-            self.crawl_status,
-            self.error_details or "",
-            self.review_status,
-            self.scan_id or "",
-            self.domain_id or "",
-            ", ".join(f.value for f in self.verification_flags) if self.verification_flags else "",
-            "; ".join(self.referenced_policies) if self.referenced_policies else "",
-            "; ".join(self.referenced_urls) if self.referenced_urls else "",
-            self.lifecycle_stage,
-        ]
+        """Serialize into a Staging row matching sheet_headers()."""
+        from .policy_schema import to_staging_row
+        return to_staging_row(self)
 
 
 # --- Scan Events (WebSocket) ---
