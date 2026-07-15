@@ -41,8 +41,18 @@ class _FakeAsyncClient:
         return self._responses.pop(0)
 
 
-def _search_response(hits: dict) -> _FakeResponse:
-    return _FakeResponse(json_data={"searchresult": {**hits, "summary": {}}})
+def _search_response(hits) -> _FakeResponse:
+    """Build a getSearchRaw response in the REAL live shape.
+
+    The live API returns {"searchresult": {"summary": {...}, "results": [ ... ]}}
+    where results is a LIST of hit dicts — not numbered dict keys. Accepts a
+    list of hits, or a legacy {"0": hit, ...} dict for existing call sites.
+    """
+    if isinstance(hits, dict):
+        hits = [v for k, v in hits.items() if k != "summary"]
+    return _FakeResponse(
+        json_data={"searchresult": {"summary": {"count": len(hits)}, "results": hits}}
+    )
 
 
 def _bill_response(bill: dict | None) -> _FakeResponse:
@@ -101,6 +111,26 @@ class TestHappyPath:
 
 class TestMalformed:
     @pytest.mark.asyncio
+    async def test_results_list_shape_is_parsed(self):
+        """Regression: live getSearchRaw wraps hits in a 'results' LIST.
+
+        The client previously expected numbered dict keys and silently
+        dropped every hit, returning 0 despite thousands of matches.
+        """
+        hit = {"relevance": 95, "bill_id": 2070805, "change_hash": "abc123"}
+        bill = {
+            "title": "Waste Heat Recovery Act",
+            "description": "Requires CBA for data center waste heat",
+            "state_link": "https://leginfo.legislature.ca.gov/bill/AB123",
+            "status_text": "In committee",
+        }
+        fake = _FakeAsyncClient([_search_response([hit]), _bill_response(bill)])
+        with patch("httpx.AsyncClient", return_value=fake):
+            results = await LegiscanSource().fetch({"source_params": {"terms": ["waste heat"]}})
+        assert len(results) == 1
+        assert results[0].url == "https://leginfo.legislature.ca.gov/bill/AB123"
+        assert results[0].lifecycle_stage == "in_committee"
+
     async def test_malformed_search_response_returns_empty(self):
         fake_client = _FakeAsyncClient([_FakeResponse(json_exc=json.JSONDecodeError("bad", "", 0))])
         with patch("httpx.AsyncClient", return_value=fake_client):

@@ -16,7 +16,10 @@ from .base import PolicySource
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TERMS = ["heat networks", "waste heat", "data centre energy", "district heating"]
+# The Bills API SearchTerm matches phrases strictly, so multi-word phrases
+# like "heat networks" return nothing. Include the broad single word "heat"
+# (surfaces heating/heat-network bills) alongside the specific phrases.
+DEFAULT_TERMS = ["heat", "waste heat", "district heating", "data centre energy"]
 DEFAULT_MAX_DOCUMENTS = 25
 MIN_CONTENT_LENGTH = 200
 SEARCH_URL = "https://bills-api.parliament.uk/api/v1/Bills"

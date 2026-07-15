@@ -242,9 +242,18 @@ class LegiscanSource(PolicySource):
         if not isinstance(searchresult, dict):
             return []
 
+        # Live getSearchRaw returns hits as a "results" LIST. Older docs show
+        # numbered dict keys ("0","1",...); accept both so a future API shape
+        # change does not silently drop everything again.
+        raw = searchresult.get("results")
+        if isinstance(raw, list):
+            candidates = raw
+        else:
+            candidates = [v for k, v in searchresult.items() if k != "summary"]
+
         hits = []
-        for key, hit in searchresult.items():
-            if key == "summary" or not isinstance(hit, dict):
+        for hit in candidates:
+            if not isinstance(hit, dict):
                 continue
             bill_id = hit.get("bill_id")
             if bill_id is not None:

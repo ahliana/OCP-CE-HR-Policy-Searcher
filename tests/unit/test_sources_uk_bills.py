@@ -35,6 +35,12 @@ class TestUKBillsSource:
     def test_registered(self):
         assert SOURCE_REGISTRY["uk_bills"] is UKBillsSource
 
+    def test_default_terms_include_broad_heat_word(self):
+        # Regression: phrase-only defaults ("heat networks") matched no live
+        # UK bills. A broad single word must be present so a scan isn't empty.
+        from src.sources.uk_bills import DEFAULT_TERMS
+        assert "heat" in DEFAULT_TERMS
+
     @pytest.mark.asyncio
     async def test_happy_path(self):
         search_resp = _mock_response(json_data=_search_payload([
