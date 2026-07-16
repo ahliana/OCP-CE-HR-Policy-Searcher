@@ -133,7 +133,10 @@ function AskPolicyBox() {
       {isAsking ? (
         <p className="ask-box-status ask-box-status-busy" role="status">
           <span className="search-pulse-dot" aria-hidden="true" />
-          Searching the policy library... {elapsedSeconds}s
+          Searching the policy library...
+          {/* The ticking counter is visual-only; inside the live region it
+              would make screen readers re-announce every second. */}
+          <span aria-hidden="true"> {elapsedSeconds}s</span>
         </p>
       ) : null}
       {error ? (

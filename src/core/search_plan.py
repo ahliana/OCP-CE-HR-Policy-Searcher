@@ -11,6 +11,7 @@ The plan's `targets` string is directly usable as ScanRequest.domains
 
 import os
 import re
+from functools import lru_cache
 from typing import Optional
 
 from src.agent.domain_generator import US_STATE_ABBREVS
@@ -193,8 +194,22 @@ _GROUP_SUGGESTIONS = [
 ]
 
 
+@lru_cache(maxsize=1)
+def _suggested_places_cached() -> tuple[str, ...]:
+    return tuple(_build_suggested_places())
+
+
 def suggested_places() -> list[str]:
     """Alphabetized place names for the search box - every entry resolves.
+
+    Cached: the inputs (VALID_REGIONS, state list) are fixed at runtime,
+    so the ~360 resolver calls run once per process, not per request.
+    """
+    return list(_suggested_places_cached())
+
+
+def _build_suggested_places() -> list[str]:
+    """Generate the suggestion list - every entry resolves.
 
     Regression guard: the UI once suggested region DESCRIPTIONS
     ("US state governments") that resolve_place rejected. Suggestions are

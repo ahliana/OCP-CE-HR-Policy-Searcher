@@ -147,7 +147,6 @@ function SearchPanel({ hasApiKey, isBusy, onBusyChange, adminRequired = false })
         setScan({
             status: 'starting', found: 0, sourcesDone: 0, sourceErrors: 0,
             pagesChecked: 0, currentSource: null, names: [],
-            startedAt: Date.now(),
         });
         setElapsedSeconds(0);
         setIsStalled(false);
@@ -200,13 +199,11 @@ function SearchPanel({ hasApiKey, isBusy, onBusyChange, adminRequired = false })
                         ...prev,
                         currentSource: payload.data?.domain_name || null,
                     }));
-                } else if (payload.type === 'page_fetched' || payload.type === 'keyword_match') {
-                    if (payload.type === 'page_fetched') {
-                        setScan((prev) => prev && ({
-                            ...prev,
-                            pagesChecked: (prev.pagesChecked || 0) + 1,
-                        }));
-                    }
+                } else if (payload.type === 'page_fetched') {
+                    setScan((prev) => prev && ({
+                        ...prev,
+                        pagesChecked: (prev.pagesChecked || 0) + 1,
+                    }));
                 } else if (payload.type === 'policy_found') {
                     setScan((prev) => prev && ({
                         ...prev,
@@ -361,7 +358,10 @@ function SearchPanel({ hasApiKey, isBusy, onBusyChange, adminRequired = false })
                 </p>
             )}
             {scan && (
-                <div className="search-progress" role="status" aria-live="polite">
+                <div className="search-progress">
+                    {/* Deliberately NOT a live region: the clock ticks every
+                        second and would spam screen readers. Terminal states
+                        below carry role="status" instead. */}
                     {isRunning && (
                         <>
                             <LinearProgress
@@ -405,7 +405,7 @@ function SearchPanel({ hasApiKey, isBusy, onBusyChange, adminRequired = false })
                         </>
                     )}
                     {scan.status === 'complete' && scan.found > 0 && (
-                        <p className="search-progress-line search-progress-done">
+                        <p className="search-progress-line search-progress-done" role="status">
                             Done: {scan.found} {scan.found === 1 ? 'policy' : 'policies'} found
                             and added to review. New rows are in the Staging sheet.
                             {scan.sourceErrors > 0
@@ -413,7 +413,7 @@ function SearchPanel({ hasApiKey, isBusy, onBusyChange, adminRequired = false })
                         </p>
                     )}
                     {scan.status === 'complete' && scan.found === 0 && (
-                        <div className="search-plan-warning">
+                        <div className="search-plan-warning" role="status">
                             <p>
                                 Nothing new found. {plan ? `Searched ${plan.sources.length} sources
                                 for ${plan.place.display}.` : ''} That usually means no new or
