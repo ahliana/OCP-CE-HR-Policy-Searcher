@@ -48,6 +48,9 @@ from . import oireachtas  # noqa: E402, F401
 from . import govuk  # noqa: E402, F401
 from . import eu_have_your_say  # noqa: E402, F401
 from . import tweede_kamer  # noqa: E402, F401
+from . import egov_japan  # noqa: E402, F401
+from . import kokkai  # noqa: E402, F401
+from . import stortinget  # noqa: E402, F401
 
 # Client modules self-register via @register_source on import.
 from . import legiscan  # noqa: E402,F401
