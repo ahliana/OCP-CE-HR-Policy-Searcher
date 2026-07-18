@@ -14,7 +14,8 @@ from starlette.responses import JSONResponse
 
 from ..core.log_setup import setup_logging
 from .routes import (
-    domains, scans, policies, analysis, agent, ask, leads, logs, search, settings,
+    domains, scans, policies, analysis, agent, ask, coverage, leads, logs,
+    search, settings,
 )
 
 # Resolve .env from project root (2 levels up from src/api/app.py)
@@ -115,6 +116,7 @@ app.include_router(policies.router)
 app.include_router(analysis.router)
 app.include_router(agent.router)
 app.include_router(ask.router)
+app.include_router(coverage.router)
 app.include_router(leads.router)
 app.include_router(logs.router)
 app.include_router(search.router)
