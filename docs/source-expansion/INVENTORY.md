@@ -30,16 +30,25 @@ force-mapped into "eu" or "apac".
 
 Wave 1 (11 region files) + Wave 2 (7 files: legislation-apis, grid-operators,
 standards-bodies, countries-wave2, deep-subnational, us-local,
-multilateral-portals) combined:
+multilateral-portals) + Wave 3 (7 files: water-cooling, carbon-ets,
+dc-incentives, permitting-eia, more-legislation-apis, digital-infra-strategies,
+municipal-heat-zoning) combined:
 
-| Metric | Wave 1 | Wave 2 | Combined |
-|---|---|---|---|
-| **Total verified candidates (unique, deduped)** | **154** | **158** | **312** |
-| Tier a (drops into existing client) | 0 | 0 | 0 |
-| Tier b (plain crawl domain) | 138 | 141 | 279 |
-| Tier c (needs a new structured client) | 16 | 17 | 33 |
-| Duplicates merged | 1 | 3 | 4 |
-| Unverified / needs-human-check items (appendix) | 45 | 75 (+8 "checked, none found") | 120 (+8) |
+| Metric | Wave 1 | Wave 2 | Wave 3 | Combined |
+|---|---|---|---|---|
+| **Total verified candidates (unique, deduped)** | **154** | **158** | **99** | **411** |
+| Tier a (drops into existing client) | 0 | 0 | 0 | 0 |
+| Tier b (plain crawl domain) | 138 | 141 | 91 | 370 |
+| Tier c (needs a new structured client) | 16 | 17 | 8 | 41 |
+| Duplicates merged | 1 | 3 | 1 | 5 |
+| Unverified / needs-human-check items (appendix) | 45 | 75 (+8 "checked, none found") | 39 | 159 (+8) |
+
+Wave-3's 1 merge: `loudoun_county_dc_standards` (permitting-eia.md #9) was an
+EXACT duplicate (same base_url, same both start_paths) of wave-1's
+`us_loudoun_county_va` already drafted in `draft/crawl/us-states.yaml` — not
+re-drafted. See "## Wave 3" below for the full writeup, including one
+additional borderline case (`gla_heat_networks_london`) flagged but NOT
+dropped/merged (net-new start_paths on an existing base_url).
 
 Wave-1's 1 merge: data.europa.eu Search API, independently proposed in both
 `eu-uncovered.md` and `supranational.md`, merged into one entry
@@ -905,3 +914,23 @@ live code enums and the 390 existing sources:
 - **3 enum values** still outside `src/core/config.py` after the assembler's
   closest-value mapping: `region: global`, `region: manitoba`, `region: supranational`
   (config loader warns, does not reject). Recommended additions to `VALID_REGIONS`.
+
+---
+
+## Orchestrator validation - Wave 3 (2026-07-18)
+
+Machine check of the 92 wave-3 draft crawl entries against live enums, the 390
+existing sources, and all prior-wave drafts:
+
+- **92 entries, all `enabled: false`.** All parse. **0 id collisions** with existing
+  config; **0 cross-wave id or base_url duplicates** with waves 1-2.
+- **0 enum violations** - every region/category/tag/policy_type value maps to
+  `src/core/config.py` (cleanest wave; no new enum additions needed from wave 3).
+- **12 additive base_url overlaps with existing config** - unique ids sharing a domain
+  with an unrelated existing entry (gov.uk depts: uk_ets/secr/esos/dsit; eur-lex CSRD;
+  CARB; BAFU; METI; alberta.ca; imda.gov.sg; azleg.gov; london.gov.uk). This is the
+  codebase's established multi-entry-per-domain pattern; each notes its sibling id. Not
+  collisions - additive by design.
+- Wave-3 tier-c (8 new API clients): federal_register_api (keyless), congress_gov_api
+  (key), openstates_api (key), kenya_law_api, oparl (municipal), epa_ghgrp_envirofacts_api
+  (keyless), ga_epd_permit_search, eea_industrial_emissions_portal.

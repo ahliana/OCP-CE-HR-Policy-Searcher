@@ -1,0 +1,811 @@
+# =============================================================================
+# DRAFT WAVE 3 — Municipal / City Heat-Network-Zoning Tier (tier-b crawl
+# domains only)
+# Source: docs/source-expansion/regions-wave3/municipal-heat-zoning.md
+# All 21 candidates in the source file are tier-b; zero tier-a, zero tier-c
+# (one companion OpendataSoft API noted on the Bordeaux entry as a possible
+# future tier-c pattern, not specced this pass).
+#
+# DEDUP FLAG (not dropped, borderline - see INVENTORY.md): `gla_heat_
+# networks_london` shares base_url https://www.london.gov.uk with THREE
+# existing uk.yaml entries (`uk_gla`, `uk_gla_heat_networks`,
+# `gla_gff_london`), and `uk_gla` already carries the tag
+# "data_center_heat_reuse". None of the existing entries' start_paths
+# include this candidate's specific paths (/heat-networks-london, the
+# "Optimising Data Centres in London" PDF), so it is not an exact
+# duplicate, but a reviewer may prefer folding these two start_paths into
+# the existing `uk_gla_heat_networks` entry rather than shipping a fourth
+# london.gov.uk domain entry. Drafted below as its own entry per the
+# source researcher's original proposal; flagged for human merge decision.
+#
+# Region note: none of the city/province-level values these candidates
+# actually describe (helsinki, noord_holland, london, eindhoven, leeds,
+# oslo, copenhagen, stockholm, frankfurt, muenchen, bristol, manchester,
+# greater_manchester, lyon, strasbourg, bordeaux, nantes, koeln, denhaag,
+# rotterdam) are in VALID_REGIONS. Each entry's `region:` list below uses
+# only the valid parent region(s) (country + broad group); the specific
+# city/province is preserved in the `id` and `notes` field, same pattern
+# used for wave-2's Aragon/Catalonia/Madrid/etc. entries.
+# =============================================================================
+
+domains:
+  - name: "Helen Oy - Heat Recovery Service for Data Centers (Helsinki, Finland)"
+    id: "helen_fi_dc_heat_recovery"
+    enabled: false
+    base_url: "https://www.helen.fi"
+    start_paths:
+      - "/en/companies/cooling-for-companies/Heat-recovery-service-for-data-centers"
+    region:
+      - "nordic"
+      - "finland"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "incentives"
+      - "data_center_specific"
+    policy_types:
+      - "program"
+      - "guidance"
+    language: "en"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #1). Helen is Helsinki's wholly
+      city-owned energy utility; region "helsinki" not in VALID_REGIONS,
+      mapped to finland/nordic. Live, operational program document (not
+      just a plan) naming three heat-offtake contract models, the
+      financial incentive (reduced electricity tax, EUR0.5/MWh, for heat-
+      recovering data centers per Finnish tax law), and quantified impact
+      ("one data centre can heat up to 20,000 apartments"). Names the
+      Telia Helsinki Data Center as already recovering 90% of its waste
+      heat - the clearest "policy meets practice" document found this
+      pass. Companion: City of Helsinki's own climate page
+      (ilmasto.hel.fi/en/mitigation/heating-and-decarbonisation/) confirms
+      district heating is 98% of city-facility heating but does not itself
+      name data centers - not separately drafted. Append to nordic.yaml.
+      verified: yes - live page, official branding, program/incentive
+      confirmed.
+
+  - name: "Provincie Noord-Holland - Datacenterstrategie 2025-2027 (Netherlands)"
+    id: "noord_holland_datacenters"
+    enabled: false
+    base_url: "https://www.noord-holland.nl"
+    start_paths:
+      - "/Onderwerpen/Economie_Werk/Projecten/Datacenters"
+      - "/bestanden/pdf/Economie_Werk/Datacenterstrategie%20NH%202025-2027.pdf"
+    region:
+      - "eu"
+      - "eu_west"
+      - "netherlands"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "waste_heat"
+      - "district_heating"
+      - "data_center_specific"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "regulation"
+      - "guidance"
+    language: "nl"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #2). Region "noord_holland" not in
+      VALID_REGIONS, mapped to netherlands/eu_west. Noord-Holland (home to
+      the Amsterdam DC cluster, one of Europe's largest) explicitly
+      conditions new DC siting on waste-heat readiness; the hub page
+      confirms the province appoints a "warmteregisseur" (heat
+      coordinator) specifically to broker data-center waste heat into heat
+      networks. Companion document
+      "Richtlijn duurzame vestigingsvoorwaarden datacenters Noord-Holland"
+      linked from the hub page should be added as an additional start_path
+      on ingest. Append to netherlands.yaml. verified: yes for the hub
+      page (on-topic quotes confirmed); the PDF itself (200 OK, 4.1MB)
+      returned as unparseable binary/image-heavy content to the fetch tool
+      - not independently text-confirmed this session. A separate archived
+      press-release URL 404'd - do not use.
+
+  - name: "Greater London Authority - Heat Networks in London (+ Optimising Data Centres in London - Heat Reuse report)"
+    id: "gla_heat_networks_london"
+    enabled: false
+    base_url: "https://www.london.gov.uk"
+    start_paths:
+      - "/heat-networks-london"
+      - "/sites/default/files/2025-06/Optimising_Data_Centres_in_London_-_Heat_Reuse_250605.pdf"
+    region:
+      - "uk"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "data_center_specific"
+      - "planning"
+      - "mandates"
+    policy_types:
+      - "report"
+      - "guidance"
+      - "regulation"
+    language: "en"
+    rate_limit_seconds: 2.0
+    max_pages: 10
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #3). DEDUP FLAG - see file header:
+      base_url london.gov.uk already carries THREE existing uk.yaml
+      entries (uk_gla, uk_gla_heat_networks, gla_gff_london); uk_gla
+      already tags "data_center_heat_reuse". This candidate's start_paths
+      are net-new (not covered by those entries) - the GLA commissioned a
+      report quantifying up to 1.6 TWh/year of recoverable heat from
+      London's DC estate (enough for all of Ealing), plus explicit
+      planning-policy recommendations. Companion hub page confirms two
+      live zones (OPDC, South Westminster Area Network/SWAN) and GLA's
+      role as Zone Coordination Body. RECOMMEND a human decide: fold these
+      two start_paths into the existing uk_gla_heat_networks entry, or
+      keep as a distinct id (this entry). Append to uk.yaml either way.
+      verified: yes for the hub page; the PDF (200 OK, 4MB) returned
+      unparseable binary to the fetch tool - existence/title confirmed via
+      WebSearch snippet and the hub page's own link, not independently
+      read in full.
+
+  - name: "Gemeente Eindhoven - Warmteprogramma (+ Interconnect datacenter/Meerhoven heat deal)"
+    id: "eindhoven_warmteprogramma"
+    enabled: false
+    base_url: "https://www.eindhoven.nl"
+    start_paths:
+      - "/bouwen/warmteprogramma"
+      - "/persberichten/duurzame-warmte-van-datacenter-voor-warmtenet-meerhoven"
+    region:
+      - "eu"
+      - "eu_west"
+      - "netherlands"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "data_center_specific"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "report"
+    language: "nl"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #4). Region "eindhoven" not in
+      VALID_REGIONS, mapped to netherlands/eu_west. A live, signed
+      agreement (municipality + Interconnect Services BV) routing a named
+      data center's waste heat into the Meerhoven district heating
+      network, explicitly framed as replacing biomass in the city's heat
+      mix - the clearest Dutch example of a municipality directly brokering
+      (not just planning for) DC-to-heat-network offtake. Warmteprogramma
+      established Dec 2025, succeeds the 2021 Transitievisie Warmte.
+      Append to netherlands.yaml. verified: partial - /bouwen/
+      warmteprogramma confirmed live/on-topic; the press-release URL
+      returned HTTP 403 to the fetch tool (bot-blocking) - existence/
+      headline/content confirmed via WebSearch snippet and a cached title,
+      full text not independently read.
+
+  - name: "Leeds City Council - Local Development Order 3 (Leeds District Heating Network)"
+    id: "leeds_gov_uk_ldo3_heat_network"
+    enabled: false
+    base_url: "https://www.leeds.gov.uk"
+    start_paths:
+      - "/planning/planning-policy/supplementary-planning-documents-and-guidance/local-development-order/local-development-order-(ldo-3)-leeds-district-heating-network"
+    region:
+      - "uk"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "data_center_specific"
+      - "planning"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "strategy"
+    language: "en"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #5). Region "leeds" not in
+      VALID_REGIONS, mapped to uk. An actual adopted planning-law
+      instrument (not just a strategy document) granting automatic
+      planning permission for district heat infrastructure, explicitly
+      naming data centres as a heat source alongside the Recycling and
+      Energy Recovery Facility ("Ramboll have identified a range of heat
+      sources for this long-term project, including other Energy Recovery
+      Facilities, data centres and industrial processes"). Adopted Nov
+      2025, permission expires Dec 31 2035. Leeds is one of the six DESNZ
+      first-round heat-network zoning pilot cities already referenced
+      nationally in uk.yaml - this is the local-authority-level
+      implementation instrument. Append to uk.yaml. verified: yes - live,
+      official page confirmed.
+
+  - name: "Oslo Kommune - Klimaetaten (Climate Agency) Data Center Waste Heat"
+    id: "klimaoslo_no_dc_heat"
+    enabled: false
+    base_url: "https://www.klimaoslo.no"
+    start_paths:
+      - "/oslo-datasenter-varmer-opp-5000-leiligheter/"
+      - "/2018/10/09/overskuddsvarme-fra-datasenter/"
+    region:
+      - "nordic"
+      - "norway"
+    category: "environmental_agency"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "data_center_specific"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "no"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #6). Klimaetaten is Oslo Kommune's
+      own Climate Agency; region "oslo" not in VALID_REGIONS, mapped to
+      norway/nordic. Describes a live, operating (not proposed) data-center
+      waste-heat-to-district-heating installation (Hafslund Celsio + the
+      STACK data center on Ulven) delivering 5 MW / ~5,000 apartments,
+      profitable without subsidy from day one - published by the city's
+      own climate agency as an example of its climate-budget strategy in
+      action. klimaoslo.no is the Climate Agency's public-facing
+      communications site (distinct from the formal oslo.kommune.no
+      domain) - both official. Append to nordic.yaml. verified: yes - live,
+      official page, project detail (temperatures, MW, homes served)
+      confirmed.
+
+  - name: "VEKS (Vestegnens Kraftvarmeselskab) - Future District Heating + Microsoft Surplus Heat Project"
+    id: "veks_dk"
+    enabled: false
+    base_url: "https://www.veks.dk"
+    start_paths:
+      - "/en/focus/the-future-district-heating"
+      - "/fokus/projekter-og-aktiviteter/overskudsvarme-microsoft"
+    region:
+      - "nordic"
+      - "denmark"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "data_center_specific"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "report"
+    language: "en"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #7). VEKS is a nonprofit inter-
+      municipal utility jointly owned by 12 Greater Copenhagen
+      municipalities (same governance model as Stockholm Exergi, already
+      accepted into the corpus as stockholm_exergi_odh). Region
+      "copenhagen" not in VALID_REGIONS, mapped to denmark/nordic. Names
+      an actual signed agreement (VEKS + Microsoft, Hoje-Taastrup data
+      center) delivering waste heat equivalent to ~6,000 homes starting the
+      2025-2026 heating season, plus the FFH50 (Future District Heating)
+      policy document stating "the share of surplus heat, data centres
+      included, will increase considerably in the years ahead." Direct
+      Danish counterpart to Stockholm Data Parks; fills the gap left by
+      wave-1's rejection of HOFOR (marketing-only, no policy content).
+      Append to denmark.yaml. verified: yes, both paths confirmed live and
+      on-topic.
+
+  - name: "Stockholms Stad - Serverhallar med atervinning av overskottsvarme (Akalla)"
+    id: "stockholm_stad_akalla_dataparks"
+    enabled: false
+    base_url: "https://vaxer.stockholm"
+    start_paths:
+      - "/projekt/akalla/serverhallar-med-atervinning-av-overskottsvarme/"
+    region:
+      - "nordic"
+      - "sweden"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "data_center_specific"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "report"
+    language: "sv"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #8). Region "stockholm" not in
+      VALID_REGIONS, mapped to sweden/nordic. City of Stockholm's own
+      urban-development/city-planning portal (vaxer.stockholm), distinct
+      domain from the Stockholm Exergi utility already in sweden.yaml
+      (stockholm_exergi_odh). Describes the Stockholm Data Parks
+      initiative - a joint city + utility + grid operator + business-region
+      program specifically designed to attract data centers because their
+      waste heat feeds district heating; confirms the city's own planning
+      role (siting, grid-capacity/EMF FAQ) alongside the utility's
+      commercial heat-purchase program. A companion PDF at
+      start.stockholm (Klimathandlingsplan 2030) is noted as unverified -
+      see INVENTORY.md appendix. Append to sweden.yaml. verified: yes -
+      live, official page, Akalla project and Data Parks partnership
+      confirmed.
+
+  - name: "Team Frankfurt Klimaschutz - Kommunale Waermeplanung (Municipal Heat Planning)"
+    id: "frankfurt_kommunale_waermeplanung"
+    enabled: false
+    base_url: "https://klimaschutz-frankfurt.de"
+    start_paths:
+      - "/kommunale-waermeplanung/"
+      - "/kommunale-waermeplanung/ablauf/"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+      - "hessen"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "data_center_specific"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "report"
+    language: "de"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #9). Region "frankfurt" not in
+      VALID_REGIONS, mapped to hessen/germany (hessen IS a valid region -
+      German Land). Run by Frankfurt's municipal Klimareferat/climate
+      office under the "Team Frankfurt Klimaschutz" brand (confirmed via
+      page footer). Frankfurt is Europe's single largest data-center
+      market; this is the city's own municipal heat-planning site
+      (distinct from the existing hessen_energy/hessen_digital_dc
+      state-level entries in germany.yaml) explicitly naming "Abwaerme aus
+      Abwasser, Industrie und Rechenzentren" (waste heat from sewage,
+      industry, and data centers) as a heat source for the city's climate-
+      neutral heat target. Statutory KWP completion deadline was Jun 30
+      2026 (WPG, cities >100k population). Append to germany.yaml.
+      verified: yes - four-phase KWP process confirmed, Rechenzentren named
+      explicitly as a waste-heat source.
+
+  - name: "City of Munich - Waermewende Muenchen (Heat Transition)"
+    id: "muenchen_waermewende"
+    enabled: false
+    base_url: "https://stadt.muenchen.de"
+    start_paths:
+      - "/infos/waermewende-muenchen.html"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+      - "bayern"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "regulation"
+    language: "de"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #10). Region "muenchen" not in
+      VALID_REGIONS, mapped to bayern/germany (bayern IS a valid region -
+      German Land). Run jointly by Referat fuer Klima- und Umweltschutz and
+      Stadtwerke Muenchen; Munich's own city-level heat plan (distinct from
+      existing bayern_energy/bayern_building state-level entries), heat
+      plan adopted May 15 2024 (first Bavarian municipality to complete
+      one), Heat Ordinance adopted Nov 2025; targets 62% district-heating
+      share by 2045 and full conversion of SWM's ~1,000km network to
+      renewables + "unavoidable waste heat" by 2040. SCOPE CAVEAT: data
+      centers (Rechenzentren) are NOT named on this specific page - the
+      SWM Moosach-quarter DC-heat-pump detail came from a separate news
+      article (Solarserver), not independently verified this session -
+      worth a human follow-up for a dedicated SWM page. Append to
+      germany.yaml. verified: yes for the heat-transition-plan content
+      itself; DC-specific detail unverified (see caveat).
+
+  - name: "Koebenhavns Kommune - Klimastrategi 2035 / Klimahandleplan"
+    id: "kk_dk_klimaplan"
+    enabled: false
+    base_url: "https://www.kk.dk"
+    start_paths:
+      - "/politik/politikker-og-indsatser/klima-miljoe-og-natur/klimaplan-co2-neutral-hovedstad"
+    region:
+      - "nordic"
+      - "denmark"
+    category: "environmental_agency"
+    tags:
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "strategy"
+    language: "da"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #11). Region "copenhagen" not in
+      VALID_REGIONS, mapped to denmark/nordic. Copenhagen municipality's
+      own climate-plan hub, complementing the VEKS utility entry (veks_dk)
+      with the city government's own framing. Climate Strategy 2035 +
+      Climate Action Plan 2026-2028 adopted Sept 18 2025, replacing the
+      older KBH2025 plan. RANKED LOWER than VEKS: the visible hub page
+      itself does NOT mention district heating/overskudsvarme (surplus
+      heat)/data centers directly - that content likely lives inside linked
+      PDFs, not confirmed this session. Append to denmark.yaml. verified:
+      partial - page confirmed official/live, adoption date confirmed; no
+      district-heating/waste-heat/DC mention on the visible page text
+      itself.
+
+  - name: "Bristol City Council - Bristol Heat Network Local Development Order"
+    id: "bristol_gov_uk_heat_network_ldo"
+    enabled: false
+    base_url: "https://www.bristol.gov.uk"
+    start_paths:
+      - "/council/policies-plans-and-strategies/energy-and-environment/bristol-heat-network-local-development-order"
+    region:
+      - "uk"
+    category: "district_heating"
+    tags:
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "regulation"
+    language: "en"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #12). Region "bristol" not in
+      VALID_REGIONS, mapped to uk. Council-adopted planning instrument
+      granting permitted development rights for heat-network
+      infrastructure across specified Bristol areas - the local
+      implementation layer under Bristol's DESNZ pilot-zone designation and
+      the Bristol City Leap 20-year energy partnership. Consultation closed
+      Jan 2023. SCOPE CAVEAT: does NOT itself mention mandatory-connection
+      rules or data centers (those details come from separate news
+      coverage of the Heat Network Zoning Zone Opportunity Report, not this
+      page). Append to uk.yaml. verified: yes - live, official page, LDO
+      permitted-development scope confirmed; DC/mandatory-connection detail
+      unverified on this page.
+
+  - name: "Greater Manchester Combined Authority - Heat Networks (GM Green City)"
+    id: "gmca_heat_networks"
+    enabled: false
+    base_url: "https://gmgreencity.com"
+    start_paths:
+      - "/projects-and-campaigns/heat-networks/"
+    region:
+      - "uk"
+    category: "district_heating"
+    tags:
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "report"
+    language: "en"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #13). Region "manchester"/
+      "greater_manchester" not in VALID_REGIONS, mapped to uk. Combined
+      authority covering 10 Greater Manchester boroughs incl. Manchester
+      City Council. Confirms GM's participation in the national Heat
+      Network Zoning Pilot, five identified strategic zones (Manchester
+      City Centre, Manchester OPEN, Salford Eccles, Stockport Town Centre,
+      Trafford), names "heat recovered from industry and urban
+      infrastructure...or energy from waste plants" as network inputs.
+      Manchester City Council's own domain (manchester.gov.uk) consistently
+      returned HTTP 403 this session - this GMCA page is the best confirmed
+      substitute covering the same program; see unverified notes for the
+      Council's own domain. Append to uk.yaml. verified: yes - GMCA
+      operation and Heat Network Zoning Pilot participation confirmed.
+
+  - name: "Metropole de Lyon - Schema Directeur des Energies (SDE)"
+    id: "grandlyon_sde"
+    enabled: false
+    base_url: "https://www.grandlyon.com"
+    start_paths:
+      - "/actions/le-schema-directeur-des-energies-sde"
+    region:
+      - "eu"
+      - "eu_central"
+      - "france"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "strategy"
+    language: "fr"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #14). Region "lyon" not in
+      VALID_REGIONS, mapped to france. Lyon's own energy master plan naming
+      district-heat-network expansion (200,000 connected homes by 2030) and
+      industrial waste-heat recovery (Chemistry Valley) as core levers -
+      the closest French metropole equivalent to German kommunale
+      Waermeplanung. SDE adopted May 2019, targets through 2030 (20% energy
+      cut, 17% renewable/recovery share, 43% GHG cut). A WebSearch snippet
+      (not independently confirmed on this specific page) cited a 780 GWh
+      "chaleur fatale" estimate from Lyon-area data centers - worth a human
+      follow-up against the underlying Urbalyon/Cerema technical studies.
+      Data centers NOT named on this specific page. Append to france.yaml.
+      verified: yes for the page itself (SDE targets/waste-heat recovery
+      confirmed in general terms).
+
+  - name: "Eurometropole de Strasbourg - Schema Directeur des Reseaux de Chaleur (SDRC)"
+    id: "strasbourg_eu_sdrc"
+    enabled: false
+    base_url: "https://www.strasbourg.eu"
+    start_paths:
+      - "/-/schema-directeur-reseaux-de-chaleur"
+    region:
+      - "eu"
+      - "eu_central"
+      - "france"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "regulation"
+    language: "fr"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #15). Region "strasbourg" not in
+      VALID_REGIONS, mapped to france. Updated master plan (approved June
+      27 2025) targeting 100% renewable/recovered heat by 2050, doubling
+      inner-ring network infrastructure by 2030, and - distinct from Lyon/
+      Nantes - explicitly approving MANDATORY CONNECTION requirements for
+      new buildings and major renovations in classified network zones
+      (Strasbourg Centre, Wacken). The clearest French municipal example of
+      a compulsory-connection instrument (the regulatory mechanism the
+      brief specifically flags), with a live, current (2025) adoption date.
+      Data centers not named on this page. Append to france.yaml.
+      verified: yes - June 2025 SDRC update and mandatory-connection-zone
+      approval confirmed.
+
+  - name: "Bordeaux Metropole - Reseaux de Chaleur (+ mandatory-connection-zone open data)"
+    id: "bordeaux_metropole_reseaux_chaleur"
+    enabled: false
+    base_url: "https://www.bordeaux-metropole.fr"
+    start_paths:
+      - "/metropole/projets-en-cours/transition-energetique/reseaux-chaleur"
+    region:
+      - "eu"
+      - "eu_central"
+      - "france"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "regulation"
+    language: "fr"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #16). Region "bordeaux" not in
+      VALID_REGIONS, mapped to france. A companion dataset (separate
+      domain, NOT a duplicate of the data_gouv_fr_api national indexer
+      already proposed in wave 2) lives at Bordeaux Metropole's own
+      OpendataSoft portal: https://opendata.bordeaux-metropole.fr/explore/
+      dataset/eg_raccordement_s/ (dataset id eg_raccordement_s, GeoJSON/
+      Carto-API/OGC-WMS available) - the dataset is literally titled
+      "Perimetre de raccordement obligatoire au reseau de chaleur urbain"
+      (mandatory-connection-perimeter for the urban heat network), a real
+      GIS-mapped regulatory instrument. This opendata sub-source could
+      become a future tier-c candidate (a generic OpendataSoft/Explore API
+      client would also cover other French metropole portals, similar to
+      the CKAN-consolidation note in new-clients-wave2.md) - not specced
+      as tier-c this pass, flagged for a follow-up. The metropole page
+      itself frames connection as optional in its marketing copy; neither
+      source names data centers specifically. Append to france.yaml.
+      verified: yes for both the metropole page and the opendata portal
+      (GeoJSON/API export options confirmed working).
+
+  - name: "Nantes Metropole - Reseaux de chaleur, une energie locale et competitive"
+    id: "nantes_metropole_reseaux_chaleur"
+    enabled: false
+    base_url: "https://metropole.nantes.fr"
+    start_paths:
+      - "/ma-ville-ma-metropole/les-grands-projets/reseaux-de-chaleur-une-energie-locale-et-competitive-pour-alimenter-le-territoire"
+    region:
+      - "eu"
+      - "eu_central"
+      - "france"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "strategy"
+    language: "fr"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #17). Region "nantes" not in
+      VALID_REGIONS, mapped to france. 43,400 homes already served at 74%
+      renewable/recovery-energy share (mostly waste-incineration heat);
+      master-plan expansion targets 100% renewable/recovery by 2050; 9 new
+      networks planned, completion phases 2026-2030 - a solid, currently-
+      uncovered French metropole with an explicit "chaleur fatale" framing,
+      rounding out coverage alongside Lyon/Strasbourg/Bordeaux. Page links
+      to a downloadable "Schema directeur des reseaux de chaleur" PDF
+      summary, not independently fetched this session. Data centers not
+      named on this page. Append to france.yaml. verified: yes - network
+      scale, renewable/recovery share, and expansion plan confirmed.
+
+  - name: "Stadt Koeln - Kommunale Waermeplanung (KWP)"
+    id: "stadt_koeln_kwp"
+    enabled: false
+    base_url: "https://www.stadt-koeln.de"
+    start_paths:
+      - "/artikel/74262/index.html"
+      - "/artikel/73185/index.html"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+      - "nordrhein_westfalen"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "strategy"
+    language: "de"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #18). Region "koeln" not in
+      VALID_REGIONS, mapped to nordrhein_westfalen/germany (valid German
+      Land). Cologne's completed (published Nov-Dec 2025) municipal heat
+      plan, legally required for cities >100k population by Jun 30 2026;
+      identifies industrial waste-heat and renewable potential per
+      district. A related press-release URL
+      (/politik-und-verwaltung/presse/mitteilungen/28239/index.html,
+      "Kommunale Waermeplanung ist fertiggestellt") was found via search
+      but not independently fetched - worth adding as an additional
+      start_path if this entry is enabled. No data-center-specific mention
+      on the verified pages. Append to germany.yaml. verified: yes - KWP
+      legal basis (Waermeplanungsgesetz, Gebaeudeenergiegesetz) and
+      consultation process confirmed live.
+
+  - name: "Gemeente Den Haag - Den Haag Aardgasvrij / Transitievisie Warmte"
+    id: "denhaag_aardgasvrij"
+    enabled: false
+    base_url: "https://www.denhaag.nl"
+    start_paths:
+      - "/nl/natuur-en-milieu/duurzaamheid/den-haag-aardgasvrij/"
+    region:
+      - "eu"
+      - "eu_west"
+      - "netherlands"
+    category: "district_heating"
+    tags:
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "strategy"
+    language: "nl"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #19). Region "denhaag" not in
+      VALID_REGIONS, mapped to netherlands/eu_west. The Hague's heat-
+      transition hub, links to the 2023 Transitievisie Warmte (74% of
+      neighborhoods best suited to a heat network per the city's own
+      analysis) and the forthcoming Warmteprogramma (due late 2026).
+      Append to netherlands.yaml. verified: yes - live, official, on-topic,
+      links to the full Transitievisie Warmte document confirmed.
+
+  - name: "Gemeente Rotterdam - Klimaatdoelen Warmtesysteem"
+    id: "rotterdam_klimaatdoelen_warmte"
+    enabled: false
+    base_url: "https://www.rotterdam.nl"
+    start_paths:
+      - "/klimaatdoelen-warmtesysteem"
+    region:
+      - "eu"
+      - "eu_west"
+      - "netherlands"
+    category: "district_heating"
+    tags:
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "strategy"
+    language: "nl"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #20). Region "rotterdam" not in
+      VALID_REGIONS, mapped to netherlands/eu_west. Rotterdam's own heat-
+      system climate-goals page, references the 2021 Warmtevisie;
+      Rotterdam's port/industrial waste-heat base (AVR incinerator) is the
+      largest in the Netherlands. Per separate trade-press coverage (not
+      this page), two data centers near Zestienhoven are already
+      contracted to feed the Schiebroek/110-Morgen network build-out
+      starting 2026 - the actual delivery vehicle for that project is a
+      private company (Enertrans BV, "Rotterdamse Warmte"), not a
+      government site, so it is not itself proposed; this city page is the
+      appropriate government-source stand-in even though it doesn't name
+      Schiebroek or data centers specifically. Append to netherlands.yaml.
+      verified: yes for the page itself (heat-transition goals, Warmtevisie
+      2021 referenced); does not itself name restwarmte or data centers.
+
+  - name: "Rijksoverheid - Wet Collectieve Warmte (Wcw), Netherlands (national - bonus)"
+    id: "rijksoverheid_wcw"
+    enabled: false
+    base_url: "https://www.rijksoverheid.nl"
+    start_paths:
+      - "/onderwerpen/energie-thuis/meer-huizen-en-gebouwen-aansluiten-op-collectieve-warmte"
+    region:
+      - "eu"
+      - "eu_west"
+      - "netherlands"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "district_heating"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "nl"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (municipal-heat-zoning wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (municipal-heat-zoning.md #21). NATIONAL, not municipal -
+      included per the brief's explicit mention of the Wcw; this is the
+      law the entire municipal tier above implements, so it belongs
+      alongside these entries. The Wcw (in force Jan 1 2027) replaces the
+      2014 Warmtewet, requires heat companies to be majority publicly
+      owned, and is the legal foundation compelling Dutch municipalities
+      to run the Warmteprogramma process cited throughout the Netherlands
+      candidates above. Complements the existing wetten_overheid_nl
+      general-search entry in netherlands.yaml with this specific policy-
+      hub page. Append to netherlands.yaml. verified: yes - Wcw provisions
+      (public-ownership requirement, cost-based pricing, 2027 effective
+      date) confirmed live.

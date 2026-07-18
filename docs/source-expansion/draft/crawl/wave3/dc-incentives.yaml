@@ -1,0 +1,632 @@
+# =============================================================================
+# DRAFT WAVE 3 — Data Center Economic-Development / Tax-Incentive Sources
+# (tier-b crawl domains only)
+# Source: docs/source-expansion/regions-wave3/dc-incentives.md
+# All 19 candidates in the source file are tier-b; zero tier-a, zero tier-c.
+#
+# Shared-domain additive entries:
+#   - www.imda.gov.sg: existing imda_sg (apac.yaml, Green Data Centre
+#     Programme) vs. new sg_dc_cfa2 (DC-CFA2 capacity-allocation scheme,
+#     different path). Additive, same host, different program.
+#   - www.azleg.gov: existing az_legislature-style entry in
+#     us/arizona.yaml (base_url azleg.gov, start_path /bills/, general bill
+#     tracker) vs. new az_cdc_program_statute (specific statute page,
+#     /ars/41/01519.htm - the Computer Data Center Program tax statute).
+#     Additive, same host, different path/topic - NOT flagged by the
+#     source researcher but confirmed via grep against config/domains/
+#     during wave-3 consolidation; noted here for the reviewer.
+#
+# Append-to targets: see each entry's notes; new country/state files needed
+# for Malaysia, Wyoming (content), Nebraska (content), Mississippi (content),
+# Finland, Iceland (or fold into nordic.yaml) per the source file's own
+# recommendations.
+#
+# Enum note: region "malaysia" (my_mida_desac) is not in VALID_REGIONS;
+# mapped to "apac" below. All categories/tags/policy_types used in this file
+# fit VALID_CATEGORIES/VALID_TAGS/VALID_POLICY_TYPES directly - no other
+# substitutions needed.
+# =============================================================================
+
+domains:
+  - name: "IMDA - Call for Application: Data Centre 2 (DC-CFA2)"
+    id: "sg_dc_cfa2"
+    enabled: false
+    base_url: "https://www.imda.gov.sg"
+    start_paths:
+      - "/proposal-submission/call-for-application-data-centre-2"
+    region:
+      - "apac"
+      - "singapore"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+      - "data_center_specific"
+    policy_types:
+      - "incentive"
+      - "standard"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #1 - highest-value find). Joint EDB/IMDA
+      capacity-allocation scheme (>=200MW pool) for new Singapore data
+      centers; explicit conditions: PUE <=1.25 at 100% IT load, >=50% power
+      from eligible green pathways, BCA-IMDA Green Mark for Data Centres
+      2024 Platinum certification, SS 715:2025 compliance. The incentive
+      mechanism itself is denominated in PUE/green-power percentage.
+      Registration window for this specific round closed 5 Dec 2025; page
+      and successor rounds are the durable artifact. Additive alongside
+      the existing imda_sg entry (apac.yaml, Green Data Centre Programme) -
+      same host, different path. Append to apac.yaml. verified: yes -
+      loaded via browser, "LAST UPDATED: 31 MAR 2026" confirmed.
+
+  - name: "MIDA - Digital Infrastructure / DESAC Scheme"
+    id: "my_mida_desac"
+    enabled: false
+    base_url: "https://www.mida.gov.my"
+    start_paths:
+      - "/digital-infrastructure-the-driving-force-behind-digital-transformation/"
+      - "/wp-content/uploads/2024/12/DESAC-Guideline_MIDA.pdf"
+    region:
+      - "apac"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+      - "data_center_specific"
+    policy_types:
+      - "incentive"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #2). Malaysian Investment Development
+      Authority tax-incentive scheme (Budget 2022): Tier 1 = 100%
+      Investment Tax Allowance for 5-10 years, conditioned on adopting at
+      least one green technology (renewable generation or energy/water-
+      efficient equipment), aligned with MITI's DC sustainability guideline.
+      Applications accepted through 31 Dec 2027. Region note: "malaysia" is
+      not in VALID_REGIONS; mapped to "apac" here. Append to new
+      malaysia.yaml (no existing file). verified: yes for the HTML page
+      (dated 13 Mar 2023); the DESAC guideline PDF URL seen live in search
+      results but not independently re-fetched - lower confidence than the
+      HTML page.
+
+  - name: "Illinois DCEO - Data Center Investment Program"
+    id: "il_dceo_dc_investment"
+    enabled: false
+    base_url: "https://dceo.illinois.gov"
+    start_paths:
+      - "/expandrelocate/incentives/datacenters.html"
+    region:
+      - "us"
+      - "us_states"
+      - "illinois"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "incentive"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #3). State sales/use tax exemption requiring
+      qualifying data centers to be either carbon-neutral or certified
+      under a green building standard (LEED, ENERGY STAR, ISO 50001), plus
+      $250M capital investment / 20+ jobs at 120% of county median wage.
+      Program closed to new applications 1 Jul 2026 per gubernatorial
+      directive - still valuable as a documented policy artifact; annual
+      reports remain published. Append to config/domains/us/illinois.yaml
+      (currently only ICC + General Assembly). verified: yes - carbon-
+      neutral/green-building language and the 2026 closure notice
+      confirmed directly.
+
+  - name: "Arizona Legislature - Computer Data Center Program Statute (ARS 41-1519)"
+    id: "az_cdc_program_statute"
+    enabled: false
+    base_url: "https://www.azleg.gov"
+    start_paths:
+      - "/ars/41/01519.htm"
+    region:
+      - "us"
+      - "us_states"
+      - "arizona"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "law"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #4). TPT/Use Tax exemption administered by
+      Arizona Commerce Authority + Dept. of Revenue; base tier is 10 years,
+      but a "Sustainable Redevelopment Project" tier (ENERGY STAR/Green
+      Globes/LEED certification, or $200M+ redevelopment site) extends the
+      exemption to 20 years - a clean efficiency-for-incentive trade
+      written directly into state law. ACA's own program page
+      (azcommerce.com) returned HTTP 403 to automated fetch - use this
+      statute as the durable/crawlable primary source. Shares base_url
+      azleg.gov with the existing Arizona legislature bill-tracker entry
+      in us/arizona.yaml (start_path /bills/) - additive, new specific
+      statute path. Append to config/domains/us/arizona.yaml. verified:
+      yes - full statute text incl. "Sustainable Redevelopment Project"
+      confirmed live.
+
+  - name: "IDA Ireland - Funding Programmes & Incentives"
+    id: "ie_ida_funding_incentives"
+    enabled: false
+    base_url: "https://www.idaireland.com"
+    start_paths:
+      - "/scale-with-ida/funding-programmes-incentives"
+    region:
+      - "eu"
+      - "eu_west"
+      - "ireland"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "guidance"
+    language: "en"
+    requires_playwright: true
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #5). Ireland's national FDI agency's grant/
+      incentive hub, incl. dedicated "IDA Energy Supports" and
+      sustainability tracks applying to data-center investment. Distinct
+      from already-shipped seai.ie/gov.ie/cru.ie/irishstatutebook.ie
+      entries - this is the grant-issuing FDI agency, not a regulator or
+      ministry. Append to ireland.yaml. verified: yes - loaded via browser,
+      "IDA Energy Supports" and sustainability sub-pages confirmed present.
+      Site is JS-rendered, consistent with existing ireland.yaml entries.
+
+  - name: "Wyoming Business Council - Business Ready Community / Managed Data Center Cost Reduction Funding"
+    id: "wy_wbc_dc_cost_reduction"
+    enabled: false
+    base_url: "https://wyomingbusiness.org"
+    start_paths:
+      - "/communities/financing/business-ready-community/"
+    region:
+      - "us"
+      - "us_states"
+      - "wyoming"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+    policy_types:
+      - "incentive"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #6). State grant/loan program; a "Managed
+      Data Center" grant track (up to $2.25M) buys down local government
+      broadband/electricity costs for a data-center business, conditioned
+      on a 125% capital/payroll match; separately the Council certifies job
+      creation for Wyoming's DC sales-tax exemption (Wyo. Stat.
+      Section 39-15-105). Fills Wyoming's EMPTY us/wyoming.yaml (zero
+      domains shipped). The named sub-page
+      (.../managed-data-center-cost-reduction-funding/) returned HTTP 404
+      twice despite being linked/indexed from this parent page - use this
+      parent BRC page as the safe crawl entry point; see
+      new-clients-wave3.md-adjacent unverified notes for the sub-page.
+      verified: yes for the parent page.
+
+  - name: "ImagiNE Nebraska - Incentives Program"
+    id: "ne_imagine_act"
+    enabled: false
+    base_url: "https://imagine.nebraska.gov"
+    start_paths:
+      - "/"
+      - "/about-the-program/"
+      - "/tax-credit-usage/"
+    region:
+      - "us"
+      - "us_states"
+      - "nebraska"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "law"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #7). Nebraska Dept. of Economic
+      Development's ImagiNE Nebraska Act program; sales/use tax refunds,
+      personal property tax exemptions, investment tax credits, with a
+      dedicated "significant data center project" track (>=$200M
+      investment, 30 jobs). Fills Nebraska's EMPTY us/nebraska.yaml (zero
+      domains shipped in config; note a wave-1 draft entry, ne_dwee at
+      dwee.nebraska.gov, already targets nebraska.yaml too - different
+      base_url, not a duplicate, both should land in the same file).
+      Companion authoritative page at revenue.nebraska.gov/incentives/
+      imagine-nebraska-act (Dept. of Revenue) - consider as a second
+      domain. Append to config/domains/us/nebraska.yaml. verified: yes -
+      official footer confirmed.
+
+  - name: "Mississippi Development Authority - Sales and Use Tax Exemption for Data Center Enterprises"
+    id: "ms_mda_dc_exemption"
+    enabled: false
+    base_url: "https://mississippi.org"
+    start_paths:
+      - "/wp-content/uploads/sales-and-use-tax-exemption-data-centers-1.pdf"
+    region:
+      - "us"
+      - "us_states"
+      - "mississippi"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+    policy_types:
+      - "incentive"
+    language: "en"
+    max_pages: 5
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #8). MDA-certified incentive: sales/use tax
+      exemption on component building materials/construction equipment/
+      replacement hardware; 10-year income and franchise tax exemptions;
+      requires $20M investment + 20 jobs at 125% of state average wage.
+      2025 legislation (SB 3168) pending would raise thresholds and add an
+      electricity tax exemption. Fills Mississippi's EMPTY
+      us/mississippi.yaml (zero domains shipped). Single PDF, not
+      crawlable HTML - recommend targeting the MDA incentives/publications
+      index page instead once a human confirms the index URL. Append to
+      config/domains/us/mississippi.yaml. verified: yes - PDF downloaded
+      (382KB, application/pdf); text extraction garbled (binary artifact)
+      but fetch confirms the file is live on MDA's official domain.
+
+  - name: "Virginia Economic Development Partnership - Data Center Retail Sales & Use Tax Exemption"
+    id: "va_vedp_dc_exemption"
+    enabled: false
+    base_url: "https://www.vedp.org"
+    start_paths:
+      - "/incentive/data-center-retail-sales-use-tax-exemption"
+    region:
+      - "us"
+      - "us_states"
+      - "virginia"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+    policy_types:
+      - "incentive"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #9). VEDP-administered MOU program (with VA
+      Dept. of Taxation); exemption for qualifying computer equipment,
+      cooling (chillers, CRACs, HVAC), and power-monitoring systems; $150M/
+      50-jobs base, scaling to $35B/1,000-jobs (2040 extension) and
+      $100B/2,500-jobs (2050 extension). Fills a real gap - existing
+      us/virginia.yaml only has Dept. of Energy + legislative-bill entries,
+      nothing from the state's own incentive-granting agency. Append to
+      config/domains/us/virginia.yaml. verified: yes - agency and
+      thresholds confirmed live.
+
+  - name: "Texas Comptroller - State Sales Tax Exemption for Qualified Data Centers"
+    id: "tx_comptroller_dc_exemption"
+    enabled: false
+    base_url: "https://comptroller.texas.gov"
+    start_paths:
+      - "/taxes/data-centers/"
+    region:
+      - "us"
+      - "us_states"
+      - "texas"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "law"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #10). Tex. Tax Code Section 151.359
+      exemption on hardware/software/power equipment for certified
+      qualifying data centers ($200M+/20 jobs) and "qualifying large data
+      center projects" ($500M+/40 jobs/20MW). No explicit efficiency
+      condition found (infrastructure requirements are physical-security/
+      power-redundancy). Existing us/texas.yaml only has SECO + Legislature
+      - this is the primary source of record for live administration.
+      Append to config/domains/us/texas.yaml. verified: yes - confirmed
+      live.
+
+  - name: "Georgia Department of Revenue - High-Technology Data Center Equipment Exemption"
+    id: "ga_dor_dc_exemption"
+    enabled: false
+    base_url: "https://dor.georgia.gov"
+    start_paths:
+      - "/high-technology-data-center-equipment-exemption"
+      - "/how-apply-high-technology-data-center-exemption"
+      - "/data-centers-sales-use-tax-exemption-aggregate-expenditures-county"
+    region:
+      - "us"
+      - "us_states"
+      - "georgia"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "reporting"
+    policy_types:
+      - "incentive"
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #11). O.C.G.A. Section 48-8-3(68.1)
+      sales/use tax exemption for certified high-tech data centers; tiered
+      investment thresholds by county population ($25M-$250M) plus new-
+      quality-jobs requirements; annual reporting to Senate Finance/House
+      Ways & Means. Existing us/georgia.yaml has EPD (epd.georgia.gov,
+      environmental - different base_url) and General Assembly entries;
+      DOR is the actual administering agency, distinct base_url, not a
+      duplicate. Append to config/domains/us/georgia.yaml. verified: yes -
+      confirmed live.
+
+  - name: "EDPNC - Data Centers Sales & Use Tax Exemptions"
+    id: "nc_edpnc_dc_exemption"
+    enabled: false
+    base_url: "https://edpnc.com"
+    start_paths:
+      - "/incentives/data-centers-sales-use-tax-exemptions/"
+    region:
+      - "us"
+      - "us_states"
+      - "north_carolina"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+    policy_types:
+      - "incentive"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #12). Overview of NC's two DC exemption
+      tracks - "Qualifying Data Center" ($75M/5yr) and "Eligible Internet
+      Data Center" ($250M/5yr, restricted to Tier 1/2 economically-
+      distressed counties); page states EDPNC does not itself administer
+      the incentive (NC Dept. of Commerce does). NCDOR "Important Notice"
+      URLs found in search 404'd - EDPNC is the verified live alternative.
+      Existing us/north_carolina.yaml only has NCUC + General Assembly.
+      Append to config/domains/us/north_carolina.yaml. verified: yes -
+      page and thresholds confirmed live.
+
+  - name: "Washington Department of Revenue - Data Centers Sales and Use Tax Exemption Eligibility"
+    id: "wa_dor_dc_exemption"
+    enabled: false
+    base_url: "https://dor.wa.gov"
+    start_paths:
+      - "/forms-publications/publications-subject/tax-topics/data-centers-sales-and-use-tax-exemption-eligibility"
+      - "/content/purchases-server-equipment-and-power-infrastructure-use-eligible-data-centers-salesuse-tax-exemption"
+    region:
+      - "us"
+      - "us_states"
+      - "washington"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "reporting"
+    policy_types:
+      - "incentive"
+      - "law"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #13). RCW 82.08.986 / 82.12.986 exemption
+      for eligible server equipment/power infrastructure; annual
+      tax-performance-report requirement (RCW 82.32.534); no new
+      certificates issued after 1 Jul 2028. Existing us/washington.yaml
+      has Dept. of Commerce (general econ dev, no DC-specific page) +
+      Legislature; DOR is where eligibility rules/forms actually live.
+      Append to config/domains/us/washington.yaml. verified: yes -
+      confirmed live.
+
+  - name: "JobsOhio - Data Center Tax Exemption"
+    id: "oh_jobsohio_dc_exemption"
+    enabled: false
+    base_url: "https://www.jobsohio.com"
+    start_paths:
+      - "/incentives-programs/data-center-tax-exemption"
+    region:
+      - "us"
+      - "us_states"
+      - "ohio"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+    policy_types:
+      - "incentive"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #14). Ohio's DC sales-tax exemption (since
+      2013); $100M+ capital investment over 3 years, $1.5M+ annual employee
+      compensation; final approval via Ohio Tax Credit Authority. No
+      efficiency condition found. Existing us/ohio.yaml has
+      development.ohio.gov (general econ dev) but not this specific
+      program page; JobsOhio (the state's privatized econ-dev corp) is the
+      actual public-facing administrator. Append to
+      config/domains/us/ohio.yaml. verified: yes - confirmed live.
+
+  - name: "Invest in Finland - Map of Data Center Opportunities in Finland"
+    id: "fi_investinfinland_dc_map"
+    enabled: false
+    base_url: "https://www.investinfinland.com"
+    start_paths:
+      - "/tools-resources/data-center-opportunities-map"
+    region:
+      - "eu"
+      - "nordic"
+      - "finland"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #15). Finland's national investment-
+      promotion agency (formerly Business Finland/businessfinland.com, now
+      redirects here); site-selection database with an "Energy
+      Preferences" filter; supporting material describes the 5MW+ reduced
+      energy-tax rate and heat-recovery/district-heating angle (e.g.
+      Google/Hamina waste-heat partnership). No existing Finland-specific
+      file (only nordic.yaml has Finnish entries) - append to new
+      finland.yaml or fold into nordic.yaml's Finland section. IMPORTANT:
+      old businessfinland.com direct URL is dead; use this new domain only.
+      verified: yes - confirmed live after following the redirect chain.
+
+  - name: "Business Norway - Invest in Norway: Digital Infrastructure"
+    id: "no_businessnorway_digital_infra"
+    enabled: false
+    base_url: "https://businessnorway.com"
+    start_paths:
+      - "/invest-in-norway/industries/digital-infrastructure"
+    region:
+      - "eu"
+      - "nordic"
+      - "norway"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #16). Norway's national investment-
+      promotion agency page on data centers/digital infrastructure;
+      references the 2018 national data-centre strategy (tax reductions +
+      connectivity incentives) and near-100%-hydropower grid; notes a
+      revised strategy pending. Fills a gap - nordic.yaml has Norway's
+      energy ministry + Enova but not the investment-promotion agency.
+      Append to nordic.yaml (Norway section) or new norway.yaml. verified:
+      yes - confirmed live.
+
+  - name: "Business Sweden - Invest in Sweden: Site Finder"
+    id: "se_businesssweden_sitefinder"
+    enabled: false
+    base_url: "https://www.business-sweden.com"
+    start_paths:
+      - "/invest-in-sweden/online-tools/site-finder/"
+    region:
+      - "eu"
+      - "nordic"
+      - "sweden"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+    policy_types:
+      - "incentive"
+    language: "en"
+    requires_playwright: true
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #17). Sweden's national investment-
+      promotion agency's interactive site-selection tool (manufacturing/
+      data-center/logistics/battery industries), supports adding "regional
+      incentive areas" as a map layer. Distinct from existing sweden.yaml
+      entries (Energy Agency, Riksdagen, Regeringen, Energimarknads-
+      inspektionen, Riksrevisionen - none from the investment-promotion
+      side). Append to sweden.yaml. Likely JS-heavy map tool - recommend
+      requires_playwright: true. verified: yes - data-center site-finder
+      tool and regional-incentive layer confirmed described on the page.
+
+  - name: "Invest in Denmark"
+    id: "dk_investindk"
+    enabled: false
+    base_url: "https://investindk.com"
+    start_paths:
+      - "/"
+    allowed_path_patterns:
+      - "/set-up-a-business/*"
+      - "/insights/*"
+      - "/cases/*"
+    region:
+      - "eu"
+      - "nordic"
+      - "denmark"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #18). Denmark's national investment-
+      promotion agency (under the Ministry of Foreign Affairs); Cleantech
+      section covers green data centers, waste-heat-to-district-heating
+      case studies (Meta Odense, Microsoft), green-power positioning.
+      IMPORTANT: the specific deep-link found in search
+      (/set-up-a-business/cleantech/green-data/) is dead (404 confirmed
+      via both WebFetch and browser) - site restructured; crawl from "/"
+      with the allowed_path_patterns above and let the crawler discover
+      current DC subpages rather than hardcoding a stale path. Distinct
+      from existing denmark.yaml entries (Danish Energy Agency, Heat
+      Supply Act). Append to denmark.yaml. verified: partial - homepage
+      confirmed live/on-topic; the specific deep link is stale.
+
+  - name: "Business Iceland - Investment Opportunities"
+    id: "is_investiniceland_opportunities"
+    enabled: false
+    base_url: "https://www.inspiredbyiceland.com"
+    start_paths:
+      - "/business/investment-opportunities"
+    region:
+      - "nordic"
+      - "iceland"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (dc-incentives wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (dc-incentives.md #19). Iceland's investment-promotion
+      function (rebranded under "Inspired by Iceland"/Business Iceland; old
+      invest.is domain 301-redirects here); markets 100% renewable
+      geothermal/hydro power for data centers, plus regional investment-
+      agreement incentives. No existing Iceland-specific file (only the
+      National Energy Authority, inside nordic.yaml) - this is a second,
+      distinct agency. IMPORTANT: use the new domain, not invest.is.
+      Append to nordic.yaml (Iceland section) or new iceland.yaml.
+      verified: yes - confirmed live after following the redirect.

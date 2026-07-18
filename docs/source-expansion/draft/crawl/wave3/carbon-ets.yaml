@@ -1,0 +1,682 @@
+# =============================================================================
+# DRAFT WAVE 3 — Carbon Pricing / Emissions Trading / Climate-Compliance
+# Bodies (tier-b crawl domains only)
+# Source: docs/source-expansion/regions-wave3/carbon-ets.md
+# 21 of the 22 candidates in the source file are tier-b (drafted below);
+# candidate #21 (epa_ghgrp_envirofacts_api, US EPA Envirofacts GHGRP REST
+# API) is tier-c - specced in docs/source-expansion/draft/new-clients-wave3.md
+# instead. Candidate #22 (kr_etrs_registry) is tier-b but only PARTIALLY
+# verified (content not independently re-fetched, only the bare path) -
+# flagged inline below; recommend a human confirm crawlability before
+# enabling.
+#
+# Shared-domain additive entries (same base_url as an EXISTING config entry,
+# different department/topic - same precedent as eur-lex.europa.eu (4
+# entries) / gov.uk (30+ entries) already in the codebase):
+#   - ww2.arb.ca.gov: existing carb_generators (us/california.yaml, backup
+#     generators) vs. new ca_carb_cap_trade (cap-and-trade program).
+#   - meti.go.jp: existing meti_jp (apac.yaml, English GX growth strategy)
+#     vs. new jp_meti_gx_ets (Japanese-language ETS-specific page).
+#   - bafu.admin.ch: existing bafu_buildings (switzerland.yaml, building
+#     climate rules) vs. new ch_bafu_ets (Swiss ETS).
+#   - alberta.ca: existing alberta_energy (canada.yaml, general energy/
+#     environment landing pages) vs. new ab_tier (TIER regulation, a specific
+#     new start_path).
+#   - gov.uk: existing 8+ uk.yaml entries vs. new uk_ets_participating,
+#     uk_secr, uk_esos (distinct carbon-market/reporting topics).
+# None of these are id/base_url+start_path duplicates.
+#
+# Append-to targets:
+#   - eu.yaml            -> eu_ets_main, eu_ets2_buildings_transport,
+#                            eu_ets_union_registry, eurlex_csrd_2022_2464
+#   - uk.yaml             -> uk_ets_participating, uk_secr, uk_esos
+#   - germany.yaml        -> de_dehst_nehs
+#   - config/domains/us/california.yaml -> ca_carb_cap_trade
+#   - NEW file or config/domains/us_federal-style entry -> us_rggi (multi-state,
+#     recommend region: ["us","us_states"], no single state file)
+#   - australia.yaml      -> au_cer_safeguard, au_cer_nger
+#   - NEW new_zealand section (apac.yaml or new file) -> nz_epa_ets
+#   - switzerland.yaml    -> ch_bafu_ets
+#   - apac.yaml           -> jp_meti_gx_ets, jp_gx_league, cn_mee_ghg,
+#                            kr_etrs_registry (Korea - new section)
+#   - canada.yaml         -> qc_spede, ab_tier
+#   - NEW us_federal.yaml or config/domains/us/us_federal.yaml -> us_epa_ghgrp
+#
+# Enum note: no invalid category/tag/policy_type values in this file - all
+# fit VALID_CATEGORIES/VALID_TAGS/VALID_POLICY_TYPES directly. Region value
+# "china" used by cn_mee_ghg is NOT in VALID_REGIONS (carried-forward gap
+# already flagged in wave-2's INVENTORY.md recap); mapped to "apac" below.
+# "new_zealand" (nz_epa_ets) is likewise not in VALID_REGIONS; mapped to
+# "apac" following the same wave-1/2 precedent used for NZ entries.
+# =============================================================================
+
+domains:
+  - name: "EU Emissions Trading System (EU ETS)"
+    id: "eu_ets_main"
+    enabled: false
+    base_url: "https://climate.ec.europa.eu"
+    start_paths:
+      - "/eu-action/eu-emissions-trading-system-eu-ets_en"
+    max_depth: 2
+    region:
+      - "eu"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "directive"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #1). Flagship EU carbon market; from 2027 EU
+      ETS2 extends pricing to buildings/transport/fuel combustion. Distinct
+      subdomain/legal instrument from the existing ec_energy_datacentres/
+      jrc_coc_datacentres entries in eu.yaml (those are EED efficiency
+      rules, not ETS). Append to eu.yaml. verified: yes - curl -L HTTP 200,
+      WebFetch confirmed DG CLIMA EU ETS hub content.
+
+  - name: "EU ETS2 - Buildings, Road Transport and Additional Sectors"
+    id: "eu_ets2_buildings_transport"
+    enabled: false
+    base_url: "https://climate.ec.europa.eu"
+    start_paths:
+      - "/eu-action/eu-emissions-trading-system-eu-ets/ets2-buildings-road-transport-and-additional-sectors_en"
+    region:
+      - "eu"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "directive"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #2). 2027-effective scheme most likely to newly
+      bind DC on-site fossil combustion (backup generation, gas heating).
+      Append to eu.yaml. verified: yes - curl -L HTTP 200 (note: slug is
+      "ets2-..." not "eu-ets2-..." - a naive guess 404s).
+
+  - name: "EU ETS Union Registry"
+    id: "eu_ets_union_registry"
+    enabled: false
+    base_url: "https://climate.ec.europa.eu"
+    start_paths:
+      - "/eu-action/eu-emissions-trading-system-eu-ets/union-registry_en"
+    region:
+      - "eu"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #3). Account/allowance-tracking system of record
+      for EU ETS; publishes verified emissions/allocation data per
+      installation. The transactional registry needs login (out of scope);
+      this is the public-facing description + public-data links page.
+      Underlying registry transaction data flagged as a possible future
+      tier-c API, not scoped this pass. Append to eu.yaml. verified: yes -
+      curl -L HTTP 200.
+
+  - name: "EUR-Lex Corporate Sustainability Reporting Directive (CSRD) 2022/2464"
+    id: "eurlex_csrd_2022_2464"
+    enabled: false
+    base_url: "https://eur-lex.europa.eu"
+    start_paths:
+      - "/eli/dir/2022/2464/oj/eng"
+      - "/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2464"
+    max_depth: 1
+    region:
+      - "eu"
+    category: "legislation"
+    tags:
+      - "reporting"
+      - "mandates"
+      - "carbon"
+    policy_types:
+      - "directive"
+      - "law"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #4). Mandatory sustainability reporting (via
+      ESRS, incl. ESRS E1 Climate Change - energy/GHG Scope 1/2/3
+      disclosure) for large EU companies and listed SMEs, capturing large
+      DC operators/colocation groups. Distinct from eu.yaml's existing
+      EED/data-centre-regulation EUR-Lex entries (eurlex_eed_2023,
+      eurlex_dc_regulation, eurlex_eed_recommendation) - CSRD/CELEX
+      32022L2464 confirmed net-new. Append to eu.yaml. verified: yes - both
+      URLs curl -L HTTP 200.
+
+  - name: "Participating in the UK Emissions Trading Scheme (UK ETS)"
+    id: "uk_ets_participating"
+    enabled: false
+    base_url: "https://www.gov.uk"
+    start_paths:
+      - "/government/publications/participating-in-the-uk-ets"
+    region:
+      - "uk"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #5). UK's post-Brexit domestic carbon market
+      (power, industry, waste incineration since 2024, aviation/maritime
+      through 2025). Shares base_url gov.uk with 8+ existing uk.yaml
+      entries (uk_desnz, uk_environment_agency, uk_opss, etc.) - new,
+      distinct start_path/topic, same reuse pattern already in the
+      codebase. Append to uk.yaml. verified: yes - curl -L HTTP 200 on the
+      corrected URL (first guessed slug 404'd).
+
+  - name: "Environmental Reporting Guidelines incl. Streamlined Energy and Carbon Reporting (SECR)"
+    id: "uk_secr"
+    enabled: false
+    base_url: "https://www.gov.uk"
+    start_paths:
+      - "/government/publications/environmental-reporting-guidelines-including-mandatory-greenhouse-gas-emissions-reporting-guidance"
+    region:
+      - "uk"
+    category: "environmental_agency"
+    tags:
+      - "reporting"
+      - "mandates"
+      - "carbon"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #6). Mandatory UK energy-use/GHG disclosure in
+      annual reports for quoted and large unquoted companies/LLPs (in force
+      since Apr 2019) - captures large UK DC operators as "large unquoted
+      companies." Distinct from EU CSRD/ESRS - UK's own standing regime,
+      predates and survives Brexit. Append to uk.yaml. verified: yes -
+      curl -L HTTP 200.
+
+  - name: "Complying with the Energy Savings Opportunity Scheme (ESOS)"
+    id: "uk_esos"
+    enabled: false
+    base_url: "https://www.gov.uk"
+    start_paths:
+      - "/guidance/energy-savings-opportunity-scheme-esos"
+    region:
+      - "uk"
+    category: "environmental_agency"
+    tags:
+      - "mandates"
+      - "reporting"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #7). Mandatory energy audits every 4 years for
+      large UK undertakings (250+ employees or turnover/balance-sheet
+      thresholds); ESOS Phase 4 (2024) added mandatory net-zero
+      action-plan reporting. The mandatory-audit sibling to SECR. Append to
+      uk.yaml. verified: yes - curl -L HTTP 200 on corrected slug (two
+      earlier guesses 404'd).
+
+  - name: "DEHSt - National Emissions Trading (nEHS) under the Fuel Emissions Trading Act (BEHG)"
+    id: "de_dehst_nehs"
+    enabled: false
+    base_url: "https://www.dehst.de"
+    start_paths:
+      - "/EN/Topics/nEHS/nehs_node.html"
+    region:
+      - "germany"
+      - "eu"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #8). Germany's national carbon price on
+      heating/transport fuels (since 2021, under BEHG), merging into EU
+      ETS2 from 2027; DEHSt (housed at UBA) is also Germany's EU-ETS
+      competent authority. KTF climate-fund revenue explicitly finances
+      "transformation of heating networks" - adjacent to PolicyPulse's
+      district-heating taxonomy. Append to germany.yaml. verified: yes -
+      curl -L HTTP 200 (note: a generic EU-ETS-path guess 404'd; the nEHS
+      path above is correct).
+
+  - name: "California Air Resources Board - Cap-and-Trade Program"
+    id: "ca_carb_cap_trade"
+    enabled: false
+    base_url: "https://ww2.arb.ca.gov"
+    start_paths:
+      - "/our-work/programs/cap-and-trade-program"
+    region:
+      - "us"
+      - "us_states"
+      - "california"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    requires_playwright: true
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #9). California's economy-wide cap-and-trade
+      system (linked with Quebec's SPEDE); CARB is the model program RGGI/
+      Quebec/Washington reference. Shares base_url ww2.arb.ca.gov with the
+      existing carb_generators entry in us/california.yaml (backup-
+      generator emissions, different topic/start_path) - additive, not a
+      duplicate. Append to config/domains/us/california.yaml. verified:
+      yes, with caveat - plain curl (no UA) and WebFetch both got HTTP 403
+      (bot-detection); curl with a browser User-Agent returned HTTP 200.
+      Recommend requires_playwright: true or a custom UA header.
+
+  - name: "Regional Greenhouse Gas Initiative (RGGI)"
+    id: "us_rggi"
+    enabled: false
+    base_url: "https://www.rggi.org"
+    start_paths:
+      - "/"
+    region:
+      - "us"
+      - "us_states"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #10). First (2009) US cap-and-invest program,
+      11 Northeast/Mid-Atlantic states' fossil power-generation CO2 -
+      relevant to DC grid-electricity carbon cost in RGGI states. Multi-
+      state body, no single per-state config file fits cleanly; recommend
+      a human decide the best home file (e.g. a shared us_federal.yaml-style
+      multi-state entry, or duplicated into each RGGI-member state file).
+      verified: yes - curl -L HTTP 200, WebFetch confirmed 11-state
+      cap-and-invest description, COATS allowance tracking.
+
+  - name: "Safeguard Mechanism (Clean Energy Regulator, Australia)"
+    id: "au_cer_safeguard"
+    enabled: false
+    base_url: "https://cer.gov.au"
+    start_paths:
+      - "/schemes/safeguard-mechanism"
+    region:
+      - "australia"
+      - "apac"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #11). Mandatory emissions-intensity
+      baseline-and-credit scheme, facilities >100,000 tCO2e/year - a large
+      AU DC campus with substantial on-site generation could approach this
+      threshold; more directly caps carbon intensity of large grid
+      generators supplying DC load. Complements existing australia.yaml
+      NSW/SA state energy entries with the national regulator. Append to
+      australia.yaml. verified: yes - curl -L HTTP 200, threshold/sector
+      list confirmed directly from the page.
+
+  - name: "National Greenhouse and Energy Reporting (NGER) Scheme"
+    id: "au_cer_nger"
+    enabled: false
+    base_url: "https://cer.gov.au"
+    start_paths:
+      - "/schemes/national-greenhouse-and-energy-reporting-scheme"
+    region:
+      - "australia"
+      - "apac"
+    category: "environmental_agency"
+    tags:
+      - "reporting"
+      - "mandates"
+      - "carbon"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #12). Mandatory annual corporate GHG/energy
+      reporting feeding the Safeguard Mechanism and (above a publication
+      threshold) public facility-level data. Same cer.gov.au host as
+      au_cer_safeguard, distinct topic/start_path - additive. Published
+      facility-level dataset flagged as a possible future tier-c follow-up,
+      not scoped this pass. Append to australia.yaml. verified: yes -
+      curl -L HTTP 200.
+
+  - name: "New Zealand Emissions Trading Scheme (NZ ETS) / NZ Emissions Unit Register"
+    id: "nz_epa_ets"
+    enabled: false
+    base_url: "https://www.epa.govt.nz"
+    start_paths:
+      - "/industry-areas/emissions-trading-scheme/"
+      - "/industry-areas/emissions-trading-scheme/about-the-emissions-trading-scheme/nz-emissions-unit-register/"
+    region:
+      - "apac"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #13). NZ's economy-wide cap-and-trade system
+      (forestry, energy, industry, waste), administered by NZ EPA; rounds
+      out APAC ETS coverage alongside Australia's Safeguard Mechanism.
+      Region note: "new_zealand" is not in VALID_REGIONS; mapped to "apac"
+      here (same precedent as prior-wave NZ entries). A guessed dedicated
+      register subdomain (eur.govt.nz) did not resolve - see
+      new-clients-wave3.md / unverified notes. verified: yes - both URLs
+      curl -L HTTP 200.
+
+  - name: "Swiss Emissions Trading System (BAFU/FOEN)"
+    id: "ch_bafu_ets"
+    enabled: false
+    base_url: "https://www.bafu.admin.ch"
+    start_paths:
+      - "/bafu/en/home/topics/climate/info-specialists/climate-policy/emissions-trading.html"
+    region:
+      - "switzerland"
+      - "eu"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #14). Switzerland's ETS (linked to EU ETS since
+      2020), large industrial/power installations; complements the Swiss
+      CO2 levy on fossil fuels for non-ETS entities. Shares base_url
+      bafu.admin.ch with the existing bafu_buildings entry in
+      switzerland.yaml (building-sector climate rules, different topic) -
+      additive. Fills the gap in switzerland.yaml, which today has only
+      cantonal (Zurich) building/energy-code entries. Append to
+      switzerland.yaml. verified: yes - curl -L HTTP 200.
+
+  - name: "METI - Emissions Trading System (GX-ETS)"
+    id: "jp_meti_gx_ets"
+    enabled: false
+    base_url: "https://www.meti.go.jp"
+    start_paths:
+      - "/policy/energy_environment/global_warming/ets.html"
+    region:
+      - "apac"
+      - "japan"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "ja"
+    requires_playwright: true
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #15). Japan's national mandatory ETS entering
+      its binding phase from FY2026 for businesses with direct CO2
+      emissions >=100,000 t/year (in reach for large hyperscale campuses
+      with on-site backup/cogeneration); ERMS reporting system live ~Jun
+      2026. Shares base_url meti.go.jp with the existing meti_jp entry in
+      apac.yaml (English GX growth-strategy page, different path/language)
+      - additive. Append to apac.yaml. verified: yes, with caveat - default
+      curl/WebFetch got HTTP 403; browser User-Agent resolved HTTP 200.
+      Recommend requires_playwright: true or custom UA header.
+
+  - name: "GX League (Green Transformation League)"
+    id: "jp_gx_league"
+    enabled: false
+    base_url: "https://gx-league.go.jp"
+    start_paths:
+      - "/en/"
+    region:
+      - "apac"
+      - "japan"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "reporting"
+    policy_types:
+      - "guidance"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #16). Government-industry forum (est. 2022)
+      that piloted Japan's voluntary ETS ahead of the FY2026 mandatory
+      phase; publishes market-design docs used to shape GX-ETS. English-
+      language primary source, unlike the METI ETS page. NOTE: the page
+      itself states GX League operations ceased as of FY2025, activities
+      transferred to a "GX Future Consortium" - a human should confirm
+      whether a successor domain needs tracking instead/in addition.
+      Append to apac.yaml. verified: yes - curl -L HTTP 200.
+
+  - name: "Systeme de plafonnement et d'echange de droits d'emission (SPEDE), Quebec"
+    id: "qc_spede"
+    enabled: false
+    base_url: "https://www.environnement.gouv.qc.ca"
+    start_paths:
+      - "/changements/carbone/inscription-spede.htm"
+      - "/changementsclimatiques/marche-carbone.asp"
+    region:
+      - "north_america"
+      - "canada"
+      - "quebec"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "fr"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #17). Quebec's cap-and-trade system (since
+      2013, linked with California's since 2014 under the Western Climate
+      Initiative - together North America's largest carbon market), ~80%
+      of Quebec's GHG emissions from large emitters/fuel distributors.
+      Different base_url from the existing quebec_energy entry in
+      canada.yaml (transitionenergetique.gouv.qc.ca) - genuinely net-new
+      domain. A 2026 draft-regulation amendment was open for public
+      consultation May 20 - Jul 3 2026 (currently active/updating source).
+      Append to canada.yaml. verified: yes - both URLs curl -L HTTP 200.
+
+  - name: "Technology Innovation and Emissions Reduction (TIER) Regulation, Alberta"
+    id: "ab_tier"
+    enabled: false
+    base_url: "https://www.alberta.ca"
+    start_paths:
+      - "/technology-innovation-and-emissions-reduction-regulation"
+    region:
+      - "north_america"
+      - "canada"
+      - "alberta"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #18). Alberta's industrial carbon-pricing and
+      output-based allocation system (facilities >=100,000 tCO2e/year must
+      comply). Shares base_url alberta.ca with the existing alberta_energy
+      entry in canada.yaml (generic energy/environment landing pages,
+      only a passing "TIER system" mention with no URL) - this is the
+      specific regulation page, a new start_path turning that passing
+      mention into an actual crawlable source. Append to canada.yaml.
+      verified: yes - curl -L HTTP 200.
+
+  - name: "US EPA Greenhouse Gas Reporting Program (GHGRP)"
+    id: "us_epa_ghgrp"
+    enabled: false
+    base_url: "https://www.epa.gov"
+    start_paths:
+      - "/ghgreporting"
+    region:
+      - "us"
+    category: "environmental_agency"
+    tags:
+      - "reporting"
+      - "mandates"
+      - "carbon"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #19). Mandatory annual GHG reporting for ~8,000
+      large US facilities; publishes facility-level data via FLIGHT and
+      Envirofacts (paired tier-c API spec in new-clients-wave3.md). Distinct
+      from EPA ENERGY STAR and from any state cap-and-trade page - this is
+      the reporting requirement itself. A pending Sept-2025 proposal would
+      remove 46 source categories from the requirement (active, currently-
+      contested regulation - good change-tracking target). No existing
+      us_federal.yaml entry covers this; recommend a human pick the best
+      home file. verified: yes - curl -L HTTP 200, ~8,000-facility scope
+      and the pending-removal proposal confirmed directly from the page.
+
+  - name: "China Ministry of Ecology and Environment (MEE) - Climate Change/Carbon Market Section"
+    id: "cn_mee_ghg"
+    enabled: false
+    base_url: "https://www.mee.gov.cn"
+    start_paths:
+      - "/ywgz/ydqhbh/wsqtkz/"
+    region:
+      - "apac"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "zh"
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #20). MEE is the competent authority for
+      China's national ETS (world's largest by covered emissions, ~8
+      billion tCO2/year, power sector with cement/steel/aluminum expansion
+      underway); publishes allocation methodology, compliance rules, and
+      the annual "Progress Report of China's National Carbon Market."
+      Region note: "china" is not in VALID_REGIONS at all (gap already
+      flagged in wave-2's INVENTORY.md recap); mapped to "apac" here. The
+      registry/exchange operator (cets.org.cn) returned HTTP 412 to every
+      fetch attempt this session - see unverified notes; MEE is the
+      reliably-resolving entry point. No existing apac.yaml China entry -
+      recommend new China section. verified: yes - curl -L HTTP 200.
+
+  - name: "Emission Trade Registry System (ETRS), Korea"
+    id: "kr_etrs_registry"
+    enabled: false
+    base_url: "https://etrs.gir.go.kr"
+    start_paths:
+      - "/etrs/main.do"
+    region:
+      - "apac"
+      - "south_korea"
+    category: "environmental_agency"
+    tags:
+      - "carbon"
+      - "reporting"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "ko"
+    requires_playwright: true
+    verified_by: "source-expansion-research (carbon-ets wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (carbon-ets.md #22). PARTIALLY VERIFIED ONLY - operational
+      registry for Korea's K-ETS (4th allocation phase, EITE free-
+      allocation rules); no existing PolicyPulse coverage of gir.go.kr/
+      etrs.gir.go.kr. Korean-language only - GIR's English site was
+      separately checked and confirmed to have NO K-ETS content (do not
+      substitute). Several sub-pages found via search carried
+      `;jsessionid=...` tokens (not stable long-term) - only the bare
+      /etrs/main.do path (no session token) is recommended as the crawl
+      seed; requires_playwright: true recommended given the session-ID URL
+      pattern. verified: partial - curl -L on the bare path returned HTTP
+      200; content not independently re-fetched via WebFetch this session
+      (confirmed only via WebSearch snippets). Recommend a human confirm
+      crawlability before enabling. Append to apac.yaml (new Korea carbon
+      section).

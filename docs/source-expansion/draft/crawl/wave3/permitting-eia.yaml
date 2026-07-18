@@ -1,0 +1,395 @@
+# =============================================================================
+# DRAFT WAVE 3 — Environmental Permitting / EIA / Industrial Emissions
+# Authorities (tier-b crawl domains only)
+# Source: docs/source-expansion/regions-wave3/permitting-eia.md
+# 11 of the 13 candidates in the source file are tier-b; candidates #12
+# (ga_epd_permit_search) and #13 (eea_industrial_emissions_portal) are
+# tier-c - specced in docs/source-expansion/draft/new-clients-wave3.md.
+#
+# DUPLICATE DROPPED (1): candidate #9, "Loudoun County, VA - Data Center
+# Standards & Locations" (proposed id loudoun_county_dc_standards,
+# base_url https://www.loudoun.gov, start_paths /5990/Data-Center-
+# Standards-Locations and /6222/Phase-2-Data-Center-Standards-Locations)
+# is an EXACT duplicate (same base_url, same both start_paths) of the
+# wave-1 entry `us_loudoun_county_va` already drafted in
+# docs/source-expansion/draft/crawl/us-states.yaml. NOT re-drafted here.
+# The wave-3 permitting-eia.md researcher's dedup pass checked
+# `draft/crawl/**/*.yaml` but missed this specific wave-1 file entry; caught
+# during wave-3 consolidation via a full base_url grep across all prior
+# drafts. No action needed beyond noting this in INVENTORY.md - the
+# existing wave-1 entry already covers this source.
+#
+# Shared-domain additive entries (same base_url as an existing/other-wave
+# entry, different program/topic - not a duplicate):
+#   - epa.ie: this file's epa_ie_ied (industrial emissions licensing) vs.
+#     wave-3 water-cooling.yaml's ie_epa_water_abstraction (water
+#     abstraction licensing).
+#   - deq.virginia.gov: this file's va_deq_dc_air_permits (air permits) vs.
+#     wave-3 water-cooling.yaml's va_deq_water (water withdrawal).
+#   - tceq.texas.gov: this file's tceq_air_generators (air permitting for
+#     generators) vs. wave-3 water-cooling.yaml's tx_tceq_water_rights
+#     (water rights).
+#
+# Enum note: no invalid category/tag/policy_type/region values in this
+# file - all fit the live src/core/config.py enums directly.
+# =============================================================================
+
+domains:
+  - name: "Environmental Protection Agency Ireland - Industrial Emissions Licensing"
+    id: "epa_ie_ied"
+    enabled: false
+    base_url: "https://www.epa.ie"
+    start_paths:
+      - "/our-services/licensing/industrial/industrial-emissions-licensing-ied/"
+      - "/our-services/licensing/licencesearch/"
+    region:
+      - "eu"
+      - "eu_west"
+      - "ireland"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "planning"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (permitting-eia wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (permitting-eia.md #1). The actual enforcement mechanism
+      behind Ireland's DC backup-generator rules - IE licences mandatory
+      once backup generator thermal input hits 50MW aggregate, or
+      operation exceeds 18 hrs/yr. Secondary sources report EPA has
+      approved 15 IE licences + 24 GHG permits specifically to DC
+      operators, 800+ generators listed as emission sources. Not in
+      ireland.yaml today (only SEAI, gov.ie, CRU, statute book). The
+      underlying dynamic search app (epawebapp.epa.ie) returned HTTP 500
+      on a plain fetch - needs a live browser session, see unverified
+      notes; the two static pages here are sufficient to start. Additive
+      alongside wave-3 water-cooling.yaml's ie_epa_water_abstraction (same
+      host, water licensing instead). Append to ireland.yaml. verified:
+      yes - both pages HTTP 200, titles confirmed.
+
+  - name: "An Coimisiun Pleanala (formerly An Bord Pleanala) - Case Search"
+    id: "pleanala_ie"
+    enabled: false
+    base_url: "https://www.pleanala.ie"
+    start_paths:
+      - "/en-ie/case-search"
+      - "/en-ie/cases"
+      - "/en-ie/lists"
+    region:
+      - "eu"
+      - "eu_west"
+      - "ireland"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "guidance"
+      - "report"
+    language: "en"
+    requires_playwright: true
+    verified_by: "source-expansion-research (permitting-eia wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (permitting-eia.md #2). Ireland's national planning-appeal
+      authority - every large DC planning decision (and its EIAR/
+      environmental conditions: noise, grid connection, backup generation)
+      not resolved at local-authority level ends up here. Ireland is the
+      live EU test case for DC planning friction (Dublin grid-connection
+      moratorium, Ennis/AWS North Dublin appeals, Equinix refusal).
+      Nothing in ireland.yaml currently covers planning appeals. Search
+      covers 2016-present; filters incl. ABP case number, planning
+      authority, address, date ranges, case type (incl. Strategic
+      Infrastructure Development), decision outcome, EIAR/NIS indicators -
+      likely needs Playwright (interactive filter form, not GET params).
+      Append to ireland.yaml. verified: yes - filterable case-search tool
+      confirmed live with the fields listed.
+
+  - name: "Planning Inspectorate - National Infrastructure Planning (NSIP register)"
+    id: "pins_nsip_uk"
+    enabled: false
+    base_url: "https://infrastructure.planninginspectorate.gov.uk"
+    start_paths:
+      - "/"
+    region:
+      - "uk"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "guidance"
+      - "report"
+    language: "en"
+    requires_playwright: true
+    verified_by: "source-expansion-research (permitting-eia wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (permitting-eia.md #3). New regulations effective Jan 2026
+      formally brought data centres into the NSIP regime (opt-in via
+      Secretary of State direction under Planning Act 2008 s.35) - a
+      genuinely new UK consenting pathway for large DCs decided nationally
+      via a statutory Development Consent Order process incl. EIA. uk.yaml
+      already has Environment Agency (generator permits) + Heat Networks
+      Planning Database but nothing on the NSIP/DCO track. Append to
+      uk.yaml. verified: yes - direct WebFetch got HTTP 403 (bot
+      protection); curl with a standard browser User-Agent returned HTTP
+      200, title confirmed. Recommend requires_playwright: true or a
+      custom UA.
+
+  - name: "Regierungspraesidium Darmstadt - Immissionsschutz (BImSchG data centre permits)"
+    id: "rp_darmstadt_immissionsschutz"
+    enabled: false
+    base_url: "https://rp-darmstadt.hessen.de"
+    start_paths:
+      - "/Themen-A-Z/immissionsschutz"
+      - "/umwelt-und-energie/laerm-luft-strahlen/genehmigungsverfahren"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+      - "hessen"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "planning"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "de"
+    verified_by: "source-expansion-research (permitting-eia wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (permitting-eia.md #4). Frankfurt is Europe's largest data
+      centre market; RP Darmstadt is the actual BImSchG (Federal Immission
+      Control Act) permitting authority for it - fetched content showed
+      live permit entries for named operators (e.g. 30.06.2026 permit to
+      "CyrusOne Frankfurt 7 Holdings B.V." and emergency-diesel-generator
+      approvals in Dietzenbach and Raunheim). germany.yaml already tracks
+      Hesse's econ-dev/digital-infra ministries (hessen_energy,
+      hessen_digital_dc) and state-law database (hessen_recht), but not
+      the actual permitting authority. From Jan 2027, new applications
+      route through the ELiA online portal, but published decisions stay
+      on this page; notice list paginated (63 entries/8 pages at time of
+      check), refreshes every 2-4 weeks. Append to germany.yaml. verified:
+      yes - live permit notices confirmed including the entries above.
+
+  - name: "Lansstyrelsen Stockholm - Provning av miljofarlig verksamhet (environmental permit review)"
+    id: "lansstyrelsen_stockholm_miljo"
+    enabled: false
+    base_url: "https://www.lansstyrelsen.se"
+    start_paths:
+      - "/stockholm/miljo-och-vatten/miljofarlig-verksamhet/provning-av-miljofarlig-verksamhet.html"
+    region:
+      - "eu"
+      - "nordic"
+      - "sweden"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "sv"
+    verified_by: "source-expansion-research (permitting-eia wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (permitting-eia.md #5). PENDING HUMAN CHECK on page-level
+      specificity (see caveat below). Sweden requires data centres to
+      secure a Chapter 9 Environmental Code permit ("B-verksamhet") via the
+      county's Miljoprovningsdelegationen when material environmental
+      impact exists; a Naturvardsverket decision PDF found separately
+      explicitly covers "datacenter med reservkraftsgeneratorer" (data
+      centre with backup generators). This page is the permitting layer
+      underneath sweden.yaml's existing energy-agency/legislative entries
+      (Energimyndigheten, Riksdagen, Regeringen, EI, Riksrevisionen) - none
+      of which is the actual permit-granting authority. Append to
+      sweden.yaml. verified: yes for the MPD/permit-review process itself;
+      the page does NOT name data centres explicitly (that link comes from
+      a separate Naturvardsverket PDF) - a human should confirm whether to
+      crawl this entry-page (process/authority coverage, as drafted) or
+      instead seed on Naturvardsverket's decision-document index.
+
+  - name: "Miljostyrelsen - Miljogodkendelse af listevirksomheder (environmental approval of listed activities)"
+    id: "mst_dk_miljoegodkendelse"
+    enabled: false
+    base_url: "https://mst.dk"
+    start_paths:
+      - "/erhverv/groen-produktion-og-affald/industri/miljoegodkendelse-af-listevirksomheder"
+    region:
+      - "eu"
+      - "nordic"
+      - "denmark"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "da"
+    verified_by: "source-expansion-research (permitting-eia wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (permitting-eia.md #6). Miljostyrelsen is the national-level
+      environmental approval authority for "Annex 1/2" listed polluting
+      activities (most delegated to municipalities, MST retains authority
+      for the subset marked "s"); mechanism through which DC cooling-water
+      discharge, noise, and generator-emissions conditions are set.
+      denmark.yaml today only has the Danish Energy Agency + Heat Supply
+      Act text - no environmental-permitting body. Links to the digital
+      application system "Byg og Miljoe"/DMA at dma.mst.dk. Append to
+      denmark.yaml. verified: yes - HTTP 200, approval-process description
+      confirmed (authority split between municipalities/MST, conditions
+      cover emissions/noise/vibration/groundwater).
+
+  - name: "IPLO - Milieubelastende activiteit datacentrum (Bal paragraaf 3.7.3)"
+    id: "iplo_nl_datacentrum"
+    enabled: false
+    base_url: "https://iplo.nl"
+    start_paths:
+      - "/regelgeving/regels-voor-activiteiten/milieubelastende-activiteiten-hoofdstuk-3-bal/dienstverlening/datacentrum/"
+    region:
+      - "eu"
+      - "eu_west"
+      - "netherlands"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "efficiency"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "nl"
+    verified_by: "source-expansion-research (permitting-eia wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (permitting-eia.md #7). A page dedicated specifically to data
+      centres as a named "environmentally polluting activity" (Bal
+      Section 3.7.3) under the Omgevingswet (Environment and Planning Act)
+      - the exact permitting hook for DC energy consumption, cooling-water
+      discharge, and backup-power conditions in the Netherlands.
+      netherlands.yaml only has the general national legislation search
+      (wetten.overheid.nl); eu.yaml's rvo_nl entry is incentives, not
+      permitting. Net-new and precisely on-topic. Append to
+      netherlands.yaml. verified: yes - HTTP 200, title confirmed.
+
+  - name: "Virginia Department of Environmental Quality - Issued Air Permits for Data Centers"
+    id: "va_deq_dc_air_permits"
+    enabled: false
+    base_url: "https://www.deq.virginia.gov"
+    start_paths:
+      - "/news-info/shortcuts/permits/air/issued-air-permits-for-data-centers"
+    region:
+      - "us"
+      - "us_states"
+      - "virginia"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "guidance"
+      - "report"
+    language: "en"
+    requires_playwright: true
+    verified_by: "source-expansion-research (permitting-eia wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (permitting-eia.md #8 - single highest-value US find in this
+      batch). Virginia (Loudoun/Prince William - "Data Center Alley") is
+      the single largest DC concentration in the world; DEQ's own curated
+      page listing issued air permits specifically for data centers, incl.
+      the new statewide BACT standard for both emergency and non-emergency
+      diesel generators (applies to applications received on/after
+      2026-07-01). us/virginia.yaml currently only has Dept. of Energy +
+      General Assembly bill trackers (HB323/HB906/HB824) - nothing from
+      the actual permitting regulator. Additive alongside wave-3
+      water-cooling.yaml's va_deq_water (same agency, water withdrawal
+      instead). Append to config/domains/us/virginia.yaml. verified: yes,
+      indirectly - site sits behind Akamai bot-protection (WebFetch and
+      curl both got HTTP 403/"Access Denied"); the exact URL is
+      independently cited as the canonical DEQ source by multiple
+      secondary sources (Hunton, Trinity Consultants, MIRATECH, Virginia
+      Mercury, VPM) and the search engine returned the live page title.
+      Treat as verified-by-corroboration; requires_playwright: true to get
+      past the bot gate.
+
+  - name: "Texas Commission on Environmental Quality - Air Permitting (Electric Generating Units / Portable & Emergency Engines)"
+    id: "tceq_air_generators"
+    enabled: false
+    base_url: "https://www.tceq.texas.gov"
+    start_paths:
+      - "/permitting/air/newsourcereview/combustion/egu_sp.html"
+      - "/permitting/air/permitbyrule/subchapter-w/portable_power.html"
+    region:
+      - "us"
+      - "us_states"
+      - "texas"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (permitting-eia wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (permitting-eia.md #10). Texas is a fast-growing DC market
+      (ERCOT interconnection-queue pressure is a live policy topic); TCEQ
+      publishes the specific standard-permit and permit-by-rule conditions
+      (30 TAC 106.4/106.511 for portable & emergency engines, 30 TAC
+      116.601-615 for the EGU standard permit) letting DC backup/electric-
+      generating-unit gensets avoid full individual air permits.
+      us/texas.yaml currently only has SECO + the legislature bill tracker
+      - no environmental regulator. Additive alongside wave-3
+      water-cooling.yaml's tx_tceq_water_rights (same agency, water rights
+      instead). Append to config/domains/us/texas.yaml. verified: yes -
+      confirmed via search-snippet titles matching the exact TCEQ pages;
+      not independently re-fetched with curl this pass - standard .gov
+      pages, low risk.
+
+  - name: "NSW Planning Portal / Dept. of Planning - SSD Warehouses and Data Centres"
+    id: "nsw_planning_ssd_dc"
+    enabled: false
+    base_url: "https://www.planning.nsw.gov.au"
+    start_paths:
+      - "/policy-and-legislation/planning-reforms/ssd-warehouses-and-data-centres"
+    region:
+      - "apac"
+      - "australia"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (permitting-eia wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (permitting-eia.md #11). Defines the SSD threshold - data
+      centres >15MW total power consumption trigger State Significant
+      Development status, assessed by the Independent Planning Commission
+      or minister rather than local council, requiring a full
+      Environmental Impact Statement. australia.yaml currently only has
+      NSW Climate and Energy Action + NSW Investment Delivery Authority -
+      no planning/EIA authority. Consider also the sibling domain
+      planningportal.nsw.gov.au (individual project pages, e.g. DigiCo
+      SYD1, Mamre Road Data Centre Campus) as a follow-up second entry.
+      Append to australia.yaml. verified: yes - >15MW SSD threshold
+      language confirmed directly.

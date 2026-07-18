@@ -15,8 +15,8 @@ Last updated: 2026-07-18.
 |---|---|---|---|---|
 | Wave 1 | 154 | 138 | 16 | 45 |
 | Wave 2 | 158 | 141 | 17 | ~71 |
-| Wave 3 | *in progress* | - | - | - |
-| **Combined (1+2)** | **312** | **279** | **33** | **~116** |
+| Wave 3 | 100 | 92 | 8 | ~34 |
+| **Combined (1+2+3)** | **412** | **371** | **41** | **~150** |
 
 Deduped against 390 existing sources in `config/domains/**` (33 country files +
 50-state `us/` subdir + 9 structured API clients), plus cross-wave dedup (wave 2
@@ -29,10 +29,13 @@ CH Curia Vista, FR Assemblee Nationale), 18 grid operators/TSOs (ENTSO-E + 12 EU
 across 30 uncovered countries, 50 deep-subnational, 11 US county/municipal, 8
 multilateral bodies + 10 open-data portal APIs.
 
-**Wave 3 in progress** (thematic angles): DC water/cooling regulation, carbon/ETS,
-DC tax incentives, environmental permitting/EIA, Open States + Congress.gov + Federal
-Register + more legislature APIs, digital-infra ministries & national DC strategies,
-municipal heat-network zoning.
+**Wave 3 added** (thematic angles): 22 carbon/ETS/GHG bodies (EPA Envirofacts GHGRP
+API - keyless facility emissions), 21 municipal heat-zoning (Helsinki Helen Oy live
+heat-recovery program), 19 DC tax-incentive programs (Singapore DC-CFA2: incentive
+requires PUE <=1.25), 13 environmental permitting/EIA (Ireland EPA DC emissions
+licences), 9 water/cooling (Virginia DEQ HB589 water disclosure), 9 digital-infra
+strategies (Ireland DETE 80%-renewables rule), 6 more legislation APIs (US Federal
+Register - keyless, 2,651 DC hits; Open States - all 50 states; Congress.gov).
 
 ---
 

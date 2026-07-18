@@ -1,0 +1,63 @@
+# =============================================================================
+# DRAFT WAVE 3 — Additional Legislature/Gazette Structured APIs (tier-b
+# crawl-domain candidate only)
+# Source: docs/source-expansion/regions-wave3/more-legislation-apis.md
+# 5 of the 6 candidates in this source file are tier-c (structured API
+# clients) - specced in docs/source-expansion/draft/new-clients-wave3.md:
+# congress_gov_api, federal_register_api, openstates_api, kenya_law_api,
+# oparl. Only `bundesrat_rss` fits the plain crawl-domain / RSS-ingestion
+# pattern (a chronological XML feed, no query parameters) and is drafted
+# below.
+#
+# Per the source file's own recommendation: Bundesrat coverage may already
+# be reachable by extending the existing `dip` structured client's query
+# params (a keyless probe of `f.zuordnung=BR` returned the standard DIP
+# auth-required error, not a bad-parameter error, suggesting the filter is
+# valid) - flag this for the `dip` client maintainer as the likely BETTER
+# integration path rather than building/enabling a second Bundesrat source.
+# The RSS entry below is included for completeness per the brief's "capture
+# everything verified" instruction, but is explicitly lower priority.
+# =============================================================================
+
+domains:
+  - name: "Bundesrat Plenary-Document RSS Feeds (Germany)"
+    id: "bundesrat_rss"
+    enabled: false
+    base_url: "https://www.bundesrat.de"
+    start_paths:
+      - "/SiteGlobals/Functions/RSSFeed/RSSGenerator_Publication.xml"
+      - "/SiteGlobals/Functions/RSSFeed/RSSGenerator_PBPrintout.xml"
+    region:
+      - "germany"
+      - "eu"
+    category: "legislative"
+    tags:
+      - "mandates"
+    policy_types:
+      - "legislation"
+      - "report"
+    language: "de"
+    rate_limit_seconds: 3.0
+    verified_by: "source-expansion-research (more-legislation-apis wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (more-legislation-apis.md #6). Chronological RSS 2.0 feeds
+      (feed self-declares ttl: 60 min) - Plenarprotokolle (plenary session
+      transcripts) and Drucksachen/printed matter (the actual bill/
+      resolution documents); companion feeds exist for committee events
+      and announcements. NOT a keyword-searchable database - a plain
+      publication feed. The Bundesrat's own open-data landing page
+      referenced in earlier research (/DE/service/opendata/
+      opendata-node.html) now 404s - no true query API was found for the
+      Bundesrat itself this pass.
+      LOWER PRIORITY THAN THE OTHER OPTION: the existing `dip` structured
+      client (api_sources.yaml) accepts a `f.zuordnung=BR` filter to
+      restrict results to Bundesrat-attributed documents - a keyless probe
+      returned the expected `401 API key required` auth-gate response
+      (not a parameter error), meaning Bundesrat coverage may already be
+      reachable by extending `dip`'s query params rather than adding this
+      RSS domain. Flag for the `dip` client maintainer before enabling
+      this entry. Site was intermittently slow/unreachable this session -
+      build in generous timeouts if enabled. Append to germany.yaml.
+      verified: yes for the RSS feed itself - curl returned real, dated
+      RSS items (e.g. "Plenarprotokoll 1067. Sitzung, 10.07.2026").

@@ -1,0 +1,385 @@
+# =============================================================================
+# DRAFT WAVE 3 — Digital-Infrastructure / Telecom Ministry & National
+# Data-Centre Strategy Sources (tier-b crawl domains only)
+# Source: docs/source-expansion/regions-wave3/digital-infra-strategies.md
+# 9 candidates fully verified + 1 (Australia DTA, #10) partially verified.
+# All tier-b; zero tier-a, zero tier-c.
+#
+# Enum note: this source file's proposed category "digital_ministry" is NOT
+# in VALID_CATEGORIES (src/core/config.py). Mapped to "policy" ("Government
+# policy frameworks") below for every entry in this file - the closest
+# existing bucket. Recommend adding "digital_ministry" as a new category
+# given this is a recurring, distinct class of source (national ICT/digital
+# ministries publishing DC strategy), not a one-off substitution.
+# Region note: "mena" (used by sdaia_sa) is not in VALID_REGIONS (only
+# "middle_east" is) - mapped to "middle_east" below. "nigeria", "kenya",
+# "malaysia", "indonesia" are likewise not in VALID_REGIONS - mapped to
+# "africa"/"apac" respectively per each entry.
+#
+# Shared-domain additive entry: gov.uk (dsit_datacentres_uk) - already
+# present many times in uk.yaml for other departments/paths; this is a new
+# start_path under DSIT (Dept. for Science, Innovation and Technology, not
+# DESNZ), same reuse pattern as the rest of uk.yaml.
+# =============================================================================
+
+domains:
+  - name: "Ireland DETE - Government Statement on Data Centres in Enterprise Strategy"
+    id: "dete_datacentres_ie"
+    enabled: false
+    base_url: "https://enterprise.gov.ie"
+    start_paths:
+      - "/en/publications/government-statement-on-role-of-data-centres-in-enterprise-strategy.html"
+      - "/en/publications/publication-files/government-statement-on-the-role-of-data-centres-in-irelands-enterprise-strategy.pdf"
+    region:
+      - "ireland"
+      - "eu_west"
+    category: "policy"
+    tags:
+      - "mandates"
+      - "planning"
+      - "renewable_energy"
+      - "efficiency"
+    policy_types:
+      - "strategy"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (digital-infra-strategies wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (digital-infra-strategies.md #1 - highest-value find). Ireland's
+      Department of Enterprise, Trade and Employment (not SEAI/CRU/gov.ie,
+      already covered) is the ministry actually setting DC siting and
+      renewable-supply policy - incl. the widely-reported rule that new
+      >=1MVA data centres must source 80% of annual demand from new
+      in-country renewables within 6 years of operation. The "twin
+      transition" (digitalisation + decarbonisation) framing document.
+      Category note: original "digital_ministry" mapped to "policy" - see
+      file header. Append to ireland.yaml. verified: yes - HTTP 200, DETE
+      authorship and July 2022 publication date confirmed.
+
+  - name: "NITDA - National Information Technology Development Agency (Nigeria)"
+    id: "nitda_ng"
+    enabled: false
+    base_url: "https://nitda.gov.ng"
+    start_paths:
+      - "/wp-content/uploads/2025/10/National-Cloud-Policy-2025-Oct2-2025.pdf"
+    region:
+      - "africa"
+    category: "policy"
+    tags:
+      - "mandates"
+      - "planning"
+      - "incentives"
+    policy_types:
+      - "strategy"
+      - "guidance"
+    language: "en"
+    max_pages: 5
+    verified_by: "source-expansion-research (digital-infra-strategies wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (digital-infra-strategies.md #2). Nigeria's National Cloud
+      Policy 2025 mandates sovereign (Level 3/4) government data be hosted
+      exclusively within Nigeria; NITDA is building the "Nigeria Digital
+      Triangle" national sovereign-cloud DC infrastructure strategy - the
+      clearest African digital-ministry DC strategy found this pass.
+      Distinct from NERC (energy regulator, drafted separately in
+      mena-africa.md). Region note: "nigeria" not in VALID_REGIONS; mapped
+      to "africa". Append to new nigeria.yaml. verified: yes - 765.7KB PDF
+      resolved HTTP 200 via curl; corroborated by independent 2026 press
+      coverage.
+
+  - name: "Kenya Ministry of ICT and the Digital Economy - Policy Documents"
+    id: "kenya_ict_dc"
+    enabled: false
+    base_url: "https://ict.go.ke"
+    start_paths:
+      - "/policy-documents"
+      - "/sites/default/files/2024-12/Kenya%20Cloud%20Policy%20-%202024.pdf"
+    region:
+      - "africa"
+    category: "policy"
+    tags:
+      - "mandates"
+      - "reporting"
+      - "efficiency"
+    policy_types:
+      - "standard"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (digital-infra-strategies wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (digital-infra-strategies.md #3). ICT Authority's Data Centre
+      Standard applies compliance audits across all Ministries, Counties
+      and Agencies - a binding national technical standard for government
+      DC facilities, paired with the Ministry's 2024 Cloud Policy. A
+      secondary base_url, https://cms.icta.go.ke (ICT Authority technical
+      standards: /sites/default/files/2022-05/Data%20Centre%20Standard.pdf,
+      /sites/default/files/2022-06/Cloud%20computing%20Standard.pdf), is a
+      companion source a human may want as a second domain entry. Distinct
+      from Kenya EPRA (energy regulator, unverified draft in
+      mena-africa.md). Region note: "kenya" not in VALID_REGIONS; mapped
+      to "africa". Append to new kenya.yaml. verified: yes -
+      ict.go.ke/policy-documents HTTP 200 (Kenya Cloud Policy 2024 listed);
+      cms.icta.go.ke Data Centre Standard PDF HTTP 200 (460.5KB, OCR not
+      available this pass but confirmed live).
+
+  - name: "Japan MIC - Digital Infrastructure Resilience / Regional Data Centre Distribution Programme"
+    id: "mic_datacenter_jp"
+    enabled: false
+    base_url: "https://www.soumu.go.jp"
+    start_paths:
+      - "/menu_seisaku/ictseisaku/datacenter/index.html"
+      - "/menu_seisaku/ictseisaku/digital_infrastructure/index.html"
+    region:
+      - "apac"
+      - "japan"
+    category: "policy"
+    tags:
+      - "incentives"
+      - "planning"
+      - "efficiency"
+    policy_types:
+      - "program"
+      - "guidance"
+      - "report"
+    language: "ja"
+    verified_by: "source-expansion-research (digital-infra-strategies wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (digital-infra-strategies.md #4). MIC (Ministry of Internal
+      Affairs and Communications - Japan's telecom/digital ministry, NOT
+      the already-covered METI) runs the subsidy programme moving DC
+      siting from Tokyo/Osaka into depopulating regions; ¥130bn+ Digital
+      Infrastructure Development Fund, "Digital Infrastructure Development
+      Plan 2030" issued June 2025, ¥1-2bn per project. Distinct ministry
+      from the already-covered METI (meti.go.jp) entry in apac.yaml.
+      Append to apac.yaml. verified: yes - both pages fetched directly,
+      MIC authorship/subsidy amounts/regional-siting intent confirmed.
+
+  - name: "Malaysia Ministry of Digital (KKD) / MyDIGITAL Corporation"
+    id: "kkd_my"
+    enabled: false
+    base_url: "https://www.digital.gov.my"
+    start_paths:
+      - "/en-GB/profil-kementerian"
+    region:
+      - "apac"
+    category: "policy"
+    tags:
+      - "planning"
+      - "incentives"
+    policy_types:
+      - "strategy"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (digital-infra-strategies wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (digital-infra-strategies.md #5, part 1 of 2 - see also
+      mydigital_my below). KKD is the ministry overseeing Malaysia's DC
+      sector (alongside MCMC as regulator). Distinct from SEDA/Energy
+      Commission (energy-ministry equivalents, already drafted in
+      oceania-south-asia.yaml). Content is strategy-level rather than a
+      standalone PUE mandate - ranked below entries with binding
+      standards. MCMC's own /en/legal/acts page was checked and found too
+      generic (no DC-specific standard visible) - dropped, see unverified
+      notes. Region note: "malaysia" not in VALID_REGIONS; mapped to
+      "apac". Append to new malaysia.yaml (shared with wave-3
+      dc-incentives.yaml's my_mida_desac). verified: yes - HTTP 200,
+      content confirmed on-topic.
+
+  - name: "MyDIGITAL - Malaysia Digital 2030"
+    id: "mydigital_my"
+    enabled: false
+    base_url: "https://www.mydigital.gov.my"
+    start_paths:
+      - "/"
+      - "/budget-2026-accelerating-malaysias-digital-transformation-for-all/"
+    region:
+      - "apac"
+    category: "policy"
+    tags:
+      - "planning"
+      - "incentives"
+    policy_types:
+      - "strategy"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (digital-infra-strategies wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (digital-infra-strategies.md #5, part 2 of 2). MyDIGITAL's
+      blueprint (NIMP 2030 Digital & ICT sectoral plan) names cloud/
+      data-centre investment as a named "catalytic project" with a stated
+      sustainability framing for DC growth. Companion to kkd_my above -
+      separate base_url, both from the same digital-ministry ecosystem.
+      Region note: "malaysia" not in VALID_REGIONS; mapped to "apac".
+      Append to new malaysia.yaml. verified: yes - HTTP 200, content
+      confirmed on-topic.
+
+  - name: "Komdigi JDIH - Legal Database (PP 71/2019 Electronic Systems & Data Centres, Indonesia)"
+    id: "komdigi_id"
+    enabled: false
+    base_url: "https://jdih.komdigi.go.id"
+    start_paths:
+      - "/produk_hukum/view/id/695/t/peraturan+pemerintah+nomor+71+tahun+2019"
+      - "/produk_hukum"
+    region:
+      - "apac"
+    category: "legislation"
+    tags:
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "id"
+    verified_by: "source-expansion-research (digital-infra-strategies wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (digital-infra-strategies.md #6). PP 71/2019 is Indonesia's
+      foundational data-centre/data-localization regulation - sets the
+      strategic/high/low data-classification scheme determining which
+      data centres must be sited domestically. Komdigi's own legal-
+      instrument portal, not a secondary summary site. Distinct from ESDM
+      (energy ministry, already drafted in oceania-south-asia.yaml).
+      Region note: "indonesia" not in VALID_REGIONS; mapped to "apac".
+      Category set to "legislation" (this entry is the statute text itself,
+      unlike the strategy-document entries elsewhere in this file). Append
+      to new indonesia.yaml. verified: yes - HTTP 200, full PP 71/2019 text
+      confirmed hosted.
+
+  - name: "European Commission Digital Strategy - Cloud and AI Development Act (CADA)"
+    id: "eu_cada"
+    enabled: false
+    base_url: "https://digital-strategy.ec.europa.eu"
+    start_paths:
+      - "/en/policies/cloud-and-ai-development-act"
+    region:
+      - "eu"
+    category: "policy"
+    tags:
+      - "planning"
+      - "efficiency"
+      - "incentives"
+    policy_types:
+      - "strategy"
+      - "directive"
+    language: "en"
+    verified_by: "source-expansion-research (digital-infra-strategies wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (digital-infra-strategies.md #7). CADA explicitly targets
+      tripling EU data-centre capacity while "improving access to key
+      resources such as energy, land, water and financing" and deploying
+      "sustainable cloud and data centre infrastructure" - DG CONNECT (the
+      EU's digital-ministry equivalent) setting DC sustainability/capacity
+      policy. Complements rather than duplicates the already-covered
+      EED/Delegated Regulation enacted-law EUR-Lex entries in eu.yaml -
+      distinct base_url, forthcoming-legislation stage vs. enacted law.
+      Append to eu.yaml. verified: yes - HTTP 200, DC-capacity and
+      sustainability framing confirmed.
+
+  - name: "SDAIA - National Strategy for Data & AI / Government Cloud (Saudi Arabia)"
+    id: "sdaia_sa"
+    enabled: false
+    base_url: "https://sdaia.gov.sa"
+    start_paths:
+      - "/en/SDAIA/SdaiaStrategies/Pages/NationalStrategyForDataAndAI.aspx"
+      - "/en/Services/Pages/Deem.aspx"
+    region:
+      - "middle_east"
+      - "saudi_arabia"
+    category: "policy"
+    tags:
+      - "planning"
+      - "mandates"
+    policy_types:
+      - "strategy"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (digital-infra-strategies wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (digital-infra-strategies.md #8). SDAIA is Saudi Arabia's
+      national data/AI/cloud authority (distinct from the energy ministry)
+      and sets data-sovereignty and government-cloud hosting requirements
+      shaping where national data centres may be sited. Distinct from the
+      already-covered Ministry of Energy/SEEC entries in saudi_arabia.yaml.
+      A specific sub-path (/en/SDAIA/about/Pages/RegulationsAndPolicies.aspx)
+      returned a WAF/access-denied block during verification - avoid that
+      path, use the two start_paths above. Region note: "mena" is not in
+      VALID_REGIONS (only "middle_east" is); mapped accordingly. Append to
+      saudi_arabia.yaml. verified: yes for the two start_paths listed
+      (HTTP 200, content confirmed); explicitly NOT verified for
+      RegulationsAndPolicies.aspx (blocked) - do not use that path.
+
+  - name: "UK DSIT - Data Centres as Critical National Infrastructure"
+    id: "dsit_datacentres_uk"
+    enabled: false
+    base_url: "https://www.gov.uk"
+    start_paths:
+      - "/government/publications/cyber-security-and-resilience-network-and-information-systems-bill-factsheets/data-centres"
+      - "/government/news/data-centres-to-be-given-massive-boost-and-protections-from-cyber-criminals-and-it-blackouts"
+    region:
+      - "uk"
+    category: "policy"
+    tags:
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (digital-infra-strategies wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (digital-infra-strategies.md #9). Department for Science,
+      Innovation and Technology (NOT DESNZ, already covered) designated
+      data centres as Critical National Infrastructure (Sept 2024); per the
+      June 2026 policy paper, brings >=1MW-load DCs under NIS Regulations
+      with Ofcom as operational regulator - a distinct digital-ministry
+      policy track from the existing heat-network/DESNZ content in
+      uk.yaml. gov.uk already present many times in uk.yaml for other
+      departments/paths - this is a NEW start_path under the same shared
+      domain, append to the existing uk.yaml gov.uk block rather than a
+      fresh top-level entry. verified: yes - HTTP 200, 1MW threshold/Ofcom
+      role/NIS designation confirmed from the June 30 2026 policy paper.
+
+  - name: "Australia DTA - Hosting Certification Framework"
+    id: "dta_hcf_au"
+    enabled: false
+    base_url: "https://www.dta.gov.au"
+    start_paths:
+      - "/articles/new-data-centre-panel"
+    region:
+      - "australia"
+    category: "policy"
+    tags:
+      - "mandates"
+      - "reporting"
+      - "efficiency"
+    policy_types:
+      - "standard"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (digital-infra-strategies wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (digital-infra-strategies.md #10 - LOWER CONFIDENCE, PARTIAL
+      VERIFICATION ONLY). DTA's Hosting Certification Framework reportedly
+      has mandatory sustainability reporting for government-facing DC
+      providers (environmental ratings, power consumption, renewable-
+      energy percentage) per independent secondary sources
+      (DataCenterDynamics, Lexology, Holding Redlich, NextDC blog), but no
+      primary-source page was directly rendered this session - all three
+      relevant .gov.au hostnames (this one, hostingcertification.gov.au,
+      architecture.digital.gov.au) confirmed live via HTTP 301 redirect
+      checks, but every content-fetch attempt timed out from the research
+      environment. Australia currently has only NSW/SA state energy
+      entries, no federal digital-agency entry. RECOMMEND BROWSER-BASED
+      HUMAN VERIFICATION BEFORE ENABLING. Append to australia.yaml if
+      confirmed. verified: partial - domain liveness confirmed, page
+      content not independently rendered this session.

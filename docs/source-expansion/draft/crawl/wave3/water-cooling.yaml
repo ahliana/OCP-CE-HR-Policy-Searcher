@@ -1,0 +1,329 @@
+# =============================================================================
+# DRAFT WAVE 3 — Water & Cooling Regulation (tier-b crawl domains only)
+# Source: docs/source-expansion/regions-wave3/water-cooling.md
+# Every entry below is `enabled: false`. All 9 candidates in the source file
+# are tier-b; no tier-a/tier-c candidates in this file.
+#
+# Enum note: VALID_TAGS (src/core/config.py) has no water-specific tag at
+# all ("waste_heat"/"district_heating"/"pue_limits" etc. are energy-only).
+# Two entries below want tags not in the current enum:
+#   - "water_quality" (candidate #2, NL Unie van Waterschappen) — mapped to
+#     "planning" (closest existing tag), original intent kept in notes.
+#   - "wue" (candidate #5, Singapore PUB) — mapped to "efficiency" (closest
+#     existing tag; Water Use Efficiency is the water-side analogue of PUE).
+# Recommend a small VALID_TAGS addition (e.g. "water_use" or
+# "water_stewardship") given this is a newly-opened regulatory dimension for
+# the project, not a one-off.
+#
+# Append-to targets (per-file notes below repeat this):
+#   - config/domains/us/virginia.yaml    -> va_deq_water
+#   - config/domains/us/arizona.yaml     -> az_water_resources
+#   - config/domains/us/texas.yaml       -> tx_tceq_water_rights
+#   - config/domains/us/california.yaml  -> ca_dwr_water_use, ca_swrcb_water_rulemaking
+#   - config/domains/netherlands.yaml    -> nl_unie_waterschappen_dc, nl_hhnk_datacenters
+#   - config/domains/ireland.yaml        -> ie_epa_water_abstraction
+#   - config/domains/apac.yaml           -> sg_pub_water_efficiency
+#
+# Cross-reference: `ie_epa_water_abstraction` (base_url epa.ie) is additive
+# alongside wave-3 permitting-eia.yaml's `epa_ie_ied` (same host, different
+# licensing program: water abstraction vs. industrial-emissions licensing).
+# `va_deq_water` (deq.virginia.gov) is additive alongside permitting-eia.yaml's
+# `va_deq_dc_air_permits` (same agency, water withdrawal vs. air permits).
+# `tx_tceq_water_rights` (tceq.texas.gov) is additive alongside
+# permitting-eia.yaml's `tceq_air_generators` (same agency, water rights vs.
+# air permitting for generators). None of these are id/base_url+start_path
+# duplicates — different programs, different start_paths.
+# =============================================================================
+
+domains:
+  - name: "Virginia Department of Environmental Quality - Water Withdrawal"
+    id: "va_deq_water"
+    enabled: false
+    base_url: "https://www.deq.virginia.gov"
+    start_paths:
+      - "/water/water-withdrawal"
+      - "/water/water-quantity/water-supply-planning/water-withdrawal-reporting"
+    region:
+      - "us"
+      - "us_states"
+      - "virginia"
+    category: "environmental_agency"
+    tags:
+      - "mandates"
+      - "reporting"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "law"
+    language: "en"
+    verified_by: "source-expansion-research (water-cooling wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (water-cooling.md #1). Ground Water Management Act of 1992 +
+      Groundwater Withdrawal Regulations (permits at 300,000+ gal/month);
+      Virginia Water Protection Permit Program for surface water; this page
+      is the DEQ side of 2026 HB589 (utility-level data-center water-sale
+      reporting from Jan 1 2027). Append to config/domains/us/virginia.yaml.
+      Additive alongside permitting-eia.yaml's va_deq_dc_air_permits (same
+      agency, air permits not water). verified: yes - direct fetch got HTTP
+      403 (bot protection); a real browser render loaded it cleanly and
+      confirmed on-topic content. Recommend requires_playwright: true or a
+      browser User-Agent at crawl-config time.
+    requires_playwright: true
+
+  - name: "Dutch Water Authorities Association (Unie van Waterschappen) - Datacenters"
+    id: "nl_unie_waterschappen_dc"
+    enabled: false
+    base_url: "https://unievanwaterschappen.nl"
+    start_paths:
+      - "/standpunten/datacenters/"
+    region:
+      - "eu"
+      - "eu_west"
+      - "netherlands"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "guidance"
+      - "report"
+    language: "nl"
+    verified_by: "source-expansion-research (water-cooling wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (water-cooling.md #2). Umbrella body for NL's 21 regional
+      waterschappen (statutory water-quantity/quality authorities). Explicit
+      policy position tying data-center cooling-water discharge to Water
+      Framework Directive quality targets; calls for national + decentralized
+      legal frameworks. Append to config/domains/netherlands.yaml.
+      Enum note: original tag "water_quality" is not in VALID_TAGS; mapped
+      to "planning" here (closest existing tag) - see file header.
+      verified: yes - full page text fetched directly, on-topic quote
+      captured.
+
+  - name: "HHNK Regional Water Authority - Datacenters Noord-Holland"
+    id: "nl_hhnk_datacenters"
+    enabled: false
+    base_url: "https://www.hhnk.nl"
+    start_paths:
+      - "/_flysystem/media/datacenters-2.pdf"
+    region:
+      - "eu"
+      - "eu_west"
+      - "netherlands"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "guidance"
+      - "report"
+    language: "nl"
+    max_pages: 5
+    verified_by: "source-expansion-research (water-cooling wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (water-cooling.md #3). The actual permitting authority for the
+      Microsoft/Google Wieringermeer cluster; PDF documents discharge-permit
+      conditions (salt-content limits, no-chemicals condition, drought
+      priority ranking placing drinking water above cooling water). Append
+      to config/domains/netherlands.yaml. Single-PDF domain - keep max_pages
+      low. verified: yes - PDF fetched (200, 179.2KB); full text extraction
+      needs OCR/PDF parser at crawl time (same as any PDF source in this
+      project); resolution + on-topic identity confirmed via the file itself
+      plus a corroborating search snippet.
+
+  - name: "Ireland Environmental Protection Agency - Water Abstraction"
+    id: "ie_epa_water_abstraction"
+    enabled: false
+    base_url: "https://www.epa.ie"
+    start_paths:
+      - "/our-services/licensing/freshwater--marine/water-abstraction/"
+      - "/our-services/licensing/waste-water/"
+    region:
+      - "eu"
+      - "eu_west"
+      - "ireland"
+    category: "environmental_agency"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (water-cooling wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (water-cooling.md #4). Water Environment (Abstractions and
+      Associated Impoundments) Act 2022 + 2024 Regulations (in force
+      Aug 28 2024), transposing the EU Water Framework Directive;
+      registration/licensing above 25 m3/day. Fills a real gap - no water
+      regulator existed anywhere in ireland.yaml (only SEAI/gov.ie/CRU).
+      Append to config/domains/ireland.yaml. Additive alongside
+      permitting-eia.yaml's epa_ie_ied (same host, industrial-emissions
+      licensing program instead of water abstraction). verified: yes -
+      fetched directly, statute names/dates/threshold confirmed.
+
+  - name: "PUB Singapore - Mandatory Water Efficiency Management Practices"
+    id: "sg_pub_water_efficiency"
+    enabled: false
+    base_url: "https://www.pub.gov.sg"
+    start_paths:
+      - "/Public/WaterLoop/Water-Conservation/Mandatory-Water-Efficiency-Requirements"
+      - "/-/media/Images/Feature/Content-Pages/Public/Singapore-Water-Loop/Water-Conversation/Mandatory-Water-Efficiency-Requirements/Guide-on-Water-Efficiency-Management-Practices.pdf"
+    region:
+      - "apac"
+      - "singapore"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "reporting"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (water-cooling wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (water-cooling.md #5). Mandatory Water Efficiency Management
+      Practices (MWEMP, since 2015) - data centers/large water users above
+      60,000 m3/year must submit annual consumption, a Water Efficiency
+      Management Plan, and install sub-meters; feeds Singapore's sectoral
+      WUE benchmark. Append to config/domains/apac.yaml (new Singapore
+      water-agency section, alongside existing imda_sg/BCA entries - PUB is
+      the water regulator, not previously covered). Enum note: original tag
+      "wue" is not in VALID_TAGS; mapped to "efficiency" here - see file
+      header. verified: yes via the linked PDF guide (200, downloaded,
+      content confirms thresholds/reporting); HTML landing page confirmed
+      live via browser render but is client-rendered.
+    requires_playwright: true
+
+  - name: "Arizona Department of Water Resources - Assured and Adequate Water Supply"
+    id: "az_water_resources"
+    enabled: false
+    base_url: "https://www.azwater.gov"
+    start_paths:
+      - "/assured-and-adequate-water-supply"
+      - "/laws-rules-policies"
+    region:
+      - "us"
+      - "us_states"
+      - "arizona"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (water-cooling wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (water-cooling.md #6). Assured Water Supply program requires a
+      100-year water-supply demonstration per Active Management Area;
+      Arizona's industrial users (incl. data centers) sit outside the 2023
+      groundwater moratorium - the regulatory gap behind the Project Blue
+      (Tucson) well-permit controversy ADWR itself approved in 2026. Append
+      to config/domains/us/arizona.yaml (currently only Corp Commission +
+      Legislature). verified: yes, via interactive browser render only -
+      site is behind a Cloudflare bot-challenge; direct curl/WebFetch both
+      failed. Must set requires_playwright: true.
+    requires_playwright: true
+
+  - name: "Texas Commission on Environmental Quality - Water Rights"
+    id: "tx_tceq_water_rights"
+    enabled: false
+    base_url: "https://www.tceq.texas.gov"
+    start_paths:
+      - "/permitting/water_rights/wr-permitting"
+      - "/permitting/water_rights/wr-permitting/water-right-permits-annual-water-use-report"
+    region:
+      - "us"
+      - "us_states"
+      - "texas"
+    category: "regulatory"
+    tags:
+      - "reporting"
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (water-cooling wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (water-cooling.md #7). Surface-water rights permitting, drought
+      contingency plans, watermaster programs, and the annual Water Use
+      Report system; also administers reclaimed-water agreements for
+      industrial cooling. Texas legislators are actively pressing TCEQ over
+      data-center water-use non-disclosure. Append to
+      config/domains/us/texas.yaml (currently only SECO + Legislature).
+      Additive alongside permitting-eia.yaml's tceq_air_generators (same
+      agency, air permitting for generators instead of water rights).
+      verified: yes - fetched directly, on-topic content confirmed.
+
+  - name: "California Department of Water Resources - Water Use Efficiency"
+    id: "ca_dwr_water_use"
+    enabled: false
+    base_url: "https://water.ca.gov"
+    start_paths:
+      - "/Programs/Water-Use-And-Efficiency/Land-And-Water-Use"
+      - "/wateruseefficiency/"
+    region:
+      - "us"
+      - "us_states"
+      - "california"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "research"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (water-cooling wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (water-cooling.md #8). Forward-looking placeholder: DWR is the
+      agency pending AB 2469/AB 2619 requires to publish a data-center
+      water-use definition and annual consumption estimate by Jun 30 2028.
+      Does NOT yet mention data centers by name - flagged explicitly; ranked
+      lower for that reason. Append to config/domains/us/california.yaml
+      (currently only CEC/CPUC/CARB/CAISO, zero water-agency coverage).
+      verified: yes for general CII/water-use-efficiency content; explicitly
+      NOT yet verified for DC-specific mentions - recommend re-check in 2028.
+
+  - name: "California SWRCB - Water Measurement and Reporting Regulations Rulemaking"
+    id: "ca_swrcb_water_rulemaking"
+    enabled: false
+    base_url: "https://www.waterboards.ca.gov"
+    start_paths:
+      - "/waterrights/water_issues/programs/diversion_use/rulemaking.html"
+      - "/conservation/water-use-explorer/"
+    region:
+      - "us"
+      - "us_states"
+      - "california"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (water-cooling wave-3 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 3 (water-cooling.md #9). Pairs with ca_dwr_water_use (#8) as the
+      other half of California's forward data-center water mandate; SWRCB
+      must adopt a binding CII water-use classification for data centers,
+      separate from other CII users, by Dec 31 2029. Water Use Explorer tool
+      covers CII generally under AB 1668/SB 606 (no DC mention yet, same
+      caveat as #8). Append to config/domains/us/california.yaml. verified:
+      yes - both pages live; Water Use Explorer sub-page directly fetched
+      and confirmed on-topic for CII/AB 1668 (no DC mention yet).
