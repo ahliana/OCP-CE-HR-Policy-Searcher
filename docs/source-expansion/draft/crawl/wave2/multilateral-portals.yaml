@@ -1,0 +1,265 @@
+# =============================================================================
+# DRAFT WAVE 2 — Multilateral/Regional Bodies (tier-b crawl candidates only).
+# Source: docs/source-expansion/regions-wave2/multilateral-portals.md, Target 1
+# ("Verified candidates" #1-8). Target 1's #9-10 (Climate Watch NDC, Eurostat)
+# and ALL of Target 2 (#11-18, national open-data portal APIs) are tier-c —
+# see docs/source-expansion/draft/new-clients-wave2.md instead.
+# Every entry below is `enabled: false`.
+#
+# All 8 entries append to a NEW config/domains/supranational.yaml file —
+# the same file wave 1 already recommended for IEA 4E EDNA / Energy
+# Community / C40 Knowledge Hub / ISO-IEC 30134 (see draft/crawl/
+# supranational.yaml), and the same file this wave's grid-operators.yaml
+# and standards-bodies.yaml also point ENTSO-E / ASHRAE / IEC Webstore /
+# Green Grid / Uptime Institute at.
+# =============================================================================
+
+domains:
+  - name: "ECREEE - ECOWAS Centre for Renewable Energy and Energy Efficiency"
+    id: "ecreee_regional"
+    enabled: false
+    base_url: "https://www.ecreee.org"
+    start_paths:
+      - "/energy-efficiency/"
+      - "/regional-policies/"
+      - "/regional-progress-reports/"
+      - "/country-documents/"
+    region:
+      - "africa"
+    category: "coordination_body"
+    tags:
+      - "efficiency"
+      - "planning"
+      - "research"
+    policy_types:
+      - "report"
+      - "guidance"
+      - "directive"
+    language: "en"
+    notes: |
+      Wave 2 (multilateral-portals.md Target 1 #1). Direct regional
+      counterpart to the already-shipped RCREEE (Arab states) and AFREC
+      (AU) entries — ECOWAS-specific (15 West African member states), a
+      dedicated Energy Efficiency section holding consolidated regional
+      policy documents, not just renewables. Also links to eis.ecowas.int
+      ("ECOWREX" data platform) — worth a follow-up pass for a possible
+      API. verified: yes — fetched directly, confirmed title and all
+      named sections live.
+
+  - name: "EACREEE - East African Centre of Excellence for Renewable Energy and Efficiency"
+    id: "eacreee_regional"
+    enabled: false
+    base_url: "https://www.eacreee.org"
+    start_paths:
+      - "/content/activities-and-services"
+      - "/publications"
+      - "/documents"
+    region:
+      - "africa"
+    category: "coordination_body"
+    tags:
+      - "efficiency"
+      - "planning"
+      - "research"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (multilateral-portals.md Target 1 #2). East African Community
+      regional energy body — a region-wide Minimum Energy Performance
+      Standards (MEPS) program for refrigerating appliances and air
+      conditioners, directly in-taxonomy (cooling-efficiency standard).
+      verified: yes — fetched directly, confirmed "Draft Regional
+      Renewable Energy Policy and Transboundary" framework, MEPS program,
+      2025-2030 strategy document.
+
+  - name: "CCREEE - Caribbean Centre for Renewable Energy and Energy Efficiency"
+    id: "ccreee_regional"
+    enabled: false
+    base_url: "https://ccreee.org"
+    start_paths:
+      - "/all-strategic-documents/"
+      - "/all-publications/"
+      - "/our-work/"
+    region:
+      - "north_america"
+    category: "coordination_body"
+    tags:
+      - "efficiency"
+      - "planning"
+      - "research"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (multilateral-portals.md Target 1 #3). CARICOM regional
+      energy body — fulfills the brief's CARICOM ask directly, more
+      specific than the general CARICOM secretariat site. region mapped to
+      "north_america" as the closest VALID_REGIONS value (its own
+      docstring says "US, Canada, Mexico" — imperfect fit); Caribbean/
+      CARICOM has no dedicated bucket, recommend adding one. Energy Report
+      Cards per member state, Integrated Resource and Resilience Plan
+      (IRRP) resource confirmed live. verified: yes — fetched directly,
+      confirmed title and all named sections.
+
+  - name: "SACREEE - SADC Centre for Renewable Energy and Energy Efficiency"
+    id: "sacreee_regional"
+    enabled: false
+    base_url: "https://www.sacreee.org"
+    start_paths:
+      - "/services/policy-advisory"
+      - "/resources/publications"
+      - "/sekh"
+    region:
+      - "africa"
+    category: "coordination_body"
+    tags:
+      - "efficiency"
+      - "planning"
+      - "research"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (multilateral-portals.md Target 1 #4). SADC (Southern African
+      Development Community) regional energy body — the SADC Industrial
+      Energy Efficiency Programme (SIEEP) is its flagship policy/
+      regulatory-framework project. Completes the Africa regional-body
+      set alongside ECREEE/EACREEE/AFREC/RCREEE, one per major African
+      regional economic community. verified: yes — fetched directly,
+      confirmed Vision & Mission, Services > Policy Advisory, SEKH
+      (Sustainable Energy Knowledge Hub), Publications sections.
+
+  - name: "OLADE - Latin American and Caribbean Energy Organization"
+    id: "olade_regional"
+    enabled: false
+    base_url: "https://www.olade.org"
+    start_paths:
+      - "/en/"
+    region:
+      - "south_america"
+    category: "coordination_body"
+    tags:
+      - "efficiency"
+      - "research"
+      - "reporting"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "es"
+    notes: |
+      Wave 2 (multilateral-portals.md Target 1 #5). 27-member Ibero-
+      American/LatAm energy IGO (Quito, Ecuador) — the brief's explicit
+      OLADE ask. Publishes Energy Outlook reports, the ENERLAC journal,
+      cross-country statistical series (1970-present) across all 27
+      member states. Has an English section (/en/) and a SieLAC
+      statistical portal (not confirmed as an API this pass — likely a
+      web UI, follow-up pass needed before considering tier-c). verified:
+      yes — fetched /en/ directly, confirmed title, SieLAC/ENERLAC/Energy
+      Outlook references.
+
+  - name: "Cool Coalition (UNEP) - Cooling Policy Hub"
+    id: "cool_coalition"
+    enabled: false
+    base_url: "https://coolcoalition.org"
+    start_paths:
+      - "/knowledge-hub"
+      - "/working-groups"
+      - "/global-cooling-pledge"
+    region:
+      - "eu"
+    category: "district_heating"
+    tags:
+      - "efficiency"
+      - "planning"
+      - "carbon"
+    policy_types:
+      - "guidance"
+      - "report"
+      - "standard"
+    language: "en"
+    notes: |
+      Wave 2 (multilateral-portals.md Target 1 #6). UNEP-hosted global
+      coalition (governments, cities, business) — the brief's explicit
+      district-cooling/cooling-specific ask. Tracks National Cooling
+      Action Plans (NCAPs) by country, a Policy Toolkit for Sustainable
+      Cooling, MEPS/procurement working groups, Global Cooling Pledge
+      (250+ signatories) — the closest global equivalent to a
+      district-cooling regulator index. CATEGORY NOTE: no "district_cooling"
+      value exists in VALID_CATEGORIES today — mapped to the closest
+      allowed value, "district_heating" (heat network authorities), which
+      is thematically close but not exact; recommend adding
+      "district_cooling" as a dedicated category. Region ideally
+      ["supranational","global"] once those enum values land (flagged
+      wave 1); using "eu" as a placeholder is imprecise for a genuinely
+      global body — new supranational.yaml file recommended instead of
+      forcing a country/regional bucket. verified: yes — fetched directly,
+      confirmed title and all named working groups/pledge count.
+
+  - name: "Climate Change Laws of the World (Grantham Research Institute / LSE)"
+    id: "climate_laws_lse"
+    enabled: false
+    base_url: "https://climate-laws.org"
+    start_paths:
+      - "/"
+    region:
+      - "eu"
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "research"
+      - "reporting"
+    policy_types:
+      - "law"
+      - "report"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (multilateral-portals.md Target 1 #7). 196-country climate-law
+      database, LSE Grantham Research Institute, now powered by Climate
+      Policy Radar's NLP search — the brief's explicit "LSE Grantham has
+      data" ask. NOT the same as Climate Policy Radar's own API, which
+      wave 1 already confirmed is "coming soon," not live — this proposes
+      crawling the public search/browse website itself. Likely
+      JS-rendered (React-style) search results — requires_playwright is a
+      reasonable default pending confirmation; the exact filtered-search
+      URL pattern (e.g. /search?q=energy+efficiency) was not independently
+      confirmed this pass. Over 7,000 climate laws/policies/UNFCCC
+      submissions indexed; a bulk-export "Download our data" form exists
+      but was not tested. Recommend region ["supranational","global"] once
+      those enum values land; new supranational.yaml file recommended.
+      verified: yes, with caveat — homepage/search-landing copy confirmed
+      live; exact filtered-search URL and no-JS rendering NOT confirmed.
+
+  - name: "SEforALL - Research and Analysis"
+    id: "seforall_research"
+    enabled: false
+    base_url: "https://www.seforall.org"
+    start_paths:
+      - "/our-work/research-analysis"
+    region:
+      - "eu"
+    category: "standards"
+    tags:
+      - "efficiency"
+      - "research"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (multilateral-portals.md Target 1 #8). UN-affiliated global
+      SDG7 body — the brief's explicit SEforALL ask. 181 research outputs
+      filterable by programme area/SDG7 target/region/country — a
+      publication hub, not a queryable database or API; no downloadable
+      structured dataset or policy tracker found. Lower priority than the
+      district-cooling-specific Cool Coalition entry above, but a
+      legitimate, currently-updated global energy-access/efficiency
+      knowledge hub (cooling-sector "Chilling Prospects" series, eCooking
+      guidance). Recommend region ["supranational","global"] once those
+      enum values land; new supranational.yaml file recommended.
+      verified: yes — fetched directly, confirmed title, 181 outputs,
+      cooling/eCooking publications named explicitly.

@@ -1,0 +1,1079 @@
+# =============================================================================
+# DRAFT WAVE 2 — Countries Not Yet Covered (tier-b crawl domains only — this
+# source file produced 0 tier-a and 0 tier-c candidates; 39 verified).
+# Source: docs/source-expansion/regions-wave2/countries-wave2.md
+# Every entry below is `enabled: false`.
+#
+# Region-mapping note: VALID_REGIONS (src/core/config.py) has no bucket for
+# Central Asia or the Caucasus. Per the task's "map to closest allowed + flag"
+# instruction: Central Asia (Kazakhstan, Uzbekistan) is mapped here to "apac"
+# (closest broad Asian bucket); Caucasus (Azerbaijan, Georgia, Armenia) is
+# mapped to "europe" (Council-of-Europe-adjacent framing, same logic used for
+# Balkan states below). Both are imprecise placeholders — recommend adding
+# dedicated "central_asia" and "caucasus" VALID_REGIONS values (see report).
+# Country identity is preserved in every id/name/notes regardless.
+# Balkans + Moldova use the existing valid ["europe","eu_east"] pairing
+# (same convention wave-1's eu-uncovered.yaml used for Serbia/Ukraine).
+#
+# One new config/domains/<country>.yaml file recommended per country below
+# (established one-country-per-file convention, e.g. nigeria.yaml/ghana.yaml).
+# =============================================================================
+
+domains:
+  - name: "APRUE - National Agency for the Promotion and Rationalization of Energy Use (Algeria)"
+    id: "aprue_dz"
+    enabled: false
+    base_url: "https://aprue.org.dz"
+    start_paths:
+      - "/en/public-programs/national-energy-management-program/industry/"
+      - "/en/public-programs/national-energy-management-program/buildings/"
+      - "/en/legislative-and-regulatory-texts/"
+    region:
+      - "africa"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+      - "planning"
+      - "research"
+    policy_types:
+      - "regulation"
+      - "standard"
+      - "guidance"
+      - "report"
+    language: "fr"
+    notes: |
+      Wave 2 (countries-wave2.md #1). Highest-value find of the Africa
+      sub-batch. Dedicated national efficiency implementation agency since
+      1985 — National Energy Management Program (industry/buildings/
+      transport), Energy Management Observatory, approved-energy-auditor
+      registry. robots.txt permissive. New file config/domains/algeria.yaml.
+      verified: yes — WebFetch confirmed all named sections.
+
+  - name: "Adilet Legal Information System (Ministry of Justice, Kazakhstan)"
+    id: "adilet_zan_kz"
+    enabled: false
+    base_url: "https://adilet.zan.kz"
+    start_paths:
+      - "/eng/docs/Z1200000541"
+      - "/eng/docs/Z2300000193"
+    region:
+      - "apac"
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "efficiency"
+      - "reporting"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #2). Region: Central Asia, no VALID_REGIONS
+      bucket exists — mapped to "apac" as closest allowed (see file header;
+      recommend adding "central_asia"). Kazakhstan's canonical legal
+      database; the one country in this wave with an explicit, named
+      data-center-energy policy regime (electricity price zones, state
+      crypto-mining registry, quarterly MW-consumption disclosure at data
+      centers) via Law No. 194-VII. New file config/domains/kazakhstan.yaml.
+      verified: partial — WebFetch hit a TLS certificate-chain error on
+      every attempt; content strongly corroborated via WebSearch (direct
+      quotes of the operative law text). Flag for a human re-check with a
+      proper cert store before enabling.
+
+  - name: "ANME - National Agency for Energy Management (Tunisia)"
+    id: "anme_tn"
+    enabled: false
+    base_url: "https://www.anme.tn"
+    start_paths:
+      - "/fr/content/industrie"
+      - "/cadre-reglementaire"
+    region:
+      - "africa"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+      - "incentives"
+      - "planning"
+    policy_types:
+      - "law"
+      - "regulation"
+      - "standard"
+      - "incentive"
+    language: "fr"
+    notes: |
+      Wave 2 (countries-wave2.md #3). Law No. 2009-7 (mandatory periodic
+      energy audits for large consumers) plus implementing decree, National
+      Energy Management Fund, appliance labeling, thermal building
+      regulation, 2030 target (30% demand reduction). Drupal robots.txt
+      blocks only /admin//search/. New file config/domains/tunisia.yaml.
+      verified: yes — WebFetch confirmed "Cadre Reglementaire" section,
+      certified-auditor lists, 2030 targets.
+
+  - name: "Ministry of Energy of Azerbaijan - Laws"
+    id: "minenergy_az_laws"
+    enabled: false
+    base_url: "https://minenergy.gov.az"
+    start_paths:
+      - "/en/qanunlar"
+    region:
+      - "europe"
+    category: "energy_ministry"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "law"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #4). Region: Caucasus, no VALID_REGIONS
+      bucket exists — mapped to "europe" as closest allowed (see file
+      header; recommend adding "caucasus"). ~20 laws listed directly,
+      including Law No. 359-VIQ (Efficient Use of Energy Resources and
+      Energy Efficiency, in force 2022) and the Electricity Law. New file
+      config/domains/azerbaijan.yaml. verified: yes — WebFetch confirmed
+      title, listed law numbers/dates, pagination.
+
+  - name: "AEME - Agency for Energy Economy and Management (Senegal)"
+    id: "aeme_sn"
+    enabled: false
+    base_url: "https://www.aeme.sn"
+    start_paths:
+      - "/textes-legislatifs-et-reglementaires"
+      - "/normes-sur-la-maitrise-de-lenergie"
+    region:
+      - "africa"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "standard"
+      - "guidance"
+      - "report"
+    language: "fr"
+    notes: |
+      Wave 2 (countries-wave2.md #5). Operational arm of Senegal's national
+      energy management policy since 2011 — dedicated legislative-texts and
+      efficiency-norms sections, plus a national 28% energy-savings
+      assessment. WordPress robots.txt blocks only /wp-admin/. New file
+      config/domains/senegal.yaml. verified: yes — WebFetch confirmed both
+      named sections plus Reports/Studies.
+
+  - name: "Energy Regulatory Agency of Azerbaijan (AERA) - Energy Efficiency"
+    id: "regulator_gov_az"
+    enabled: false
+    base_url: "https://regulator.gov.az"
+    start_paths:
+      - "/en/elektrik/enerji-semereliliyi-ve-enerjiye-qenaet"
+    region:
+      - "europe"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "efficiency"
+      - "district_heating"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #6). Region: Caucasus, no VALID_REGIONS
+      bucket — mapped to "europe" (see file header note). Independent
+      regulator's energy-efficiency page — smart heat/gas/electricity
+      metering mandates, consumer heat-consumption disclosure rules,
+      Energy Efficiency Fund. Append to config/domains/azerbaijan.yaml
+      alongside minenergy_az_laws. verified: yes — WebFetch confirmed
+      title and smart-heat-meter/EE-Fund content.
+
+  - name: "DGE - Directorate General of Energy (Cote d'Ivoire)"
+    id: "dge_ci"
+    enabled: false
+    base_url: "https://www.dgenergie.ci"
+    start_paths:
+      - "/lois-et-reglements"
+      - "/documentation"
+    region:
+      - "africa"
+    category: "energy_ministry"
+    tags:
+      - "mandates"
+      - "efficiency"
+      - "reporting"
+    policy_types:
+      - "law"
+      - "regulation"
+      - "report"
+    language: "fr"
+    notes: |
+      Wave 2 (countries-wave2.md #7). Downloadable mandatory-energy-audit
+      arrete ("Arrete Interministeriel No.156/MMPE/MCLU/MT/MINEDDTE/MCI
+      du 23 Avril 2024") plus a full Laws/Decrees/Orders and Reports/
+      Statistics archive. robots.txt returned 404 (unrestricted). New file
+      config/domains/cote_divoire.yaml. verified: yes — WebFetch confirmed
+      the LOIS & REGLEMENTS section, cited the specific arrete by number.
+
+  - name: "ANRE - National Agency for Energy Regulation (Moldova)"
+    id: "anre_md"
+    enabled: false
+    base_url: "https://anre.md"
+    start_paths:
+      - "/en"
+    region:
+      - "europe"
+      - "eu_east"
+    category: "district_heating"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "law"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #8). Full tariff-setting authority for
+      Chisinau district heating; dedicated "Regulatory framework" section
+      (EU directives, government decisions, laws, ANRE decisions). New file
+      config/domains/moldova.yaml. verified: yes — WebFetch confirmed
+      title, Consumer/thermal-energy section, Regulatory framework nav.
+
+  - name: "NEECA - National Energy Efficiency and Conservation Authority (Pakistan)"
+    id: "neeca_pk"
+    enabled: false
+    base_url: "https://www.neeca.gov.pk"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "strategy"
+      - "regulation"
+      - "standard"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #9). Sharpest on-topic hit in the South
+      Asia batch — 2023 Energy Conservation Building Code, mandatory
+      audits/energy-labeling regime (PELR). Site uses CMS-hashed detail
+      URLs — confirm exact policy-doc paths at build time; robots.txt not
+      checked. New file config/domains/pakistan.yaml. verified: yes —
+      WebFetch confirmed ECBC-2023, National EE and Conservation Policy
+      2023, Action Plan 2023-30, PELR, sector pages.
+
+  - name: "SREDA - Sustainable and Renewable Energy Development Authority (Bangladesh)"
+    id: "sreda_bd"
+    enabled: false
+    base_url: "https://sreda.gov.bd"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "law"
+      - "regulation"
+      - "strategy"
+    language: "bn"
+    notes: |
+      Wave 2 (countries-wave2.md #10). Statutory nodal agency for
+      demand-side energy efficiency under the Energy Efficiency and
+      Conservation Rules 2014/Master Plan — office-building energy
+      management guidelines, mandatory audits, EE labeling. Exact
+      Bengali-labeled nav slugs to confirm at build time; robots.txt not
+      checked. New file config/domains/bangladesh.yaml. verified: yes —
+      WebFetch confirmed dedicated EE&C nav, Laws/Rules/Regulations/
+      Policies section.
+
+  - name: "Ministry of Energy, Mining and Mineral Resources (North Macedonia)"
+    id: "energy_gov_mk"
+    enabled: false
+    base_url: "https://energy.gov.mk"
+    start_paths:
+      - "/en-GB"
+    region:
+      - "europe"
+      - "eu_east"
+    category: "energy_ministry"
+    tags:
+      - "mandates"
+      - "efficiency"
+      - "incentives"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #11). Brand-new ministry (est. June 2024),
+      zero prior coverage anywhere in this project. Dedicated Laws/Draft
+      Laws nav, a live Energy Efficiency Fund rollout, a vulnerable-
+      consumer efficiency voucher program. New file
+      config/domains/north_macedonia.yaml. verified: yes — WebFetch
+      confirmed title, Regulations/Documents nav, EE Fund content.
+
+  - name: "State Electricity Regulatory Commission (SERC, Bosnia and Herzegovina)"
+    id: "serc_ba"
+    enabled: false
+    base_url: "https://www.derk.ba"
+    start_paths:
+      - "/en"
+      - "/en/legislation"
+    region:
+      - "europe"
+      - "eu_east"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #12). State-level electricity regulator
+      (BiH's constitutional split of energy between state/entity levels) —
+      detailed Legislation page listing named transmission/system-operator
+      laws, tariff procedures, licensing. New file
+      config/domains/bosnia_and_herzegovina.yaml. verified: yes — WebFetch
+      confirmed title, itemized law list, dated "last updated July 16,
+      2026."
+
+  - name: "Energy Regulation Board (ERB, Zambia)"
+    id: "erb_zm"
+    enabled: false
+    base_url: "https://www.erb.org.zm"
+    start_paths:
+      - "/regulation"
+      - "/documents"
+      - "/statistics"
+    region:
+      - "africa"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "law"
+      - "regulation"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #13). Statutory regulator under the
+      Energy Regulation Act 2019 (downloadable), searchable Documents
+      library, active Newsroom with dated regulatory directives ("DIRECTIVE
+      NO.1 OF 2025"). WordPress robots.txt blocks only /wp-admin/. New file
+      config/domains/zambia.yaml. verified: yes — WebFetch confirmed Act
+      2019 PDF link, Documents/Statistics/Newsroom sections.
+
+  - name: "Ministry of Energy (Zambia)"
+    id: "moe_zm"
+    enabled: false
+    base_url: "https://www.moe.gov.zm"
+    start_paths:
+      - "/"
+    region:
+      - "africa"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "planning"
+      - "reporting"
+    policy_types:
+      - "strategy"
+      - "report"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #14). Hosts Zambia's Energy Efficiency
+      Strategy and Action Plan 2022 as a direct-download PDF — a rare
+      full national EE strategy document find. robots.txt not checked this
+      pass. Append to config/domains/zambia.yaml alongside erb_zm.
+      verified: yes — PDF fetched successfully (binary confirmed, not a
+      404); homepage separately confirmed live.
+
+  - name: "ERC - Energy Regulatory Commission (Mongolia)"
+    id: "erc_mn"
+    enabled: false
+    base_url: "https://erc.gov.mn"
+    start_paths:
+      - "/en/files?tag=16"
+      - "/en/files?tag=17"
+      - "/en/"
+    region:
+      - "apac"
+    category: "regulatory"
+    tags:
+      - "district_heating"
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "law"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #15). Only cold-climate country in the
+      South/SE-Asia batch — regulates BOTH electricity and district-heat
+      tariffs, actively working a heat-meter transition for Ulaanbaatar's
+      DH system, dedicated Energy Conservation section. Squarely on the
+      district-heating taxonomy. New file config/domains/mongolia.yaml.
+      verified: yes — WebFetch confirmed heat-tariff pages, a Feb 2026
+      heat-meter news item, Energy Conservation section.
+
+  - name: "Ministry of Energy of the Republic of Moldova"
+    id: "energie_gov_md"
+    enabled: false
+    base_url: "https://energie.gov.md"
+    start_paths:
+      - "/en/content/about-ministry"
+      - "/en/content/energy-efficiency"
+    region:
+      - "europe"
+      - "eu_east"
+    category: "energy_ministry"
+    tags:
+      - "mandates"
+      - "efficiency"
+      - "incentives"
+    policy_types:
+      - "strategy"
+      - "guidance"
+      - "law"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #16). Standalone ministry since a Feb
+      2023 reorg — Energy Strategy to 2050, National Energy Efficiency
+      Program, Energy Efficiency Fund, EU Directive 2018/2002 transposition
+      obligations. Append to config/domains/moldova.yaml alongside anre_md.
+      verified: yes — WebFetch confirmed title and all named programs.
+
+  - name: "LCEC - Lebanese Center for Energy Conservation"
+    id: "lcec_lb"
+    enabled: false
+    base_url: "https://lcec.org.lb"
+    start_paths:
+      - "/EPC"
+      - "/"
+    region:
+      - "middle_east"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "incentives"
+    policy_types:
+      - "standard"
+      - "law"
+      - "program"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #17). Lebanon's national energy-
+      efficiency agency (technical arm of the Ministry of Energy and
+      Water) — first National Energy Efficiency Action Plan in the Arab
+      world, runs the EPC-L building energy certification scheme and a
+      green-building finance program. New file config/domains/lebanon.yaml.
+      verified: yes — WebFetch confirmed EPC-L Scheme page, Distributed
+      Renewable Energy Law 318/2023 resource.
+
+  - name: "LEX.UZ - National Database of Legislation (Uzbekistan)"
+    id: "lex_uz"
+    enabled: false
+    base_url: "https://lex.uz"
+    start_paths:
+      - "/en"
+    region:
+      - "apac"
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #18). Region: Central Asia, no
+      VALID_REGIONS bucket — mapped to "apac" (see file header note).
+      Uzbekistan's actual legislative search engine (not just a ministry
+      static page) — advanced search across Laws/Presidential
+      acts/Government decisions/Ministry acts, filterable by branch. Has
+      an advanced search UI but no confirmed public API — tier-b for now,
+      worth revisiting as tier-c if one surfaces. New file
+      config/domains/uzbekistan.yaml. verified: yes — WebFetch confirmed
+      title and search-filter description.
+
+  - name: "MEMR - Ministry of Energy and Mineral Resources (Jordan)"
+    id: "memr_jo"
+    enabled: false
+    base_url: "https://www.memr.gov.jo"
+    start_paths:
+      - "/Default/En"
+      - "/En/List/Open_Data"
+    region:
+      - "middle_east"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "renewable_energy"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "law"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #19). Operates the Jordan Renewable
+      Energy & Energy Efficiency Fund (JREEEF) funding
+      residential/hospital/industrial/service-sector efficiency; Energy
+      Sector Strategy, Legislations section, licensed-energy-auditor
+      registry. New file config/domains/jordan.yaml. verified: yes —
+      WebFetch confirmed JREEEF references, Strategy, Legislations
+      section, auditor list.
+
+  - name: "Ministry of Infrastructure and Energy (Albania)"
+    id: "infrastruktura_gov_al"
+    enabled: false
+    base_url: "https://www.infrastruktura.gov.al"
+    start_paths:
+      - "/en/"
+    region:
+      - "europe"
+      - "eu_east"
+    category: "energy_ministry"
+    tags:
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "law"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #20). A draft law (2026 rollout) mandates
+      district heating/cooling and CHP consideration for new buildings,
+      plus a dedicated "Legjislacioni" nav section. New file
+      config/domains/albania.yaml. verified: yes — WebFetch confirmed
+      title, Legislation section, Energy service listing.
+
+  - name: "Ministry of Energy (Nishati), Tanzania"
+    id: "nishati_tz"
+    enabled: false
+    base_url: "https://www.nishati.go.tz"
+    start_paths:
+      - "/pages/policy-and-strategy"
+    region:
+      - "africa"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+      - "planning"
+      - "reporting"
+    policy_types:
+      - "law"
+      - "regulation"
+      - "strategy"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #21). National Energy Efficiency Action
+      Plan 2019 (2020-2025, MEPS/labeling for refrigerators/HVAC/lighting/
+      motors) sits under this ministry; confirmed dedicated "Acts and
+      Regulations" and "Policy and strategy" sections. robots.txt not
+      checked this pass. New file config/domains/tanzania.yaml. verified:
+      yes — WebFetch confirmed both named sections under
+      Electricity/Renewable Energy.
+
+  - name: "AEPC - Alternative Energy Promotion Centre (Nepal)"
+    id: "aepc_np"
+    enabled: false
+    base_url: "https://www.aepc.gov.np"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "renewable_energy"
+      - "incentives"
+    policy_types:
+      - "standard"
+      - "regulation"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #22). Nepal's government energy-
+      efficiency mandate holder (under the Ministry of Energy, Water
+      Resources and Irrigation) — dedicated Energy Efficiency menu
+      (audits, energy management systems, standards/labeling) plus a
+      Resource Centre with Policy & Frameworks / AEPC Regulations. New file
+      config/domains/nepal.yaml. verified: yes — WebFetch confirmed the EE
+      menu and Resource Centre sections.
+
+  - name: "ANARE-CI - National Regulatory Authority for the Electricity Sector (Cote d'Ivoire)"
+    id: "anare_ci"
+    enabled: false
+    base_url: "https://anare.ci"
+    start_paths:
+      - "/documents/lois-et-reglementation/les-arretes/"
+      - "/le-regulateur/"
+    region:
+      - "africa"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "law"
+      - "regulation"
+      - "directive"
+    language: "fr"
+    notes: |
+      Wave 2 (countries-wave2.md #23). National electricity regulator
+      (est. under Ordonnance 2013) — ~20 downloadable regulatory orders
+      2012-2024 (connection procedures, licensing, eligible-customer
+      status). Complements DGE (dge_ci) with the regulator-side
+      enforcement instruments, not a duplicate. robots.txt fully open.
+      Append to config/domains/cote_divoire.yaml alongside dge_ci.
+      verified: yes — WebFetch confirmed a page listing specific arrete
+      numbers/titles with PDF links.
+
+  - name: "Sri Lanka Sustainable Energy Authority (SLSEA)"
+    id: "slsea_lk"
+    enabled: false
+    base_url: "https://www.energy.gov.lk"
+    start_paths:
+      - "/en/"
+      - "/en/energy-management/introducing-standards"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "standard"
+      - "law"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #24). Warm-climate/cooling-relevant —
+      statutory power (Act No. 35 of 2007) to enforce a code of practice
+      on efficient energy use in buildings, publishes the Energy
+      Efficiency Building Code, runs a National Energy Benchmarking
+      Portal. New file config/domains/sri_lanka.yaml. verified: yes —
+      WebFetch confirmed Energy Management section (Establishing Systems,
+      Introducing Standards, Labelling Programme).
+
+  - name: "Ministry of Economy and Sustainable Development (Georgia)"
+    id: "economy_ge"
+    enabled: false
+    base_url: "https://www.economy.ge"
+    start_paths:
+      - "/?lang=en"
+    region:
+      - "europe"
+    category: "energy_ministry"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "law"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #25). Region: Caucasus, no VALID_REGIONS
+      bucket — mapped to "europe" (see file header note). Absorbed the
+      Ministry of Energy's functions in 2017, current holder of the energy
+      portfolio (EU Association Agreement energy-efficiency/renewables
+      obligations); dedicated "Energy" subsection under Economic Policy.
+      New file config/domains/georgia_country.yaml (disambiguate from the
+      existing US-state georgia.yaml). verified: yes — WebFetch confirmed
+      ministry identity, Energy subsection, affiliated state energy
+      entities.
+
+  - name: "Ministry of Mines and Energy (Cambodia)"
+    id: "mme_kh"
+    enabled: false
+    base_url: "https://mme.gov.kh"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "planning"
+      - "renewable_energy"
+    policy_types:
+      - "strategy"
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #26). Warm-climate country — MME leads
+      Cambodia's National Energy Efficiency Policy 2022-2030 (19%
+      consumption reduction target by 2030); "Resources > Rules and
+      Regulations" section confirmed. New file config/domains/cambodia.yaml.
+      verified: yes — WebFetch confirmed the General Department of
+      Energy's policy/planning role and Resources section; the policy
+      itself independently corroborated as a standalone PDF via Open
+      Development Cambodia.
+
+  - name: "Ministry of Foreign Trade and Economic Relations (BiH) - Energetika"
+    id: "mvteo_gov_ba"
+    enabled: false
+    base_url: "https://www.mvteo.gov.ba"
+    start_paths:
+      - "/"
+    region:
+      - "europe"
+      - "eu_east"
+    category: "energy_ministry"
+    tags:
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "strategy"
+    language: "bs"
+    notes: |
+      Wave 2 (countries-wave2.md #27). Publishes the Framework Energy
+      Strategy of BiH until 2035 (confirmed live as a 194-page PDF)
+      including a district-heating strategy section. Homepage is a
+      language-selector gate — a human should pick the correct
+      post-language-selection path before enabling. Append to
+      config/domains/bosnia_and_herzegovina.yaml alongside serc_ba.
+      verified: yes, partial — homepage nav 404'd on a guessed /en path,
+      but the strategy PDF itself downloaded successfully (7.7MB, 194pp),
+      confirming the domain hosts real current strategy documents.
+
+  - name: "Electricity Control Board (ECB, Namibia)"
+    id: "ecb_na"
+    enabled: false
+    base_url: "https://www.ecb.org.na"
+    start_paths:
+      - "/economic-regulation/"
+      - "/about-us/"
+    region:
+      - "africa"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "report"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #28). National electricity regulator,
+      publishes Legal Instruments, an Integrated Strategic Business Plan,
+      and Smart Grid Policy / National Electrification Policy PDFs.
+      robots.txt not checked. New file config/domains/namibia.yaml.
+      verified: yes — WebFetch confirmed "Legal Instruments," "Integrated
+      Strategic Business Plan," Studies/Peer Reviewed Documents sections.
+
+  - name: "Rwanda Utilities Regulatory Authority (RURA) - Energy Sector"
+    id: "rura_rw"
+    enabled: false
+    base_url: "https://www.rura.rw"
+    start_paths:
+      - "/sectors/energy/overview"
+      - "/sectors/energy/sub-sectors-and-services/electricity"
+    region:
+      - "africa"
+    category: "regulatory"
+    tags:
+      - "efficiency"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "guidance"
+      - "regulation"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #29). Published "Guidelines for Promoting
+      Energy Efficiency Measures" (2013) plus Electricity Licensing
+      Regulations under Law No.21/2011 (amended by Law No.52/2018) —
+      clearest EE-specific regulatory artifact found for Rwanda.
+      robots.txt not checked. New file config/domains/rwanda.yaml.
+      verified: yes — WebFetch confirmed "Regulatory Instruments,"
+      "Sector Reports," "Publications" sections.
+
+  - name: "Ministry of Water and Energy (MoWE), Ethiopia"
+    id: "mowe_et"
+    enabled: false
+    base_url: "https://www.mowe.gov.et"
+    start_paths:
+      - "/en/about"
+      - "/en"
+    region:
+      - "africa"
+    category: "energy_ministry"
+    tags:
+      - "planning"
+      - "efficiency"
+    policy_types:
+      - "strategy"
+      - "report"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #30). Parent ministry for Ethiopia's
+      energy policy/strategy formulation and the Energy Efficiency and
+      Conservation Fund framework (Energy Regulation Ch.6); confirmed live
+      with an "Energy Development Documents" resource category. robots.txt
+      not checked. New file config/domains/ethiopia.yaml. verified: yes,
+      partial — WebFetch confirmed the live site and three-sector
+      structure with a documents subsection; specific policy PDFs not
+      individually opened this session.
+
+  - name: "Ministry of Electricity and Energy (MOEE), Myanmar"
+    id: "moee_mm"
+    enabled: false
+    base_url: "https://moep.gov.mm"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "mandates"
+      - "efficiency"
+      - "planning"
+    policy_types:
+      - "law"
+      - "regulation"
+      - "strategy"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #31). Electricity Law, Grid Code,
+      National Electrification Plan, and stated energy-efficiency
+      initiatives all confirmed live under one ministry. FLAG: current
+      State Administration Council (post-2021) government site — expect
+      intermittent availability. Note: energy.gov.mm is a similarly-named
+      but SEPARATE oil/gas-focused ministry — do not conflate. robots.txt
+      not checked. New file config/domains/myanmar.yaml. verified: yes —
+      WebFetch confirmed Electricity Law, Grid Code, NEP Plan, department
+      pages.
+
+  - name: "Ministry of Energy of the Republic of Uzbekistan"
+    id: "gov_uz_minenergy"
+    enabled: false
+    base_url: "https://gov.uz"
+    start_paths:
+      - "/en/minenergy"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #32). Region: Central Asia, no
+      VALID_REGIONS bucket — mapped to "apac" (see file header note).
+      Designated authority for the amended Law on Rational Use of Energy
+      (2020); Documents section lists laws, ministry-of-justice-registered
+      regulations, resolutions. Caveat: no data-center-specific content
+      surfaced — general EE framework only. Append to
+      config/domains/uzbekistan.yaml alongside lex_uz. verified: yes —
+      WebFetch confirmed title and Documents-section nav.
+
+  - name: "Electricity Authority of Cambodia (EAC)"
+    id: "eac_kh"
+    enabled: false
+    base_url: "https://eac.gov.kh"
+    start_paths:
+      - "/site/index?lang=en"
+    region:
+      - "apac"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "law"
+      - "regulation"
+      - "standard"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #33). National electricity regulator
+      complementing MME (mme_kh) — dedicated Law & Regulation, Power
+      Technical Standard, Circular sections; issues tariff/licensing
+      decisions relevant to future data-center grid-connection policy.
+      Site notes Khmer text prevails on discrepancy. Append to
+      config/domains/cambodia.yaml alongside mme_kh. verified: yes —
+      WebFetch confirmed Law & Regulation / Power Technical Standard /
+      Circular / Annual Report nav sections.
+
+  - name: "Public Services Regulatory Commission (Armenia)"
+    id: "psrc_am"
+    enabled: false
+    base_url: "https://www.psrc.am"
+    start_paths:
+      - "/contents/fields/electric_energy/el_energy_tariffs"
+    region:
+      - "europe"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "hy"
+    notes: |
+      Wave 2 (countries-wave2.md #34). Region: Caucasus, no VALID_REGIONS
+      bucket — mapped to "europe" (see file header note). Sole regulator
+      for electricity, gas, water, and thermal energy/district heating
+      tariffs in Armenia — the only Armenian body confirmed to actually
+      regulate district heating. New file config/domains/armenia.yaml.
+      verified: yes, partial — WebFetch confirmed title and the
+      electricity-tariff subsection directly; the thermal-energy/DH
+      subsection corroborated by search but not independently fetched
+      (flag for a human to confirm the exact URL, likely a parallel
+      fields/thermal_energy path).
+
+  - name: "Energy and Minerals Regulatory Commission (EMRC, Jordan)"
+    id: "emrc_jo"
+    enabled: false
+    base_url: "https://www.emrc.gov.jo"
+    start_paths:
+      - "/"
+    region:
+      - "middle_east"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "renewable_energy"
+    policy_types:
+      - "regulation"
+      - "law"
+    language: "ar"
+    notes: |
+      Wave 2 (countries-wave2.md #35). Legal successor to Jordan's
+      Electricity Regulatory Commission — licensing authority for
+      electricity/renewables, a national electricity conservation
+      campaign, laws/regulations section; complements MEMR (memr_jo) with
+      the regulator side. Mostly Arabic-only content. Append to
+      config/domains/jordan.yaml alongside memr_jo. verified: yes —
+      WebFetch confirmed electricity-sector licensing, renewable-energy
+      licensing division, conservation campaign, laws/regulations section.
+
+  - name: "Electricity Regulation Commission (ERC, Nepal)"
+    id: "erc_np"
+    enabled: false
+    base_url: "https://erc.gov.np"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "ne"
+    notes: |
+      Wave 2 (countries-wave2.md #36). Statutory electricity regulator
+      (Electricity Regulatory Commission Act 2017) — Acts and Rules,
+      Regulations, Guidelines, Grid Code sections all confirmed; drafting
+      an Energy Efficiency Policy per its 2024-2029 roadmap (not yet
+      published). Append to config/domains/nepal.yaml alongside aepc_np.
+      verified: yes — WebFetch confirmed Acts and Rules, Regulations,
+      Guidelines, Grid Code, tariff/charge-order sections.
+
+  - name: "Botswana Energy Regulatory Authority (BERA)"
+    id: "bera_bw"
+    enabled: false
+    base_url: "https://www.bera.co.bw"
+    start_paths:
+      - "/"
+    region:
+      - "africa"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "standard"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #37). Sole national energy regulator
+      under the Botswana Energy Regulatory Act 2016, covering electricity/
+      gas/coal/petroleum/renewables licensing and standards. A Documents
+      section is referenced under the Media nav — exact slug not
+      independently confirmed. New file config/domains/botswana.yaml.
+      verified: partial — homepage confirmed live and on-topic; Documents
+      subsection content itself not independently loaded this session,
+      recommend a human/deeper crawl-time check before enabling.
+
+  - name: "Public Utilities Commission of Sri Lanka (PUCSL)"
+    id: "pucsl_lk"
+    enabled: false
+    base_url: "https://www.pucsl.gov.lk"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+      - "renewable_energy"
+    policy_types:
+      - "regulation"
+      - "law"
+    language: "en"
+    notes: |
+      Wave 2 (countries-wave2.md #38). Economic/technical/safety regulator
+      for electricity (Sri Lanka Electricity Act No.20 of 2009) — tariff
+      decisions, legal documents (acts/regulations/guidelines), feed-in-
+      tariff reviews. Weaker on efficiency-specific content than SLSEA
+      (slsea_lk) but complements it on the regulatory/tariff side. Append
+      to config/domains/sri_lanka.yaml alongside slsea_lk. verified: yes —
+      WebFetch confirmed tariff decisions (incl. a May 2026 decision),
+      legal documents section, feed-in tariff reviews.
+
+  - name: "Ministry of Energy of the Republic of Kazakhstan"
+    id: "gov_kz_energo"
+    enabled: false
+    base_url: "https://www.gov.kz"
+    start_paths:
+      - "/memleket/entities/energo?lang=en"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (countries-wave2.md #39). Region: Central Asia, no
+      VALID_REGIONS bucket — mapped to "apac" (see file header note).
+      Primary national ministry, natural companion to adilet_zan_kz above.
+      Every fetch attempt returned only the bare page <title> with zero
+      body content across three sub-paths — a heavy JS single-page app;
+      requires_playwright strongly recommended, and a human with a real
+      rendered browser needs to confirm content before enabling. Append to
+      config/domains/kazakhstan.yaml alongside adilet_zan_kz. verified:
+      partial, low confidence — domain/ministry identity solid, page
+      content never actually inspected.

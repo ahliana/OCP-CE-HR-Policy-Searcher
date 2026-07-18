@@ -1,0 +1,373 @@
+# =============================================================================
+# DRAFT WAVE 2 — US Local (County/Municipal) Sources (tier-b crawl domains
+# only — this source file produced 0 tier-a and 0 tier-c candidates).
+# Source: docs/source-expansion/regions-wave2/us-local.md
+# Every entry below is `enabled: false`.
+#
+# All 11 entries below append to the matching config/domains/us/<state>.yaml
+# file (see each entry's notes for the specific state file). None collide
+# with the wave-1-drafted Loudoun/Prince William County, VA entries in
+# draft/crawl/us-states.yaml (both explicitly skipped by this source file's
+# own dedup pass).
+# =============================================================================
+
+domains:
+  - name: "Grant County PUD — Evolving Industry (Data Center) Rate Schedules (Washington)"
+    id: "us_grant_county_pud_wa"
+    enabled: false
+    base_url: "https://www.grantpud.org"
+    start_paths:
+      - "/rates-fees"
+    region:
+      - "us"
+      - "us_states"
+      - "washington"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "planning"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+      - "program"
+    language: "en"
+    notes: |
+      Wave 2 (us-local.md #1). Special-purpose local government (county-
+      created public utility district) — Rate Schedule 17 ("Evolving
+      Industry") restructures pricing for data centers/crypto/AI compute
+      effective Apr 2026, strips preferential hydropower access, creates a
+      core-vs-non-core cost-allocation policy, layers demand charges as DCs
+      reach 48% of Grant County's retail electric sales. Quincy/Grant
+      County WA is one of the densest US DC clusters. Rate-schedule PDFs
+      live under versioned paths that churn year to year — crawl the
+      /rates-fees index and follow PDF links rather than hardcoding dated
+      paths. Append to config/domains/us/washington.yaml. verified: yes —
+      WebFetch confirmed the official page listing Rate Schedule 17
+      tiers and linking current PDF resolutions; corroborated by
+      KilowattLogic/gcj.news coverage.
+
+  - name: "Linn County, Iowa — Data Centers in Unincorporated Linn County"
+    id: "us_linn_county_ia"
+    enabled: false
+    base_url: "https://www.linncountyiowa.gov"
+    start_paths:
+      - "/1862/Data-Centers-in-Unincorporated-Linn-Coun"
+      - "/DocumentCenter/View/27695/PA26-0001-Ordinance-PDF"
+    region:
+      - "us"
+      - "us_states"
+      - "iowa"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandates"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (us-local.md #2). Adopted ordinance (~Feb 18, 2026) creating
+      zoning standards for data centers on unincorporated county land:
+      setbacks, noise limits, traffic/road-impact review, and — for large
+      projects — a mandatory water study (cooling method + efficiency
+      measures), water-use agreement, community-benefit agreement.
+      Secondary press additionally describes quarterly energy/on-site-
+      generation reporting to the Iowa Utilities Commission incl.
+      waste-heat reuse — not independently confirmed on the county's own
+      page, treat that specific claim as needing the linked ordinance PDF.
+      One of the most detailed county-level DC ordinances found in the
+      whole wave-2 scan. Append to config/domains/us/iowa.yaml. verified:
+      yes — WebFetch confirmed official page (last updated Mar 4 2026)
+      with working links to ordinance PDF and staff report.
+
+  - name: "City of New Albany, Ohio — Data Centers (dedicated portal)"
+    id: "us_new_albany_oh"
+    enabled: false
+    base_url: "https://datacenters.newalbanyohio.org"
+    start_paths:
+      - "/"
+    region:
+      - "us"
+      - "us_states"
+      - "ohio"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandates"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (us-local.md #3). Dedicated city microsite covering the
+      Technology Manufacturing District (Codified Ordinances Sec.1154) and
+      General Employment district (Sec.1153) zoning permitting data
+      centers in the 12,000-acre New Albany International Business Park
+      (Franklin/Licking counties). Documents architectural/design
+      standards, mechanical-equipment screening, noise caps, water/
+      wastewater and air-quality requirements. New Albany/Licking County
+      is trade-press-described as "the capital of Ohio's data center hub"
+      (Meta, Google, Microsoft, Amazon, QTS) — the one city in the whole
+      wave with a purpose-built, standalone government DC policy site.
+      Append to config/domains/us/ohio.yaml. verified: yes — WebFetch
+      confirmed official City of New Albany site (city seal, footer,
+      zoning/design/environmental content).
+
+  - name: "Storey County, Nevada — Tahoe-Reno Industrial Center Development Agreement"
+    id: "us_storey_county_nv"
+    enabled: false
+    base_url: "https://www.storeycounty.org"
+    start_paths:
+      - "/647/Tahoe-Reno-Industrial-Center-Development"
+    region:
+      - "us"
+      - "us_states"
+      - "nevada"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "incentives"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (us-local.md #4). Document repository (21 linked files) for
+      the TRIC development agreement — I-2 Heavy Industrial zoning
+      (adopted 1999), infrastructure plans, design guidelines, CC&Rs
+      governing the industrial park hosting Switch/Google/Microsoft data
+      centers plus Tesla's Gigafactory. TRIC is the largest industrial park
+      in the US, third-largest in the world by land area — this is the
+      direct local-government counterpart to the state-level Nevada
+      large-load/Clean Transition Tariff dockets already noted in
+      config/domains/us/nevada.yaml. Append there. verified: yes —
+      WebFetch confirmed official page listing the development agreement,
+      zoning ordinance, infrastructure documents.
+
+  - name: "Fairfax County, Virginia — Data Centers (Adopted Zoning Ordinance Amendment)"
+    id: "us_fairfax_county_va"
+    enabled: false
+    base_url: "https://www.fairfaxcounty.gov"
+    start_paths:
+      - "/planning-development/data-centers"
+    region:
+      - "us"
+      - "us_states"
+      - "virginia"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandates"
+      - "efficiency"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (us-local.md #5). Zoning ordinance amendment adopted Sept 10
+      2024 (effective Sept 11 2024) — requires a "future energy needs"
+      assessment at special-exception application, proposed
+      LEED-Silver/on-site-solar/off-site-renewable-investment energy
+      standards, a 200-ft residential setback, fully-enclosed cooling/
+      generator equipment, a noise study. Direct neighbor of the already-
+      drafted Loudoun/Prince William entries in the densest DC corridor in
+      the world; unlike most peer counties this one explicitly proposes
+      energy-efficiency (LEED/on-site renewables) conditions, closest fit
+      to the efficiency/PUE taxonomy of the VA county tier. Append to
+      config/domains/us/virginia.yaml. verified: yes — WebFetch confirmed
+      official page with working links to adopted ordinance PDF, staff
+      report, research report.
+
+  - name: "City of South Fulton, Georgia — Data Center Ordinance"
+    id: "us_south_fulton_ga"
+    enabled: false
+    base_url: "https://www.cityofsouthfultonga.gov"
+    start_paths:
+      - "/CivicAlerts.asp?AID=777"
+    region:
+      - "us"
+      - "us_states"
+      - "georgia"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandates"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (us-local.md #6). City-enacted Data Center Ordinance:
+      100-150ft residential buffers, equipment screening, noise/lighting
+      controls, mandatory Special Use Permits, risk-assessment review.
+      Fills the gap left by Fulton County proper (no dedicated ordinance
+      page found) and Atlanta (403-blocked to automated fetch). CivicPlus
+      alert-page URL pattern (AID= query param) may be superseded by newer
+      alert IDs over time — also crawl the city's main planning/zoning
+      department page if a stable non-alert URL surfaces. Append to
+      config/domains/us/georgia.yaml. verified: yes — WebFetch confirmed
+      official city page describing the ordinance and active permitting
+      pipeline.
+
+  - name: "Frederick County, Maryland — Data Centers Workgroup"
+    id: "us_frederick_county_md"
+    enabled: false
+    base_url: "https://www.frederickcountymd.gov"
+    start_paths:
+      - "/8544/Data-Centers-Workgroup"
+      - "/CivicAlerts.aspx?AID=5845"
+    region:
+      - "us"
+      - "us_states"
+      - "maryland"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandates"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (us-local.md #7). Documents the 2023-2024 Data Centers
+      Workgroup (11 members) that produced a Critical Digital
+      Infrastructure Overlay Zone limiting DCs to ~2,600 acres (0.6% of
+      the county, around the Eastalco site), plus a Jul 2026 executive-
+      order pause on new applications pending the state Data Center Impact
+      Analysis, tied to Maryland's new PSC large-load customer registry
+      (Utility RELIEF Act). Maryland is emerging as a 2nd major East
+      Coast battleground (Prince George's, Frederick, Washington County);
+      this has the most fully documented workgroup-to-ordinance pipeline
+      of the three. Older /9122/Data-Centers path 404s — use the two paths
+      above. Append to config/domains/us/maryland.yaml. verified: yes —
+      WebFetch confirmed both URLs live, describing the workgroup mandate
+      and the Jul 2026 pause.
+
+  - name: "Maricopa County, Arizona — Adopted (Modernized) Zoning Ordinance"
+    id: "us_maricopa_county_az"
+    enabled: false
+    base_url: "https://www.maricopa.gov"
+    start_paths:
+      - "/2753/Adopted-Regulations"
+      - "/CivicAlerts.aspx?AID=3541"
+    region:
+      - "us"
+      - "us_states"
+      - "arizona"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandates"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (us-local.md #8). Board of Supervisors adopted a modernized
+      zoning ordinance (Dec 10 2025) that, for the first time, formally
+      defines "Data Center" as a land use and restricts it to IND-2/IND-3
+      (general/heavy industrial) districts; land not so zoned needs full
+      rezoning. Maricopa County (Phoenix metro) is a top-3 US DC market —
+      this is the county's first-ever formal DC zoning definition. Append
+      to config/domains/us/arizona.yaml. verified: yes — WebFetch
+      confirmed both URLs; news flash explicitly states the ordinance
+      "clarifies and expands definitions, including for... Data Centers."
+
+  - name: "City of Chandler, Arizona — Data Center Ordinance (No. 5033)"
+    id: "us_chandler_az"
+    enabled: false
+    base_url: "https://www.chandleraz.gov"
+    start_paths:
+      - "/news-center/chandlers-data-center-ordinance-now-effect"
+      - "/sites/default/files/departments/development-services/PLH22-0053-Ordinance-No-5033-Data-Center.pdf"
+    region:
+      - "us"
+      - "us_states"
+      - "arizona"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandates"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (us-local.md #9). Ordinance 5033 (effective Jan 5 2023)
+      restricts data centers to Planned-Area-Development (PAD) zones only,
+      mandates pre-construction and five-years-of annual noise studies,
+      resident-notification protocols, backup-generator maintenance/
+      testing limits. One of the earliest (Jan 2023) and most specific
+      city-level DC noise/generator ordinances in the country; ordinance
+      PDF is hosted directly on chandleraz.gov, not a third-party mirror.
+      Append to config/domains/us/arizona.yaml alongside
+      us_maricopa_county_az. verified: yes — WebFetch confirmed the
+      news-center page describing Ordinance 5033's provisions in detail.
+
+  - name: "Prince George's County, Maryland — Qualified Data Center Task Force"
+    id: "us_prince_georges_county_md"
+    enabled: false
+    base_url: "https://pgccouncil.us"
+    start_paths:
+      - "/1051/Qualified-Data-Center-Task-Force"
+    region:
+      - "us"
+      - "us_states"
+      - "maryland"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "research"
+    policy_types:
+      - "report"
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (us-local.md #10). Council Resolution CR-16-2025 established
+      a 19-member task force (county government, utilities, labor,
+      business, environmental-justice, academic reps) to study energy
+      demand/ratepayer impact, air/water/woodland effects, and quality-of-
+      life impacts of "Qualified Data Center" siting; final report Nov 2025
+      with rezoning recommendations. Prince George's passed a full
+      two-year moratorium on new DC development in 2026 after this task
+      force's report — among the strongest local-government responses in
+      the entire wave. NOTE: domain is pgccouncil.us (council/legislative
+      branch), NOT princegeorgescountymd.gov (executive branch, which
+      403'd on the guessed URL — see us-local.md Unverified section).
+      Append to config/domains/us/maryland.yaml alongside
+      us_frederick_county_md. verified: yes — WebFetch confirmed official
+      page with working links to the final report and resolution PDFs.
+
+  - name: "Morrow County, Oregon — Zoning Ordinance"
+    id: "us_morrow_county_or"
+    enabled: false
+    base_url: "https://www.morrowcountyor.gov"
+    start_paths:
+      - "/planning/page/zoning-ordinance"
+      - "/ordinances/morrow-county-zoning-ordinance"
+    region:
+      - "us"
+      - "us_states"
+      - "oregon"
+    category: "regulatory"
+    tags:
+      - "planning"
+    policy_types:
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (us-local.md #11). The 2017 Morrow County Zoning Ordinance
+      (10 articles) is the instrument the county has repeatedly used to
+      rezone agricultural land to industrial for AWS/Amazon and other
+      hyperscale campuses (e.g. the Percheron project near Boardman); the
+      "Space Age Industrial"/"General Industrial"/"Port Industrial" zones
+      are the operative districts. No data-center-specific chapter exists
+      yet — general zoning-amendment mechanism, lower specificity than the
+      other 10 entries in this file, but Morrow/Umatilla is Oregon's
+      largest DC corridor and every rezoning fight runs through this
+      ordinance. Append to config/domains/us/oregon.yaml. verified: yes —
+      WebFetch confirmed official page hosting the full zoning ordinance
+      text online.

@@ -1,0 +1,518 @@
+# =============================================================================
+# DRAFT WAVE 2 — Grid Operators / ISOs / TSOs (tier-b crawl domains only —
+# this source file produced 0 tier-a and 0 tier-c candidates).
+# Source: docs/source-expansion/regions-wave2/grid-operators.md
+# Every entry below is `enabled: false`.
+#
+# Append-to targets (new file needed unless noted otherwise):
+#   - ercot_large_load          -> config/domains/us/texas.yaml
+#   - nyiso_large_load          -> config/domains/us/new_york.yaml
+#   - isone_interconnection     -> NEW config/domains/us/ (New England has no
+#                                  existing state file that fits; human should
+#                                  pick a host file, e.g. us_federal.yaml or a
+#                                  new england-wide file)
+#   - spp_gi                    -> NEW config/domains/us/kansas.yaml (or
+#                                  nebraska.yaml/oklahoma.yaml — SPP's footprint
+#                                  spans all three; human should pick one host)
+#   - aemo_datacentre           -> config/domains/apac.yaml (or new
+#                                  config/domains/australia.yaml alongside the
+#                                  wave-1-drafted aer_au/aemc_au/state entries)
+#   - entsoe_datacentres        -> config/domains/eu.yaml (or the not-yet-
+#                                  created supranational.yaml, alongside the
+#                                  wave-1 IEA 4E EDNA / C40 / ISO entries)
+#   - rte_datacenters           -> config/domains/france.yaml
+#   - amprion_datacenter, 50hertz_datacenter, transnetbw_datacenter
+#                               -> config/domains/germany.yaml
+#   - tennet_connection         -> config/domains/netherlands.yaml
+#   - elia_hosting_capacity     -> config/domains/belgium.yaml
+#   - terna_datacenter          -> config/domains/italy.yaml
+#   - fingrid_connection, svk_connection, statnett_connection
+#                               -> config/domains/nordic.yaml
+#   - ree_access_connection     -> config/domains/spain.yaml
+#   - transpower_connections    -> config/domains/apac.yaml (or a new NZ file)
+#
+# Dedup note: AESO, AER, AEMC, PJM, MISO, CAISO, NESO/National Grid ESO, and
+# PUCT (interchange.puc.texas.gov) are all already live or already drafted
+# elsewhere — none of those are repeated here. See the source .md file's own
+# "Dedup performed" section for the full trail.
+# =============================================================================
+
+domains:
+  - name: "ERCOT — Large Load Integration (Texas)"
+    id: "ercot_large_load"
+    enabled: false
+    base_url: "https://www.ercot.com"
+    start_paths:
+      - "/services/rq/large-load-integration"
+    region:
+      - "us"
+      - "us_states"
+      - "texas"
+    category: "grid_operator"
+    tags:
+      - "planning"
+      - "data_center_specific"
+    policy_types:
+      - "guidance"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (grid-operators.md #1). ERCOT's "Batch Zero" large-load
+      (>=75MW) interconnection process — 137 pending requests totaling
+      ~140,000MW by 2036 per ERCOT's own notices. Direct implementation-side
+      companion to the PUCT rulemaking already drafted in
+      draft/crawl/us-states.yaml. verified: yes — WebFetch confirmed live,
+      current content (through Jul 2026).
+
+  - name: "NYISO — Large Load Interconnection Queue (New York)"
+    id: "nyiso_large_load"
+    enabled: false
+    base_url: "https://www.nyiso.com"
+    start_paths:
+      - "/-/energy-intensive-projects-in-nyiso-s-interconnection-queue"
+      - "/interconnections"
+    region:
+      - "us"
+      - "us_states"
+      - "new_york"
+    category: "grid_operator"
+    tags:
+      - "planning"
+      - "data_center_specific"
+      - "reporting"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (grid-operators.md #2). NYISO's own data-center-labeled queue
+      article: growth from 1 project/500MW (2018) to 29 projects/~6,055MW
+      (Jul 2025). Complements the NY DPS/PSC entry already drafted in
+      us-states.yaml. verified: yes — WebFetch confirmed live (dated
+      Aug 26 2025), plus /interconnections hub (updated Jun 30 2026).
+
+  - name: "AEMO — Digital Demand Surge / Data Centre Connections (Australia)"
+    id: "aemo_datacentre"
+    enabled: false
+    base_url: "https://www.aemo.com.au"
+    start_paths:
+      - "/newsroom/news-updates/digital-demand-surge"
+    region:
+      - "apac"
+      - "australia"
+    category: "grid_operator"
+    tags:
+      - "planning"
+      - "data_center_specific"
+      - "reporting"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (grid-operators.md #3). AEMO's dedicated data-centre-growth
+      page: 11 large-scale (>5MW) projects, 5.4GW, progressing through the
+      NEM connection process as of Mar 2026. Distinct from AEMC (rule-maker)
+      and AER (regulator), both already drafted wave 1 — AEMO is the system
+      operator running the connection process itself. verified: yes —
+      confirmed live via browser render (WebFetch 403'd, bot-detection).
+
+  - name: "ENTSO-E — Data Centres and the Power System (Supranational, EU)"
+    id: "entsoe_datacentres"
+    enabled: false
+    base_url: "https://www.entsoe.eu"
+    start_paths:
+      - "/news/2026/05/08/from-energy-demand-to-grid-support-entso-e-explores-data-centres-dual-role/"
+    region:
+      - "eu"
+    category: "coordination_body"
+    tags:
+      - "planning"
+      - "research"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (grid-operators.md #4). Highest-leverage single find in this
+      file — pan-EU TSO association's report on data-centre grid-connection
+      codes (ramp-rate, oscillation-damping, voltage-control, hosting-
+      capacity transparency), framing what all 10 national TSOs below
+      implement. Report PDF is hosted on a separate CDN domain
+      (eepublicdownloads.blob.core.windows.net) — flag for
+      allowed_path_patterns if the crawler follows off-domain PDF links.
+      verified: yes — WebFetch confirmed live, dated May 8 2026.
+
+  - name: "RTE — Data Centers in France (Reseau de Transport d'Electricite)"
+    id: "rte_datacenters"
+    enabled: false
+    base_url: "https://www.rte-france.com"
+    start_paths:
+      - "/bases-electricite/consommation-electricite/essor-data-centers-france"
+    region:
+      - "eu"
+      - "eu_central"
+      - "france"
+    category: "grid_operator"
+    tags:
+      - "planning"
+      - "data_center_specific"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "fr"
+    notes: |
+      Wave 2 (grid-operators.md #5). France's TSO fast-track connection
+      programme for data centers: ~300 DCs, 8 directly HV-connected at
+      800MW cumulative, ~18GW reserved across ~80 projects (May 2026).
+      France's TSO gap — france.yaml today covers only
+      ecologie.gouv.fr/ADEME/Legifrance. verified: yes — WebFetch confirmed
+      live, current 2026 figures.
+
+  - name: "Amprion — Grid Connection for Industrial Facilities and Data Centers (Germany)"
+    id: "amprion_datacenter"
+    enabled: false
+    base_url: "https://www.amprion.net"
+    start_paths:
+      - "/Strommarkt/Netzkunden/Netzanschluss/Industrieanlagen-und-Rechenzentren.html"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "grid_operator"
+    tags:
+      - "mandates"
+      - "planning"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "de"
+    notes: |
+      Wave 2 (grid-operators.md #6). One of 4 joint German TSOs; the new
+      "Reifegradverfahren" (maturity-level procedure) replacing
+      first-come-first-served, effective for applications from Apr 1 2026;
+      EUR50,000 application fee, EUR1,500/MW deposit; explicitly names data
+      centers, electrolyzers, battery storage. Germany's TSO-level coverage
+      gap — most data-center-explicit connection page found in this wave.
+      verified: yes — WebFetch confirmed live.
+
+  - name: "50Hertz — Grid Connection (Germany, eastern control zone)"
+    id: "50hertz_datacenter"
+    enabled: false
+    base_url: "https://www.50hertz.com"
+    start_paths:
+      - "/de/Vertragspartner/Netzkunden/Netzanschluss/"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "grid_operator"
+    tags:
+      - "mandates"
+      - "planning"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "de"
+    notes: |
+      Wave 2 (grid-operators.md #7). Same joint Reifegradverfahren as
+      Amprion/TransnetBW; covers the Berlin/eastern-Germany DC cluster —
+      concrete example: 300MW Virtus contract at Wustermark substation; 5
+      DCs approved for 2GW total so far. verified: yes — WebFetch confirmed
+      live, explicit "data centers" framing and the Virtus example.
+
+  - name: "TransnetBW — Reifegradverfahren / Grid Access and Tariffs (Germany, Baden-Wuerttemberg)"
+    id: "transnetbw_datacenter"
+    enabled: false
+    base_url: "https://www.transnetbw.de"
+    start_paths:
+      - "/de/transparenz/netzzugang-und-entgelt/reifegradverfahren"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+      - "baden_wuerttemberg"
+    category: "grid_operator"
+    tags:
+      - "mandates"
+      - "planning"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "de"
+    notes: |
+      Wave 2 (grid-operators.md #8). Third of the four joint-procedure
+      German TSOs; points-based (B-series technical/C-series economic)
+      assessment, standardized forms F.1-F.6, connection-capacity map;
+      first round began Apr 1 2026. Completes 3-of-4 German TSO coverage
+      (TenneT DE not separately covered — see tennet_connection notes).
+      verified: yes — WebFetch confirmed live.
+
+  - name: "TenneT — Connection Services (Netherlands / Germany)"
+    id: "tennet_connection"
+    enabled: false
+    base_url: "https://www.tennet.eu"
+    start_paths:
+      - "/nl-en/connection-services"
+    region:
+      - "eu"
+      - "eu_west"
+      - "netherlands"
+    category: "grid_operator"
+    tags:
+      - "planning"
+    policy_types:
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (grid-operators.md #9). General new-connection process page
+      (timeline, cost guidelines under Dutch ACM). WEAKER MATCH: page
+      content is general, not data-center-explicit, though TenneT is the
+      TSO at the center of the widely-reported Schiphol-area DC connection
+      freeze (~2035 capacity constraint per news, not on this page itself).
+      Fills netherlands.yaml's zero-grid-operator gap. Recommend a human
+      follow-up search for a Dutch-language TenneT news/congestion page
+      before/alongside enabling — see grid-operators.md's "Unverified"
+      section for the specific lead. verified: yes (general content) —
+      WebFetch 403'd, confirmed live via browser navigation.
+
+  - name: "Elia — Grid Hosting Capacity (Belgium)"
+    id: "elia_hosting_capacity"
+    enabled: false
+    base_url: "https://www.elia.be"
+    start_paths:
+      - "/en/customers/connection/grid-hosting-capacity"
+      - "/en/customers/connection/questions-about-grid-congestion-and-the-impact-on-connections-in-flanders"
+    region:
+      - "eu"
+      - "eu_west"
+      - "belgium"
+    category: "grid_operator"
+    tags:
+      - "planning"
+      - "mandates"
+    policy_types:
+      - "guidance"
+      - "regulation"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (grid-operators.md #10). Belgium's TSO; CREG code-of-conduct
+      amendment (Jan 29 2026) proposing a dedicated "data centre" connection
+      category with capacity caps and curtailable "flexible connections",
+      requests up 9x since 2022. Fills belgium.yaml's zero-grid-operator
+      gap. Site sits behind Cloudflare — requires_playwright recommended.
+      verified: yes, with caveat (general connection/congestion content,
+      not yet a dedicated DC page) — browser navigation confirmed live.
+
+  - name: "Terna — Data Center Insight (Italy)"
+    id: "terna_datacenter"
+    enabled: false
+    base_url: "https://lightbox.terna.it"
+    start_paths:
+      - "/it/insight/data-center-rete-trasmissione"
+    region:
+      - "eu"
+      - "eu_south"
+      - "italy"
+    category: "grid_operator"
+    tags:
+      - "planning"
+      - "data_center_specific"
+      - "reporting"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "it"
+    notes: |
+      Wave 2 (grid-operators.md #11). Terna's own editorial subdomain
+      (lightbox.terna.it, distinct host from the corporate terna.it) —
+      >300 connection requests exceeding 50GW (mid-2025), 80% in
+      Lombardy/Piedmont, EUR16.6B investment plan 2024-2028. Fills
+      italy.yaml's zero-grid-operator gap. verified: yes — WebFetch
+      confirmed live, current 2025-2026 figures.
+
+  - name: "Fingrid — Grid Connection Agreement Phases (Finland)"
+    id: "fingrid_connection"
+    enabled: false
+    base_url: "https://www.fingrid.fi"
+    start_paths:
+      - "/en/grid/grid-connection-agreement-phases/"
+    region:
+      - "eu"
+      - "nordic"
+      - "finland"
+    category: "grid_operator"
+    tags:
+      - "planning"
+      - "mandates"
+    policy_types:
+      - "guidance"
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (grid-operators.md #12). Finnish TSO connection-process page
+      with explicit large-consumer thresholds (250+MW at 400kV). Fingrid
+      has paused new >10MW connections in parts of southern Finland for two
+      years due to DC demand, steering large consumers to the west coast —
+      that guidance lives in a PDF under /globalassets/ worth adding as a
+      second start_path. Fills nordic.yaml's TSO gap (that file today covers
+      ministries/regulators, not TSOs). verified: yes — WebFetch confirmed
+      live, explicit MW/kV thresholds.
+
+  - name: "Svenska kraftnaet — Connect to the Transmission Grid (Sweden)"
+    id: "svk_connection"
+    enabled: false
+    base_url: "https://www.svk.se"
+    start_paths:
+      - "/aktorsportalen/anslut-till-transmissionsnatet/"
+    region:
+      - "eu"
+      - "nordic"
+      - "sweden"
+    category: "grid_operator"
+    tags:
+      - "planning"
+    policy_types:
+      - "guidance"
+    language: "sv"
+    notes: |
+      Wave 2 (grid-operators.md #13). WEAKER MATCH: general connection page,
+      not DC-explicit on-page, but corroborating 2025-2026 Swedish press
+      confirms data centers made up just over half of ~9,000MW in 2025
+      connection applications (Malardalen/Stockholm/Uppsala/Gavleborg), with
+      a 70bn SEK 2027-2029 investment programme (NordSyd) partly driven by
+      this demand. The connection-guide PDF is a genuine policy document.
+      A more DC-specific news page may exist — see grid-operators.md's
+      "Unverified" section. verified: yes (general page) — WebFetch
+      confirmed live.
+
+  - name: "Statnett — Grid Connection Process (Norway)"
+    id: "statnett_connection"
+    enabled: false
+    base_url: "https://www.statnett.no"
+    start_paths:
+      - "/en/for-stakeholders-in-the-power-industry/the-grid-connection-process/"
+    region:
+      - "europe"
+      - "nordic"
+      - "norway"
+    category: "grid_operator"
+    tags:
+      - "planning"
+    policy_types:
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (grid-operators.md #14). WEAKER MATCH: general connection page
+      (English), not DC-explicit on-page, but Norwegian coverage confirms
+      data centers account for the largest single volume of national
+      grid-connection requests (6,700MW) and 70% of reserved new-project
+      capacity in Mid-Norway. Statnett's regional "omradeplan" PDFs carry
+      the detailed DC figures and would be a stronger start_path — see
+      grid-operators.md's "Unverified" section. verified: yes (general
+      page) — WebFetch confirmed live.
+
+  - name: "Red Electrica (REE) — Grid Access and Connection (Spain)"
+    id: "ree_access_connection"
+    enabled: false
+    base_url: "https://www.ree.es"
+    start_paths:
+      - "/en/operation/system-development/access-conection-grid"
+    region:
+      - "eu"
+      - "eu_south"
+      - "spain"
+    category: "grid_operator"
+    tags:
+      - "planning"
+    policy_types:
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (grid-operators.md #15). WEAKER MATCH: general English
+      access/connection overview; fuller detail sits on a Spanish-only
+      "Customers" section (/es/clientes/consumidor/acceso-conexion, not
+      independently fetched — worth adding as a second start_path with
+      language: "es"). Corroborating Spanish press describes a documented
+      "cascade effect" where one large-consumer (DC) request can block
+      neighboring nodes' capacity. Fills spain.yaml's zero-grid-operator gap
+      (that file covers only MITECO ministry + BOE gazette). verified: yes
+      (general page) — WebFetch confirmed live.
+
+  - name: "ISO New England — Interconnection Service (US)"
+    id: "isone_interconnection"
+    enabled: false
+    base_url: "https://www.iso-ne.com"
+    start_paths:
+      - "/system-planning/interconnection-service/"
+    region:
+      - "us"
+      - "us_states"
+    category: "grid_operator"
+    tags:
+      - "planning"
+    policy_types:
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (grid-operators.md, "weaker/supporting" #1). WEAKEST match in
+      this file — page is explicitly generation-focused ("new resources...
+      a supply-side generator or an elective transmission upgrade"), not
+      large-load-specific. Included for completeness — rounds out 4-of-4
+      previously-missing US ISO/RTO coverage (ERCOT/NYISO/ISO-NE/SPP)
+      alongside already-live PJM/MISO/CAISO. Repo currently has zero
+      ISO-NE presence. verified: yes (page live) — flagged weak/general.
+
+  - name: "SPP — Generator Interconnection (US, Southwest Power Pool)"
+    id: "spp_gi"
+    enabled: false
+    base_url: "https://www.spp.org"
+    start_paths:
+      - "/engineering/generator-interconnection/"
+    region:
+      - "us"
+      - "us_states"
+    category: "grid_operator"
+    tags:
+      - "planning"
+    policy_types:
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (grid-operators.md, "weaker/supporting" #2). GI queue process
+      under revised Tariff Attachment V (effective Jan 2022), DISIS Study
+      Manual. Generator-interconnection-focused, not explicitly large-load
+      — SPP's large-load-specific work (if any) wasn't found as a distinct
+      page this pass; flagged for a follow-up search on "SPP large load" /
+      "SPP data center". Completes 4-of-4 remaining US RTO/ISO coverage;
+      covers Kansas/Nebraska/Oklahoma. verified: yes (page live) — flagged
+      weak/general.
+
+  - name: "Transpower — Grid Connection Process (New Zealand)"
+    id: "transpower_connections"
+    enabled: false
+    base_url: "https://www.transpower.co.nz"
+    start_paths:
+      - "/connections/our-grid-connection-process"
+    region:
+      - "apac"
+    category: "grid_operator"
+    tags:
+      - "planning"
+    policy_types:
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (grid-operators.md, "weaker/supporting" #3). Content is
+      generation-focused (solar/wind/BESS), not load-specific. The concrete
+      DC example (Datagrid's Southland project, up to 240MW IT load, new
+      220kV substation) is documented in press/a Services Agreement, not
+      this page. The PDF "Guidelines for new connections to the grid"
+      (static.transpower.co.nz/public/2025-07/...) is a stronger candidate
+      worth a follow-up fetch. Fills a complete NZ grid-operator gap (none
+      exists anywhere in the repo today). verified: yes (page live) —
+      flagged weak/general.

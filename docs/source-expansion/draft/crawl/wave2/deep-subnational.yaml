@@ -1,0 +1,1481 @@
+# =============================================================================
+# DRAFT WAVE 2 — Deep Subnational Coverage (tier-b crawl domains only — this
+# source file produced 0 tier-a and 0 tier-c candidates; 53 verified
+# candidates found, 50 drafted below).
+# Source: docs/source-expansion/regions-wave2/deep-subnational.md
+# Every entry below is `enabled: false`.
+#
+# CROSS-WAVE DUPLICATES REMOVED (3, not drafted here — see INVENTORY.md
+# "Wave 2" section for the full merge writeup):
+#   - `ge_len_energie` (Geneva, base_url https://silgeneve.ch) — EXACT
+#     duplicate (same id, same base_url, same start_path) of the entry
+#     already drafted wave 1 in draft/crawl/dach.yaml. Not re-added.
+#   - `be_weu_energie` (Bern, base_url https://www.weu.be.ch) — EXACT
+#     duplicate (same id, same base_url, same start_path) of the entry
+#     already drafted wave 1 in draft/crawl/dach.yaml. Not re-added.
+#   - `vd_legislation_energie` (Vaud, base_url https://www.vd.ch) — SAME
+#     underlying source as wave-1's `vd_energie_legislation` in dach.yaml
+#     (same base_url, overlapping subject). Not re-added as a new entry;
+#     the one genuinely new piece of information (start_path
+#     "/djes/nouvelle-loi-sur-lenergie" covering the incoming LVLEne law,
+#     adopted Feb 2026 / in force Jan 2027, F/G-building-retrofit-by-2042
+#     and fossil-heating-ban-by-2047 provisions) should be folded into the
+#     existing wave-1 `vd_energie_legislation` entry's start_paths/notes by
+#     a human reviewer rather than shipped as a second same-base_url entry.
+# `bs_aue` (Basel-Stadt, base_url https://www.bs.ch) is NOT a duplicate of
+# wave-1's `bs_energiegesetz` (base_url https://gesetzessammlung.bs.ch) —
+# different host, different content (cantonal environment/energy OFFICE
+# page vs. the statute text itself) — kept below as a genuinely new entry.
+#
+# Append-to targets:
+#   - India entries (10)      -> config/domains/india.yaml (new
+#                                 West Bengal/Uttar Pradesh/Gujarat/Odisha
+#                                 sections; Maharashtra section already
+#                                 exists alongside maharashtra_energy)
+#   - Australia entries (5)   -> NEW config/domains/australia.yaml
+#                                 (Tasmania + ACT sections)
+#   - Brazil entries (5)      -> config/domains/brazil.yaml (new
+#                                 Sao Paulo/Rio de Janeiro/Parana sections;
+#                                 existing file is federal-only)
+#   - Mexico entries (4)      -> config/domains/mexico.yaml (new
+#                                 Nuevo Leon/Queretaro sections)
+#   - Spain entries (5)       -> config/domains/spain.yaml (new
+#                                 Aragon/Madrid/Catalonia sections)
+#   - Italy entry (1)         -> config/domains/italy.yaml (new
+#                                 Lombardy section)
+#   - Switzerland entries (2) -> config/domains/switzerland.yaml
+#                                 (Geneva/Basel-Stadt sections)
+#   - Canada entries (11)     -> config/domains/canada.yaml (new
+#                                 Saskatchewan/Nova Scotia/New Brunswick/
+#                                 Newfoundland-and-Labrador sections)
+#   - Japan entries (3)       -> NEW config/domains/japan.yaml, or
+#                                 config/domains/apac.yaml (human call —
+#                                 file-placement note in deep-subnational.md)
+#   - China entries (3)       -> NEW config/domains/china.yaml (already
+#                                 flagged as needed by wave-1's east-asia.yaml
+#                                 draft and this wave's standards-bodies.yaml)
+#
+# Region-value note: individual-state/province/canton region strings don't
+# exist in VALID_REGIONS for most jurisdictions here (only a handful of
+# Indian/Australian/Canadian states are individually registered). Every
+# entry below uses only valid VALID_REGIONS values and preserves exact
+# jurisdiction identity in id/name/notes — see the wave-2 report for the
+# full recommended-additions list (aragon, catalonia, madrid, lombardy,
+# geneva, basel_stadt, saskatchewan, nova_scotia, new_brunswick,
+# newfoundland_and_labrador, tasmania, act, sao_paulo, rio_de_janeiro,
+# parana, queretaro, nuevo_leon, china).
+# =============================================================================
+
+domains:
+  # --- India (10) ---
+  - name: "West Bengal Data Centre Policy Portal (Sahayata)"
+    id: "wb_dc_policy"
+    enabled: false
+    base_url: "https://sahayata.itewb.gov.in"
+    start_paths:
+      - "/pages/data-centre-policy-2021"
+      - "/pages/vision-mission"
+      - "/"
+    region:
+      - "apac"
+      - "india"
+    category: "policy"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "strategy"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md India #1, highest value in that batch).
+      Standalone WB Data Centre Policy 2021 portal (Dept. of IT &
+      Electronics), distinct from the general IT dept site and from the
+      already-drafted wbreda_in (renewable energy only). Hosts the
+      notification, full policy text, Advisory Group Constitution Order,
+      State Empowered Committee Order as direct downloads. verified: yes —
+      WebFetch confirmed all four documents, official DoIT&E branding.
+
+  - name: "Uttar Pradesh Data Centre Policy 2021 (Invest UP)"
+    id: "up_dc_policy"
+    enabled: false
+    base_url: "https://invest.up.gov.in"
+    start_paths:
+      - "/up-data-centre-policy-2021/"
+    region:
+      - "apac"
+      - "india"
+    category: "policy"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "strategy"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md India #2). UP's first dedicated DC
+      policy — Rs 20,000 crore investment target, 250MW capacity,
+      capital/interest/land subsidies, stamp-duty and electricity-duty
+      exemptions. Actively maintained through Dec 2024 (incl. First
+      Amendment 2022). verified: yes — WebFetch confirmed policy text,
+      incentive structure, downloadable PDFs/Government Orders.
+
+  - name: "Odisha Data Centre Policy 2022 (Invest Odisha)"
+    id: "odisha_dc_policy"
+    enabled: false
+    base_url: "https://investodisha.gov.in"
+    start_paths:
+      - "/datacentre-policy"
+    region:
+      - "apac"
+      - "india"
+    category: "policy"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "strategy"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md India #3). Land subsidy, capital grants
+      up to Rs 25 crore, power-bill reductions, tax reimbursements,
+      single-window clearance under nodal agency OCAC (E&IT dept).
+      verified: yes — WebFetch confirmed policy sections and a
+      downloadable PDF.
+
+  - name: "Gujarat IT/ITeS Policy (Directorate of ICT & e-Governance)"
+    id: "gujarat_it_policy"
+    enabled: false
+    base_url: "https://directorit.gujarat.gov.in"
+    start_paths:
+      - "/IT-Policy"
+    region:
+      - "apac"
+      - "india"
+    category: "policy"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "strategy"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md India #4). Gujarat's dedicated IT/ITeS
+      Policy (2022-27) explicitly covers "technologically advanced Data
+      Centers" and Cable Landing Station development; distinct from the
+      already-drafted geda_in (renewable energy). October 2024 addendum
+      listed. verified: yes — WebFetch confirmed IT/ITeS Policy document,
+      GCC Policy, Startup & Innovation Policy, DC/CLS provisions.
+
+  - name: "Maharashtra Industries Dept - IT & ITES Policy 2023 (Data Centre chapter)"
+    id: "maharashtra_industry"
+    enabled: false
+    base_url: "https://industry.maharashtra.gov.in"
+    start_paths:
+      - "/"
+      - "/sites/default/files/2025-09/it-policy-booklet_1_11zon.pdf"
+    region:
+      - "apac"
+      - "india"
+      - "maharashtra"
+    category: "policy"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "strategy"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md India #5). No standalone "Maharashtra
+      Data Centre Policy 2023" exists — DC provisions live inside the IT &
+      ITES Policy 2023 itself (cross-confirmed via legal-industry
+      sources). Distinct from the already-shipped maharashtra_energy.
+      Includes an Oct 2024 GR amendment adding "Green Integrated Data
+      Centre Park" incentives. PDF is 8.2MB, image-heavy — note for
+      OCR/parsing. verified: yes — WebFetch confirmed official branding,
+      policy listing, IT/ITES 2023 PDF location.
+
+  - name: "Maharashtra Industrial Development Corporation (MIDC) - Industrial Policies & Incentives"
+    id: "midc_in"
+    enabled: false
+    base_url: "https://www.midcindia.org"
+    start_paths:
+      - "/en/investors/industrial-policies-and-incentives/"
+    region:
+      - "apac"
+      - "india"
+      - "maharashtra"
+    category: "economic_dev"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+      - "planning"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md India #6). Implementing body earmarking
+      land for the state's Data Centre Parks (per IT/ITES Policy 2023) —
+      distinct entity/base_url from both maharashtra_energy and
+      maharashtra_industry. Lists ~20 sector policies, filter for
+      DC-relevant ones at build time. verified: yes — WebFetch confirmed
+      official MIDC branding and the IT/ITES Policy 2023 DC entry.
+
+  - name: "Uttar Pradesh New & Renewable Energy Development Agency (UPNEDA)"
+    id: "upneda_in"
+    enabled: false
+    base_url: "https://upneda.in"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+      - "india"
+    category: "energy_ministry"
+    tags:
+      - "renewable_energy"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md India #7). UP's state renewable-energy
+      nodal agency (solar, bioenergy, biodiesel, RPO compliance) — no UP
+      energy-agency coverage exists yet. Multiple mirror domains exist
+      (upneda.org.in, solar.upneda.in). verified: yes — WebFetch confirmed
+      official portal, Saur UP/Bio Energy/Biodiesel/RPO sub-portals.
+
+  - name: "Odisha Electronics & Information Technology Department"
+    id: "odisha_it_dept"
+    enabled: false
+    base_url: "https://it.odisha.gov.in"
+    start_paths:
+      - "/en"
+    region:
+      - "apac"
+      - "india"
+    category: "policy"
+    tags:
+      - "data_center_specific"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "guidance"
+    language: "en"
+    max_depth: 2
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md India #8). Parent IT department
+      complementing the dedicated odisha_dc_policy page — broader
+      policy/rules repository; also references a newer "Odisha State Data
+      Policy 2.0" (2026) and draft "ODEV 2030". Act/Rules/Policies section
+      slug not confirmed — start at root with max_depth 2. verified: yes —
+      WebFetch confirmed department site, Act/Rules/Policies section,
+      named documents.
+
+  - name: "Odisha Renewable Energy Development Agency (OREDA)"
+    id: "oreda_in"
+    enabled: false
+    base_url: "https://oredaodisha.com"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+      - "india"
+    category: "energy_ministry"
+    tags:
+      - "renewable_energy"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md India #9). Odisha's renewable-energy
+      nodal agency (est. 1984, under the Dept. of Science & Technology) —
+      rooftop solar, biogas, PM Surya Ghar, RESCO — fills the
+      energy-agency gap alongside the IT/DC entries above. verified: yes —
+      WebFetch confirmed official site, program listings.
+
+  - name: "Gujarat Dept. of Science & Technology (Viksit Gujarat - Data Centre Policy 2026-29)"
+    id: "gujarat_dst"
+    enabled: false
+    base_url: "https://dst.gujarat.gov.in"
+    start_paths:
+      - "/"
+      - "/Home/GujaratStateDataCenter"
+    region:
+      - "apac"
+      - "india"
+    category: "policy"
+    tags:
+      - "data_center_specific"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "incentive"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md India #10). Nodal agency for a
+      brand-new (~Jul 9 2026) "Viksit Gujarat" DC policy (8GW target, Rs 6
+      lakh crore investment target) — extremely current. verified:
+      PARTIAL — domain and Gujarat State Data Center (GSDC) subpage
+      confirmed live/official; the exact 2026-29 policy document URL was
+      not located this pass (may not be posted yet) — recommend a human
+      follow-up before enabling.
+
+  # --- Australia (5) ---
+  - name: "ReCFIT - Renewables, Climate and Future Industries Tasmania"
+    id: "recfit_tas"
+    enabled: false
+    base_url: "https://www.recfit.tas.gov.au"
+    start_paths:
+      - "/"
+      - "/policies_strategies_plans"
+      - "/policies_strategies_plans/renewable-energy/renewable_energy_action_plan"
+    region:
+      - "apac"
+      - "australia"
+    category: "energy_ministry"
+    tags:
+      - "renewable_energy"
+      - "planning"
+      - "efficiency"
+    policy_types:
+      - "strategy"
+      - "report"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md Australia #1). Tasmania's actual
+      dedicated energy/climate policy division (replaces the now-unstable
+      stategrowth.tas.gov.au, mid machinery-of-government restructure into
+      "Building Tasmania"). Publishes the Renewable Energy Action Plan and
+      the legislated 200%-renewable-output target (2020). WebFetch 403'd
+      (bot detection) but curl with browser UA returned 200 on all three
+      paths. verified: yes (via curl; WebFetch blocked).
+
+  - name: "Office of the Tasmanian Economic Regulator (OTTER)"
+    id: "otter_tas"
+    enabled: false
+    base_url: "https://www.economicregulator.tas.gov.au"
+    start_paths:
+      - "/electricity"
+      - "/"
+      - "/for-customers/current-regulated-prices"
+    region:
+      - "apac"
+      - "australia"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (deep-subnational.md Australia #2). Administers the
+      Electricity Supply Industry Act 1995 and Tasmanian Electricity
+      Code — feed-in tariffs, supplier licensing, retail-price regulation;
+      publishes the "Energy in Tasmania" annual report. Successor name to
+      "Office of the Tasmanian Energy Regulator". verified: yes — WebFetch
+      confirmed Act citation, code/licensing/pricing sections.
+
+  - name: "Tasmanian Legislation Online"
+    id: "legislation_tas"
+    enabled: false
+    base_url: "https://www.legislation.tas.gov.au"
+    start_paths:
+      - "/browse/inforce"
+      - "/browse/asmade"
+      - "/browse/bills"
+    region:
+      - "apac"
+      - "australia"
+    category: "legislative"
+    tags:
+      - "mandates"
+    policy_types:
+      - "law"
+    language: "en"
+    notes: |
+      Wave 2 (deep-subnational.md Australia #3). Authoritative full-text
+      repository of Tasmanian Acts/Statutory Rules — fills the
+      primary-legislation gap for the state. verified: yes — WebFetch
+      confirmed root content and all three browse paths.
+
+  - name: "Climate Choices (ACT Government)"
+    id: "climate_choices_act"
+    enabled: false
+    base_url: "https://www.climatechoices.act.gov.au"
+    start_paths:
+      - "/"
+      - "/energy/energy-efficiency"
+      - "/policy-programs/energy-efficiency-improvement-scheme"
+    region:
+      - "apac"
+      - "australia"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+      - "incentives"
+    policy_types:
+      - "regulation"
+      - "incentive"
+      - "guidance"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md Australia #4). Where ACT's live
+      energy/climate policy content actually sits post-EPSDD-merger (now
+      under the City and Environment Directorate) — mandatory Energy
+      Efficiency Improvement Scheme, Home Energy Support rebates,
+      net-zero-by-2045 program. environment.act.gov.au 404s on all
+      climate/energy guesses — content moved here. WebFetch 403'd, curl
+      confirmed 200. verified: yes (via curl; WebFetch blocked).
+
+  - name: "ACT Legislation Register"
+    id: "legislation_act"
+    enabled: false
+    base_url: "https://www.legislation.act.gov.au"
+    start_paths:
+      - "/"
+      - "/a/2012-17"
+    region:
+      - "apac"
+      - "australia"
+    category: "legislative"
+    tags:
+      - "mandates"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (deep-subnational.md Australia #5). Official ACT Legislation
+      Act 2001 "approved website" — Acts, subordinate laws,
+      disallowable/notifiable instruments, bills; surfaces the Energy
+      Efficiency (Cost of Living) Improvement Act 2012 and its amending
+      instruments directly. verified: yes — WebFetch confirmed root
+      content; curl confirmed /a/2012-17.
+
+  # --- Brazil (5) ---
+  - name: "Assembleia Legislativa do Estado de Sao Paulo - decree repository"
+    id: "al_sp_legislacao"
+    enabled: false
+    base_url: "https://www.al.sp.gov.br"
+    start_paths:
+      - "/repositorio/legislacao/decreto/2020/"
+      - "/repositorio/legislacao/decreto/2023/"
+    region:
+      - "south_america"
+      - "brazil"
+    category: "legislative"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "law"
+      - "regulation"
+      - "incentive"
+    language: "pt"
+    notes: |
+      Wave 2 (deep-subnational.md Brazil #1). Verbatim state-level DC-
+      specific tax law — Decreto 64.771/2020 (ICMS suspension/deferral/
+      exemption on DC server/switch-gear imports, CNAE 6311-9/00) and its
+      2023 amendment (extends to optical transceivers). Static decree
+      pages, needs periodic new-year path additions. verified: yes —
+      fetched decree text directly, confirmed governor signature, CNAE
+      code, effective date.
+
+  - name: "SEMIL - Energy & Mining Subsecretariat of Sao Paulo State"
+    id: "semil_energia_sp"
+    enabled: false
+    base_url: "https://semil.sp.gov.br"
+    start_paths:
+      - "/sem/"
+      - "/sem/energia/"
+    region:
+      - "south_america"
+      - "brazil"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "renewable_energy"
+      - "planning"
+      - "carbon"
+    policy_types:
+      - "regulation"
+      - "strategy"
+      - "report"
+    language: "pt"
+    allowed_path_patterns:
+      - "/sem/*"
+    notes: |
+      Wave 2 (deep-subnational.md Brazil #2). Sao Paulo's state-level
+      energy-ministry counterpart to federal MME — State Energy Policy
+      Council (Cepe), State Energy Plan 2050, Balanco/Boletim/Anuario
+      Energetico. Large multi-secretariat portal — allowed_path_patterns
+      recommended. verified: yes — WebFetch confirmed Cepe, PEE, Balanco
+      Energetico, solar PV call, climate-committee content.
+
+  - name: "ARSESP - Sao Paulo state utility regulator"
+    id: "arsesp_sp"
+    enabled: false
+    base_url: "https://www.arsesp.sp.gov.br"
+    start_paths:
+      - "/SitePages/Legislacao.aspx"
+      - "/Paginas/energia/energia-eletrica.aspx"
+    region:
+      - "south_america"
+      - "brazil"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "pt"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md Brazil #3). State electricity regulator,
+      direct Sao Paulo counterpart to federal ANEEL; searchable
+      Deliberacoes/Portarias archive (200+ entries back to 2000).
+      Legislation search is a filterable list UI — requires_playwright or
+      a query-string start path may help. verified: yes — WebFetch
+      confirmed regulator identity and the searchable archive.
+
+  - name: "Secretaria de Estado de Fazenda do Rio de Janeiro - Legislacao"
+    id: "legislacao_fazenda_rj"
+    enabled: false
+    base_url: "https://legislacao.fazenda.rj.gov.br"
+    start_paths:
+      - "/leis-ordinarias-estaduais/"
+    region:
+      - "south_america"
+      - "brazil"
+    category: "legislative"
+    tags:
+      - "incentives"
+    policy_types:
+      - "law"
+      - "incentive"
+    language: "pt"
+    notes: |
+      Wave 2 (deep-subnational.md Brazil #4). Second Brazilian state
+      (beyond Sao Paulo) with an explicit DC tax-incentive law — Lei
+      10.431/2024, differentiated ICMS deferral for DC servers/switches/
+      optical transceivers, valid through 2032. Organized by year
+      (1979-2026) with search + thematic filters. verified: yes — fetched
+      root, confirmed year-indexed database; corroborated via ALERJ news
+      coverage of Lei 10.431/24.
+
+  - name: "Secretaria da Fazenda do Parana - Programa Parana Competitivo"
+    id: "fazenda_pr_competitivo"
+    enabled: false
+    base_url: "https://www.fazenda.pr.gov.br"
+    start_paths:
+      - "/Pagina/Parana-Competitivo"
+    region:
+      - "south_america"
+      - "brazil"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "renewable_energy"
+    policy_types:
+      - "regulation"
+      - "incentive"
+    language: "pt"
+    notes: |
+      Wave 2 (deep-subnational.md Brazil #5). State ICMS-credit transfer
+      incentive program (Decreto 7.721/2024) explicitly covering
+      renewable-energy-plant investment — a third Brazilian state worth
+      noting; decree PDF hosted at sefanet.pr.gov.br. verified: yes —
+      fetched root, confirmed program and decree provisions.
+
+  # --- Mexico (4) ---
+  - name: "Ley de Fomento a la Inversion y al Empleo - Congreso de Nuevo Leon"
+    id: "fomento_inversion_empleo_nl"
+    enabled: false
+    base_url: "https://www.hcnl.gob.mx"
+    start_paths:
+      - "/trabajo_legislativo/leyes/leyes/ley_de_fomento_a_la_inversion_y_al_empleo_para_el_estado_de_nuevo_leon/"
+    region:
+      - "north_america"
+      - "mexico"
+    category: "legislative"
+    tags:
+      - "incentives"
+    policy_types:
+      - "law"
+      - "incentive"
+    language: "es"
+    notes: |
+      Wave 2 (deep-subnational.md Mexico #1). Nuevo Leon's investment/
+      employment-promotion law — payroll-tax subsidies, registration-fee
+      waivers, land-purchase discounts, and a Consejo de Desarrollo
+      Economico that scores projects partly on environmental-technology
+      adoption; last reformed Sept 2025. verified: yes — fetched directly,
+      confirmed reform date and incentive/environmental provisions.
+
+  - name: "Prontuario de Legislacion Administrativa y Fiscal - Queretaro"
+    id: "queretaro_prontuario_fiscal"
+    enabled: false
+    base_url: "https://www.queretaro.gob.mx"
+    start_paths:
+      - "/en/prontuario-2025"
+    region:
+      - "north_america"
+      - "mexico"
+    category: "legislative"
+    tags:
+      - "incentives"
+      - "reporting"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "es"
+    notes: |
+      Wave 2 (deep-subnational.md Mexico #2). Queretaro has no separate
+      state energy secretariat (energy is federal via CFE/SENER) — this
+      fiscal-law compendium (Ley de Ingresos, Codigo Fiscal, finance-
+      ministry regulations) is the closest state-level policy-document
+      source for Mexico's #1 DC hub. Static "Visualizar" link list,
+      annual re-publish — update the year in the path each year.
+      verified: yes — fetched directly, confirmed 40 listed documents
+      with working links.
+
+  - name: "SEDESU - Queretaro Secretariat of Sustainable Development"
+    id: "sedesu_qro"
+    enabled: false
+    base_url: "https://queretaro.gob.mx"
+    start_paths:
+      - "/en/web/sedesu"
+    region:
+      - "north_america"
+      - "mexico"
+    category: "economic_dev"
+    tags:
+      - "planning"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "es"
+    notes: |
+      Wave 2 (deep-subnational.md Mexico #3). Official state body
+      co-leading the National Forum on Energy and Sustainability with the
+      Mexican Data Centers Association (Queretaro holds ~65% of Mexico's
+      installed DC capacity per that forum). Content thinner than
+      expected — mostly vehicle-emissions-verification scheduling;
+      recommend a human spot-check for a more specific incentive sub-page.
+      verified: yes, coverage thin — identity confirmed, no specific
+      DC-incentive document found yet.
+
+  - name: "Secretaria de Economia del Estado de Nuevo Leon"
+    id: "economia_nl"
+    enabled: false
+    base_url: "https://www.nl.gob.mx"
+    start_paths:
+      - "/es/economia"
+    region:
+      - "north_america"
+      - "mexico"
+    category: "economic_dev"
+    tags:
+      - "planning"
+    policy_types:
+      - "guidance"
+    language: "es"
+    notes: |
+      Wave 2 (deep-subnational.md Mexico #4, lowest priority of the
+      batch). Office publicly quoted on DC energy readiness and 1.5GW of
+      new 2026 generation capacity tied partly to DC/AI demand, but the
+      landing page itself is generic business services — the actual
+      incentive mechanism is fomento_inversion_empleo_nl above. verified:
+      yes, weak fit — department identity confirmed only.
+
+  # --- Spain (5) ---
+  - name: "Aragon - Plan de Interes General de Aragon (Region MSFT)"
+    id: "aragon_piga_msft"
+    enabled: false
+    base_url: "https://www.aragon.es"
+    start_paths:
+      - "/-/piga-microsoft"
+    region:
+      - "eu"
+      - "eu_south"
+      - "spain"
+    category: "economic_dev"
+    tags:
+      - "planning"
+      - "efficiency"
+    policy_types:
+      - "directive"
+      - "report"
+    language: "es"
+    max_depth: 2
+    notes: |
+      Wave 2 (deep-subnational.md Spain #1). Official administrative
+      dossier for three interconnected Microsoft DC campuses (La Muela,
+      Villamayor de Gallego, Zaragoza) — environmental impact assessments,
+      HV supply approvals, Declaration of General/Autonomous Interest
+      (Dec 2023-Feb 2025). Aragon is one of Europe's largest emerging
+      hyperscaler hubs. Region: Aragon has no VALID_REGIONS bucket, mapped
+      to ["eu","eu_south","spain"] (canton/region identity preserved in
+      id/notes). verified: yes — WebFetch confirmed official page, project
+      scope, DIGA history.
+
+  - name: "Aragon - regional energy legislation index"
+    id: "aragon_legislacion_energia"
+    enabled: false
+    base_url: "https://www.aragon.es"
+    start_paths:
+      - "/-/legislacion-sobre-energia"
+    region:
+      - "eu"
+      - "eu_south"
+      - "spain"
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "es"
+    notes: |
+      Wave 2 (deep-subnational.md Spain #2). Direct regional legislative
+      index — Decreto-Ley 1/2023 (energy transition), Ley 5/2024 (energy
+      communities/self-consumption), efficiency-subsidy decrees, Energy
+      Plans 2005-2012/2013-2020. Same region-mapping caveat as
+      aragon_piga_msft above. verified: yes — WebFetch enumerated specific
+      laws with numbers/dates.
+
+  - name: "Catalonia - Institut Catala d'Energia (ICAEN)"
+    id: "icaen_catalunya"
+    enabled: false
+    base_url: "https://icaen.gencat.cat"
+    start_paths:
+      - "/ca/energia/normativa/"
+      - "/ca/energia/usos_energia/edificis/lenergia-als-edificis/normativa"
+      - "/ca/participacio/llei-de-transicio-energetica-de-catalunya-i-transformacio-de-linstitut-catala-denergia-en-lagencia-denergia-de-catalunya/index.html"
+    region:
+      - "eu"
+      - "eu_south"
+      - "spain"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+      - "planning"
+      - "incentives"
+    policy_types:
+      - "law"
+      - "regulation"
+      - "guidance"
+      - "report"
+    language: "ca"
+    max_depth: 2
+    notes: |
+      Wave 2 (deep-subnational.md Spain #3). Catalonia is a top-3 Spanish
+      DC-investment region (Barcelona metro); full energy-authority site —
+      PROENCAT 2050, PINECCAT 2030, PLATER siting plan, GENERCAT
+      public-building efficiency plan, building-efficiency normativa, and
+      a pending energy-transition bill (would rename ICAEN to Agencia
+      Catalana d'Energia). Content is Catalan with some Spanish; check
+      config/keywords.yaml for Catalan-language taxonomy coverage. Region:
+      Catalonia has no VALID_REGIONS bucket, mapped to
+      ["eu","eu_south","spain"] (identity preserved in id/notes).
+      verified: yes — three separate WebFetch calls confirmed homepage,
+      normativa sub-page, transition-law page.
+
+  - name: "Madrid - FENERCOM (Fundacion de la Energia de la Comunidad de Madrid)"
+    id: "fenercom_madrid"
+    enabled: false
+    base_url: "https://www.fenercom.com"
+    start_paths:
+      - "/"
+      - "/presentacion/"
+      - "/informacion/"
+    region:
+      - "eu"
+      - "eu_south"
+      - "spain"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "guidance"
+      - "report"
+    language: "es"
+    notes: |
+      Wave 2 (deep-subnational.md Spain #4). Public foundation of the
+      Madrid regional government — the actual publisher of Madrid's
+      efficiency/incentive content (Madrid's own energy-dept pages are
+      thin procedural directories with no real documents). Publishes
+      technical efficiency guides and active incentive programs (Plan
+      Renove Electrodomesticos 2025, MOVES III, Plan Renove Ventanas).
+      Region: Madrid has no VALID_REGIONS bucket, mapped to
+      ["eu","eu_south","spain"]. verified: yes — WebFetch confirmed
+      foundation status and current program list.
+
+  - name: "Madrid - Estrategia de Energia, Clima y Aire 2023-2030"
+    id: "madrid_estrategia_energia_clima"
+    enabled: false
+    base_url: "https://www.comunidad.madrid"
+    start_paths:
+      - "/transparencia/informacion-institucional/planes-programas/estrategia-energia-clima-y-aire-comunidad-madrid-2023"
+    region:
+      - "eu"
+      - "eu_south"
+      - "spain"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "planning"
+      - "carbon"
+    policy_types:
+      - "directive"
+      - "report"
+    language: "es"
+    notes: |
+      Wave 2 (deep-subnational.md Spain #5). Madrid's actual enacted
+      regional strategy (Orden 2126/2023, published in BOCM Jan 2024,
+      replaces "Plan Azul+") — complements FENERCOM's foundation-level
+      guides with a formal government strategy document. Main PDF exceeds
+      typical fetch size limits (>10MB, 7 technical annexes) — crawler
+      should handle large-PDF parsing or extract from the HTML summary.
+      Same region-mapping caveat as fenercom_madrid above. verified: yes —
+      WebFetch confirmed transparency-portal landing page, legal basis,
+      linked PDF set.
+
+  - name: "Boletin Oficial de Aragon (BOA)"
+    id: "boa_aragon"
+    enabled: false
+    base_url: "https://www.boa.aragon.es"
+    start_paths:
+      - "/cgi-bin/EBOA/BRSCGI?CMD=VERLST&BASE=BZHT&SEC=BUSQUEDA_AVANZADA"
+    region:
+      - "eu"
+      - "eu_south"
+      - "spain"
+    category: "legislative"
+    tags:
+      - "mandates"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "es"
+    notes: |
+      Wave 2 (deep-subnational.md Spain/Italy/Switzerland #11, borderline
+      tier-b/tier-c). Aragon's own regional gazette — the actual
+      publication venue for the DIGA approvals (see aragon_piga_msft) and
+      energy-transition decree-laws in full text. CGI-based
+      parameter-driven search (BRSCGI, same tooling family as the
+      already-shipped boe_es) — a targeted query string per keyword may
+      work better than open-ended crawling; could become tier-c if a
+      query-parameter-driven client is preferred over blind crawling.
+      Same region-mapping caveat as aragon_piga_msft above. verified: yes
+      — successfully fetched a real gazette PDF confirming the mechanism
+      works; DIGA/energy-specific issue numbers found via WebSearch
+      snippets only, not independently re-fetched.
+
+  # --- Italy (1) ---
+  - name: "Lombardy - PEAR/PREAC regional energy-environmental plan"
+    id: "lombardia_pear_preac"
+    enabled: false
+    base_url: "https://www.regione.lombardia.it"
+    start_paths:
+      - "/ambiente-e-territorio/energia/programma-energetico-ambientale-regionale"
+    region:
+      - "eu"
+      - "eu_south"
+      - "italy"
+    category: "energy_ministry"
+    tags:
+      - "planning"
+      - "efficiency"
+      - "carbon"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "it"
+    max_depth: 2
+    notes: |
+      Wave 2 (deep-subnational.md Spain/Italy/Switzerland #5). Milan/
+      Lombardy is Italy's largest DC market; binding regional energy plan
+      (PEAR 2014-2020, successor PREAC approved Dec 2022, 43.8% GHG
+      reduction target vs 2005 by 2030) — fills the "national level only"
+      gap for Italy. The /wps/portal URL variant redirects unpredictably
+      to the homepage — use the confirmed path above. No DC-specific
+      provisions found (general energy/climate plan). Region: Lombardy has
+      no VALID_REGIONS bucket, mapped to ["eu","eu_south","italy"].
+      verified: yes — WebFetch confirmed plan history, decree numbers,
+      four thematic pillars.
+
+  # --- Switzerland (2; ge_len_energie and be_weu_energie duplicates removed
+  #     — see file header. vd_legislation_energie also removed, merge note
+  #     only, in file header) ---
+  - name: "Basel-Stadt - Amt fuer Umwelt und Energie (AUE)"
+    id: "bs_aue"
+    enabled: false
+    base_url: "https://www.bs.ch"
+    start_paths:
+      - "/wsu/aue"
+    region:
+      - "eu_central"
+      - "switzerland"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "planning"
+    policy_types:
+      - "guidance"
+      - "regulation"
+    language: "de"
+    notes: |
+      Wave 2 (deep-subnational.md Spain/Italy/Switzerland #10). NOT a
+      duplicate of wave-1's bs_energiegesetz (base_url
+      gesetzessammlung.bs.ch, the statute text itself) — this is the
+      cantonal environment/energy OFFICE administering the Energiegesetz
+      (SG 772.100): water protection, energy conservation, building-
+      energy guidance, heating-replacement subsidies. Basel-Stadt is a
+      growing cantonal DC market adjacent to well-covered Zurich. The
+      aue.bs.ch subdomain variant hit a TLS certificate error — stick to
+      www.bs.ch/wsu/aue. Region: Basel-Stadt has no VALID_REGIONS bucket,
+      mapped to ["eu_central","switzerland"]. verified: yes (for
+      www.bs.ch/wsu/aue only).
+
+  - name: "Geneva - Etat de Geneve energy-transition policy hub"
+    id: "ge_transition_energetique"
+    enabled: false
+    base_url: "https://www.ge.ch"
+    start_paths:
+      - "/dossier/transition-energetique-geneve"
+    region:
+      - "eu_central"
+      - "switzerland"
+    category: "energy_ministry"
+    tags:
+      - "district_heating"
+      - "efficiency"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "guidance"
+    language: "fr"
+    notes: |
+      Wave 2 (deep-subnational.md Spain/Italy/Switzerland #12). Companion
+      crawl entry to the wave-1-drafted ge_len_energie law text (dach.yaml,
+      NOT re-added here — see file header) — Plan directeur de l'energie
+      2020-2030, links to "Rejets thermiques" (waste heat) and "Chauffer
+      et rafraichir Geneve" (district heating/cooling) sub-pages, Loi
+      13222 (2024) building-retrofit financing. Different base_url
+      (ge.ch, not silgeneve.ch) — genuinely new, not a duplicate.
+      Possibly benefits from requires_playwright (peer ge.ch pages use
+      dynamic nav, not confirmed necessary here). verified: yes — WebFetch
+      confirmed content, program names, sub-page links.
+
+  # --- Canada (11) ---
+  - name: "SaveEnergyNB (New Brunswick)"
+    id: "saveenergynb"
+    enabled: false
+    base_url: "https://www.saveenergynb.ca"
+    start_paths:
+      - "/"
+      - "/en/for-business/"
+    region:
+      - "north_america"
+      - "canada"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "en"
+    notes: |
+      Wave 2 (deep-subnational.md Canada #1). Delivered jointly by NB
+      Power + Govt of NB + Govt of Canada — Business Rebate Program (25%
+      back), Commercial Buildings Retrofit ($1.25M cap), Industrial Energy
+      Efficiency Program ($1M cap), New Construction Program ($250k/
+      building). NB currently has zero entries in canada.yaml. Region:
+      "new_brunswick" has no VALID_REGIONS bucket (same gap already
+      flagged for "manitoba"), mapped to ["north_america","canada"].
+      verified: yes — WebFetch confirmed full program listings.
+
+  - name: "takeCHARGE (Newfoundland and Labrador)"
+    id: "takecharge_nl"
+    enabled: false
+    base_url: "https://takechargenl.ca"
+    start_paths:
+      - "/"
+    region:
+      - "north_america"
+      - "canada"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "en"
+    notes: |
+      Wave 2 (deep-subnational.md Canada #2). Joint NL Hydro/Newfoundland
+      Power program — Business Efficiency Program up to $50,000, plus an
+      Isolated System Business Efficiency Program for off-grid
+      communities; NL has zero existing entries. Same region-mapping
+      caveat as saveenergynb (no "newfoundland_and_labrador" bucket).
+      verified: yes — WebFetch confirmed program details.
+
+  - name: "Efficiency Nova Scotia"
+    id: "efficiency_ns"
+    enabled: false
+    base_url: "https://www.efficiencyns.ca"
+    start_paths:
+      - "/programs-rebates"
+      - "/programs-rebates/business-energy-rebates"
+      - "/programs-rebates/building-optimization-program"
+      - "/programs-rebates/pay-for-performance-program"
+    region:
+      - "north_america"
+      - "canada"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md Canada #3). Arms-length efficiency
+      utility created by government in 2009 — working alternate entry
+      point for NS efficiency content (the ministry subdomain
+      energy.novascotia.ca remains blocked, "Access denied" — see
+      unverified appendix). Building Optimization Program and
+      Pay-for-Performance Program are directly large-facility/DC-relevant.
+      WebFetch returned only the <title> (JS-rendered). verified: yes —
+      confirmed via browser render (all four programs listed).
+
+  - name: "Government of Saskatchewan - Building/Energy Code + Large-Emitter Carbon Program"
+    id: "saskatchewan_energy_standards"
+    enabled: false
+    base_url: "https://www.saskatchewan.ca"
+    start_paths:
+      - "/business/housing-development-construction-and-property-management/building-and-technical-standards/national-building-and-fire-code-information"
+      - "/business/environmental-protection-and-sustainability/a-made-in-saskatchewan-climate-change-strategy/guidance-for-emitters"
+    region:
+      - "north_america"
+      - "canada"
+    category: "standards"
+    tags:
+      - "efficiency"
+      - "mandates"
+      - "carbon"
+      - "reporting"
+    policy_types:
+      - "standard"
+      - "regulation"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (deep-subnational.md Canada #4). NECB 2020 adoption (Jan
+      2024, sets Tier-1 large-building efficiency floor applicable to DC
+      construction) and Output-Based Performance Standards (OBPS) carbon
+      program (mandatory registration/reporting for electricity facilities
+      >10,000 tCO2e/yr, industrial >25,000 tCO2e/yr). Every
+      saskatchewan.ca URL returned HTTP 403 to WebFetch (domain-wide bot
+      detection); loaded fully via real browser. verified: yes, via
+      browser on both paths.
+
+  - name: "SaskPower - Commercial Energy Optimization Program"
+    id: "saskpower_ceop"
+    enabled: false
+    base_url: "https://www.saskpower.com"
+    start_paths:
+      - "/power-savings-and-programs/business/programs/commercial-energy-optimization-program"
+      - "/power-savings-and-programs"
+    region:
+      - "north_america"
+      - "canada"
+    category: "grid_operator"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "en"
+    notes: |
+      Wave 2 (deep-subnational.md Canada #5). $0.13/kWh (non-lighting)
+      and $15/GJ natural-gas incentives, up to $100,000 per fuel type per
+      project — directly applicable to large facility/DC retrofits.
+      Program runs to March 31, 2027 with rolling annual deadlines —
+      expect content churn on renewal. verified: yes — WebFetch confirmed
+      incentive tiers and eligibility.
+
+  - name: "New Brunswick Energy & Utilities Board (EUB)"
+    id: "nbeub"
+    enabled: false
+    base_url: "https://nbeub.ca"
+    start_paths:
+      - "/electricity-decisions"
+      - "/electricity-home"
+      - "/all-current-matters-decisions"
+    region:
+      - "north_america"
+      - "canada"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (deep-subnational.md Canada #6). NB Power rate decisions,
+      Integrated Resource Plan reviews, generation-facility approvals —
+      regulatory counterpart to saveenergynb; decision archive back to
+      1991. verified: yes — WebFetch confirmed decision archive content.
+
+  - name: "Newfoundland and Labrador Board of Commissioners of Public Utilities (PUB NL)"
+    id: "pub_nl"
+    enabled: false
+    base_url: "http://www.pub.nl.ca"
+    start_paths:
+      - "/"
+      - "/PU_ordersArchive.php"
+    region:
+      - "north_america"
+      - "canada"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (deep-subnational.md Canada #7). HTTP-only (no HTTPS
+      available) — WebFetch's automatic HTTPS upgrade caused
+      ECONNREFUSED; confirmed working over http:// via real browser.
+      Whoever wires this up must verify the crawler config accepts a
+      non-HTTPS base_url. Electricity rate orders for NL Hydro/
+      Newfoundland Power (2026 NL Hydro General Rate Application, 2027
+      Newfoundland Power Capital Budget) — regulatory counterpart to
+      takecharge_nl. verified: yes, via browser only (not WebFetch).
+
+  - name: "Nova Scotia Energy and Regulatory Boards Tribunal (successor to NSUARB)"
+    id: "nserbt_ns"
+    enabled: false
+    base_url: "https://nserbt.ca"
+    start_paths:
+      - "/mandates/electricity/customer-page/changes-power-rates"
+      - "/mandates/electricity/municipal-utilities-overview"
+    region:
+      - "north_america"
+      - "canada"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (deep-subnational.md Canada #8). NS's utility regulator —
+      rate-setting for NS Power and municipal electric utilities, fills
+      the NS-regulator gap the way BCUC/OEB/AUC do elsewhere. Old host
+      nsuarb.novascotia.ca now 301-redirects here (board rebranded/
+      merged) — WebFetch followed the redirect cleanly. verified: yes —
+      WebFetch loaded content confirming mandate/rate-review process
+      after redirect.
+
+  - name: "Government of New Brunswick - Laws (Electricity Act, Part 6 Division E - Energy Efficiency)"
+    id: "nb_laws_electricity_act"
+    enabled: false
+    base_url: "https://laws.gnb.ca"
+    start_paths:
+      - "/en/ShowTdm/cs/2013-c.7"
+    region:
+      - "north_america"
+      - "canada"
+    category: "legislative"
+    tags:
+      - "mandates"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "en"
+    notes: |
+      Wave 2 (deep-subnational.md Canada #9). Only genuine NB legislative
+      source found — energy-efficiency/demand-response provisions
+      embedded directly in the Electricity Act. CAVEAT: the older 1992
+      Energy Efficiency Act (E-9.11) is repealed (2011) — do not use that
+      path as current law; active provision is Electricity Act (2013,
+      c.7) Part 6 Division E, plus a referenced 2022 regulation
+      ("2022-74 - Energy Efficiency") a human should confirm/add.
+      verified: yes for the 2013-c.7 TOC page (Part 6 Division E
+      confirmed present).
+
+  - name: "SaskEnergy - Rebates & Programs"
+    id: "saskenergy_rebates"
+    enabled: false
+    base_url: "https://www.saskenergy.com"
+    start_paths:
+      - "/ways-save/rebates-programs"
+      - "/ways-save/homes-beyond-code"
+    region:
+      - "north_america"
+      - "canada"
+    category: "grid_operator"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "en"
+    notes: |
+      Wave 2 (deep-subnational.md Canada #10). Natural-gas-side rebates
+      (boiler rebates $4,000+, "Homes Beyond Code") complementing
+      saskpower_ceop's electric-side program — narrower/lower priority.
+      verified: yes — loaded cleanly via WebFetch.
+
+  - name: "Newfoundland and Labrador Department of Energy and Mines"
+    id: "nl_energy_mines"
+    enabled: false
+    base_url: "https://www.gov.nl.ca"
+    start_paths:
+      - "/em/"
+    region:
+      - "north_america"
+      - "canada"
+    category: "energy_ministry"
+    tags:
+      - "planning"
+      - "reporting"
+    policy_types:
+      - "guidance"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (deep-subnational.md Canada #11, weakest of the eleven).
+      Rounds out NL with a ministry-level source (energy/petroleum/mining
+      policy portal, legislation links) — largely a navigation hub.
+      CAVEAT: older sources call this "Department of Industry, Energy and
+      Technology" (IET); the /iet/department/ path resolves to the same
+      content — possible 2026 machinery-of-government rename in progress,
+      a human should confirm the current org chart. verified: yes, lowest
+      confidence due to naming ambiguity.
+
+  # --- Japan (3) ---
+  - name: "Osaka Prefecture - Climate Change Countermeasures Promotion Ordinance"
+    id: "osaka_ondanka_jourei"
+    enabled: false
+    base_url: "https://www.pref.osaka.lg.jp"
+    start_paths:
+      - "/o120020/chikyukankyo/ondankaboushi_jourei/index.html"
+      - "/kurashi/kankyou/energy/index.html"
+    region:
+      - "apac"
+      - "japan"
+    category: "regulation"
+    tags:
+      - "mandatory"
+      - "carbon"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "ja"
+    notes: |
+      Wave 2 (deep-subnational.md Japan/China #4). Mandatory climate-
+      action-plan and performance-report filing for "specified business
+      operators" (large energy users, capturing large DCs), plus a
+      separate environmental-consideration filing for large-building
+      construction. Osaka is Japan's #2 DC market — direct analogue to
+      Tokyo's already-drafted cap-and-trade scheme (tokyo_kankyo_
+      capandtrade). Exact energy-use threshold for "specified" status
+      only visible in linked PDFs, not independently re-fetched.
+      verified: yes — ordinance name, reporting/filing requirements
+      confirmed on page.
+
+  - name: "Saitama Prefecture - Target-Setting Type Emissions Trading System"
+    id: "saitama_torihikiseido"
+    enabled: false
+    base_url: "https://www.pref.saitama.lg.jp"
+    start_paths:
+      - "/a0502/torihikiseido.html"
+      - "/a0502/keikaku.html"
+      - "/a0502/index.html"
+    region:
+      - "apac"
+      - "japan"
+    category: "regulation"
+    tags:
+      - "mandatory"
+      - "carbon"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "ja"
+    notes: |
+      Wave 2 (deep-subnational.md Japan/China #5). Mandatory cap-and-trade
+      for large-scale business sites, using the SAME 1,500kL crude-oil-
+      equivalent threshold as Tokyo's cap-and-trade and the national
+      METI/ANRE DC-PUE benchmark — large Saitama data centers are covered
+      entities. 4th compliance period FY2025-2029, same period as Tokyo's
+      — structurally the closest parallel to Tokyo's scheme found anywhere
+      in Japan. verified: yes — threshold, reduction-target/trading
+      mechanics, compliance period all confirmed on page.
+
+  - name: "Chiba Prefecture - Global Warming Countermeasures Promotion Division"
+    id: "chiba_ontai"
+    enabled: false
+    base_url: "https://www.pref.chiba.lg.jp"
+    start_paths:
+      - "/ontai/"
+      - "/ontai/hojo/datsutanso-sokushin.html"
+    region:
+      - "apac"
+      - "japan"
+    category: "regulation"
+    tags:
+      - "incentives"
+      - "carbon"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "guidance"
+    language: "ja"
+    notes: |
+      Wave 2 (deep-subnational.md Japan/China #6, lowest priority of the
+      Japan finds). Business decarbonization-equipment subsidy program and
+      46%-by-FY2030 GHG reduction plan; NO mandatory large-facility
+      reporting scheme found (unlike Tokyo/Saitama/Osaka), though
+      WebSearch indicates Chiba is drafting a GHG-reporting ordinance (not
+      yet enacted — do not treat as confirmed). Chiba hosts Japan's
+      largest hyperscale DC cluster (Inzai) but currently has the weakest
+      prefectural DC-adjacent policy of the three. verified: yes for the
+      subsidy program and reduction plan; the in-development reporting
+      ordinance is WebSearch-only.
+
+  # --- China (3) ---
+  - name: "Ningxia - Zhongwei Data Center Development Implementation Plan"
+    id: "ningxia_zhongwei_dc"
+    enabled: false
+    base_url: "https://www.nx.gov.cn"
+    start_paths:
+      - "/zt/nxxtgjqyjjgzlfzxgjzctx/zcfb/202305/t20230523_4118499.html"
+    region:
+      - "apac"
+    category: "regulation"
+    tags:
+      - "mandatory"
+      - "pue_limits"
+      - "renewable_energy"
+      - "incentives"
+    policy_types:
+      - "regulation"
+      - "incentive"
+    language: "zh"
+    notes: |
+      Wave 2 (deep-subnational.md Japan/China #1). New large/extra-large
+      data centers must hit PUE<=1.15 and >=65% renewable-energy use; PUE
+      >1.3 construction/expansion is prohibited outright. Substantial
+      incentives (green power pricing, land priority, RMB100M/yr backbone
+      bond funding, RMB11M/yr operating subsidy). Zhongwei is one of the 8
+      national "East Data West Compute" hub nodes — most concrete/
+      stringent PUE mandate found in any of the 8 hub provinces. New file
+      config/domains/china.yaml. verified: yes — fetched directly, PUE
+      figures and incentive amounts confirmed on the page itself.
+
+  - name: "Ningxia Development and Reform Commission"
+    id: "ningxia_fzggw"
+    enabled: false
+    base_url: "https://fzggw.nx.gov.cn"
+    start_paths:
+      - "/"
+      - "/zcgh/zzqzc/index_1.html"
+      - "/tzgg/"
+    region:
+      - "apac"
+    category: "regulation"
+    tags:
+      - "mandatory"
+      - "carbon"
+      - "efficiency"
+      - "renewable_energy"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "zh"
+    notes: |
+      Wave 2 (deep-subnational.md Japan/China #2). The named agency
+      behind ningxia_zhongwei_dc — publishes computing-hub-node policy
+      opinions, energy-rights trading reform, carbon-peak plan; broader
+      crawl surface catches newer DC-specific notices (2026-dated items
+      visible in listings). One specific 2022 "Ningxia Data Center
+      Construction Guide" notice found via search 404'd on direct fetch
+      (likely archived/moved) — do not use that exact path. Append to
+      config/domains/china.yaml alongside ningxia_zhongwei_dc. verified:
+      yes for base domain and listing pages; the specific DC-guide URL is
+      unverified.
+
+  - name: "Inner Mongolia Energy Bureau - Green Power Direct Connection for Data Centers"
+    id: "nmg_energy_greenpower"
+    enabled: false
+    base_url: "https://nyj.nmg.gov.cn"
+    start_paths:
+      - "/tzgg/202601/t20260115_2848788.html"
+      - "/zwgk/"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "mandatory"
+      - "renewable_energy"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+    language: "zh"
+    notes: |
+      Wave 2 (deep-subnational.md Japan/China #3). Document (Jan 13 2026)
+      mandates new DC loads in the Helingeer/Hohhot national hub-node
+      cluster achieve >=80% green-power consumption via direct connection/
+      green trading/green certificates, with existing loads ramping up
+      gradually. Inner Mongolia is one of the 8 national hubs with among
+      China's strictest PUE rules due to its coal-heavy grid. IMPORTANT:
+      the general provincial portal (www.nmg.gov.cn) and its Industry/IT
+      and Science/Tech subdomains all returned HTTP 403 — only the Energy
+      Bureau subdomain was reachable; do not propose those other
+      subdomains without a human re-check. Append to
+      config/domains/china.yaml. verified: yes — fetched directly, 80%
+      green-power quote for the Helingeer cluster confirmed verbatim.

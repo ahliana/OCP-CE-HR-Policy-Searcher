@@ -1,0 +1,482 @@
+# =============================================================================
+# DRAFT WAVE 2 — Standards Bodies (tier-b crawl domains only — this source
+# file produced 0 tier-a and 0 tier-c candidates).
+# Source: docs/source-expansion/regions-wave2/standards-bodies.md
+# Every entry below is `enabled: false`.
+#
+# Append-to targets (new file needed unless noted otherwise):
+#   - china_std_samr                        -> NEW config/domains/china.yaml
+#                                              (already flagged as needed by
+#                                              wave-1's east-asia.yaml draft,
+#                                              independent of this pass)
+#   - cenelec_clc_tc215                      -> config/domains/eu.yaml
+#   - ashrae_standards, iec_webstore_30134,
+#     the_green_grid, uptime_institute       -> NEW config/domains/
+#                                              supranational.yaml (same file
+#                                              wave 1 already recommended for
+#                                              IEA 4E EDNA / C40 / ISO 30134)
+#   - ecfr_10_cfr_431, betterbuildings_datacenters
+#                                            -> config/domains/us/us_federal.yaml
+#   - bis_standards_india                    -> config/domains/india.yaml
+#   - nen_en_50600                           -> config/domains/netherlands.yaml
+#   - sis_en_50600                           -> config/domains/sweden.yaml
+#   - bsi_en_50600_4_6                       -> config/domains/uk.yaml
+#   - afnor_en_50600                         -> config/domains/france.yaml
+#   - din_en_50600                           -> config/domains/germany.yaml
+#   - jdcc_pue_guideline                     -> config/domains/apac.yaml
+#
+# Note: candidates #13-15 (The Green Grid, Uptime Institute, JDCC) are
+# industry bodies, not government/IGO sources, per the brief's own strict
+# scope — included per the brief's explicit instruction to flag these as a
+# judgment call rather than silently drop them (they originate the exact
+# PUE/ERE/ERF/WUE/CUE metrics every government source cites, and JDCC ties
+# directly into Japan's Energy Conservation Law reporting mandate).
+# =============================================================================
+
+domains:
+  - name: "National Standards Information Public Service Platform (China, SAMR/SAC)"
+    id: "china_std_samr"
+    enabled: false
+    base_url: "https://std.samr.gov.cn"
+    start_paths:
+      - "/gb/search/gbDetailed?id=2E4DD4D8E2E84A4BE06397BE0A0AE354"
+    region:
+      - "apac"
+    category: "standards"
+    tags:
+      - "efficiency"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "standard"
+      - "regulation"
+    language: "zh"
+    requires_playwright: true
+    notes: |
+      Wave 2 (standards-bodies.md #1). HIGHEST-VALUE FIND OF THIS WAVE.
+      Free, full regulatory text for GB 40879 (mandatory data-center PUE
+      limits: <=1.5 floor, Grade 2 <=1.3, Grade 1 <=1.2), drafting
+      committee TC20, and the exact policy gap driving the pending revision
+      (China's 2024 four-ministry action plan requires <=1.25 by end of
+      2025 for new large/hyperscale DCs — stricter than current GB 40879).
+      Search UI is JS-driven — seed with specific detail-page ids rather
+      than link-following from a static start page; requires_playwright
+      recommended. New file config/domains/china.yaml needed regardless
+      (already flagged by wave-1's east-asia.yaml draft). verified: yes —
+      fetched the detail page directly, confirmed Chinese regulatory text,
+      standard number, committee, PUE-gap rationale.
+
+  - name: "CENELEC Technical Committee CLC/TC 215 (drafts EN 50600)"
+    id: "cenelec_clc_tc215"
+    enabled: false
+    base_url: "https://standards.cencenelec.eu"
+    start_paths:
+      - "/dyn/www/f?p=305:7:0:25:::FSP_ORG_ID,FSP_LANG_ID:1258297"
+    region:
+      - "eu"
+    category: "standards"
+    tags:
+      - "efficiency"
+      - "research"
+    policy_types:
+      - "standard"
+      - "guidance"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (standards-bodies.md #2). The literal official committee
+      record for the body that writes EN 50600 (scope text: "review
+      international standardization results of ISO/IEC JTC 1... Energy
+      Efficient Data Centres"); confirms Germany's DKE holds the
+      secretariat. Distinct domain from wave-1's cencenelec.eu marketing
+      page (different host, different content — standards database vs.
+      news/coordination-group page). "Published Standards" tab uses a
+      session-scoped Oracle APEX URL — crawl from the stable overview URL
+      above, requires_playwright recommended. Recent output: CLC/TS
+      50600-5-1 (2nd ed. 2023/2024), a data-center sustainability maturity
+      model framed around the EU Green Deal. Append to config/domains/
+      eu.yaml (companion to, not duplicate of, wave 1's cencenelec.eu
+      entry). verified: yes — fetched committee overview page directly.
+
+  - name: "ASHRAE Standards and Guidelines"
+    id: "ashrae_standards"
+    enabled: false
+    base_url: "https://www.ashrae.org"
+    start_paths:
+      - "/technical-resources/standards-and-guidelines"
+      - "/technical-resources/bookstore/datacom-series"
+      - "/technical-resources/standards-and-guidelines/standards-addenda/standard-90-4-2022"
+    region:
+      - "us"
+    category: "standards"
+    tags:
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "standard"
+      - "guidance"
+    language: "en"
+    notes: |
+      Wave 2 (standards-bodies.md #3). Standard 90.4 (Energy Standard for
+      Data Centers) and Standard 127 (data-center/ITE air-conditioning test
+      method) are the two standards the brief names by number, and 90.4 is
+      already cited by tag in config/domains/us/oregon.yaml today. Free
+      read-only preview after registration; addenda for continuous-
+      maintenance standards (90.4 is one) are free PDFs, no login; full
+      purchasable text is paywalled. Region ideally dual-tagged
+      ["us","supranational"] per the brief's own convention for
+      extra-jurisdictional standards (Korean/Spanish translations exist)
+      — "supranational" is not yet a valid VALID_REGIONS value, flag for
+      enum addition; using ["us"] only here until that lands. New file
+      config/domains/supranational.yaml recommended (joins wave-1's
+      IEA 4E EDNA / ISO 30134 / C40 entries). verified: yes — fetched
+      standards-and-guidelines page and datacom-series bookstore page
+      directly; confirmed free-preview model, 90.4-2025 and 127-2020
+      both listed.
+
+  - name: "IEC Webstore — ISO/IEC 30134 Data Centre KPI series"
+    id: "iec_webstore_30134"
+    enabled: false
+    base_url: "https://webstore.iec.ch"
+    start_paths:
+      - "/en/publication/111538"
+      - "/en/publication/70719"
+    region:
+      - "eu"
+    category: "standards"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "standard"
+    language: "en"
+    max_depth: 1
+    notes: |
+      Wave 2 (standards-bodies.md #4). Distinct organization/domain from
+      wave-1's ISO catalog entry (iso.org) — IEC's own commercial webstore,
+      with its own free abstract text and pricing/edition metadata (2026
+      edition of 30134-2/PUE already listed here vs. the older -6/ERF part
+      wave-1 checked on iso.org). Individual publication IDs are stable,
+      numeric, non-sequential — a maintainer must re-search periodically
+      for new parts/editions rather than guess URLs; search/browse pages
+      403/404'd to automated fetch, direct publication-ID URLs worked.
+      Coverage is metadata/abstract only, full text paywalled (CHF 159 for
+      30134-2) — max_depth: 1, do not attempt to crawl past the abstract
+      layer, same caveat wave-1 gave the ISO entry. Recommend region
+      ["supranational","global"] once those enum values land (flagged
+      wave 1 already); using ["eu"] as closest allowed placeholder
+      meanwhile is imprecise — new supranational.yaml file recommended
+      instead of forcing a country bucket. verified: yes — fetched both
+      publication pages directly, confirmed titles/prices/free-abstract
+      text and the 2026 edition note.
+
+  - name: "Electronic Code of Federal Regulations — 10 CFR Part 431"
+    id: "ecfr_10_cfr_431"
+    enabled: false
+    base_url: "https://www.ecfr.gov"
+    start_paths:
+      - "/current/title-10/chapter-II/subchapter-D/part-431"
+    region:
+      - "us"
+    category: "regulation"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "law"
+    language: "en"
+    requires_playwright: true
+    notes: |
+      Wave 2 (standards-bodies.md #5). Canonical, continuously updated
+      federal regulation text (DOE's EPCA-derived commercial/industrial
+      equipment energy-conservation program) — distinct base_url from the
+      existing energy_gov entry (which describes the programme, not the
+      regulation itself). Covers equipment categories (UPS,
+      air-conditioning/cooling) already regulated here that could extend to
+      data-center-adjacent equipment. A plain HTTP fetch was redirected to a
+      bot-check page (unblock.federalregister.gov) — requires_playwright
+      or a browser-like UA is needed. Append to config/domains/us/
+      us_federal.yaml as a new, non-duplicate entry. verified: yes — via
+      Browser tool, confirmed live, full regulatory text rendered ("General
+      Provisions", authority citation to 42 U.S.C. 6291-6317, up to date as
+      of 7/16/2026).
+
+  - name: "Better Buildings & Better Plants Initiative — Data Centers Sector"
+    id: "betterbuildings_datacenters"
+    enabled: false
+    base_url: "https://betterbuildingssolutioncenter.energy.gov"
+    start_paths:
+      - "/sectors/data-centers"
+      - "/data-center-toolkit"
+      - "/accelerators/data-centers"
+    region:
+      - "us"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "incentives"
+      - "research"
+    policy_types:
+      - "guidance"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (standards-bodies.md #6). DOE's dedicated data-center
+      energy-efficiency program site — distinct subdomain from the
+      existing energy_gov entry (www.energy.gov), richer/more DC-specific
+      content than that entry's two general /eere/ start paths. Confirmed
+      36% average infrastructure-energy improvement across partners,
+      $3.9M annual savings, a "Data Center Accelerator Toolkit", named
+      case studies (Sabey, NREL, LBNL/NERSC). Append to config/domains/us/
+      us_federal.yaml as a new, non-duplicate entry. Note: the short URL
+      /data-centers 404s — use the three paths above. verified: yes —
+      fetched /sectors/data-centers directly via Browser tool.
+
+  - name: "Bureau of Indian Standards — Standards Portal"
+    id: "bis_standards_india"
+    enabled: false
+    base_url: "https://standards.bis.gov.in"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+      - "india"
+    category: "standards"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "standard"
+    language: "en"
+    notes: |
+      Wave 2 (standards-bodies.md #7). India issued (Feb 2026) its first
+      data-center-specific national standard — a voluntary Cooling
+      Efficiency Ratio (CER) methodology "derived from international
+      ISO/IEC frameworks" — per trade press. The exact IS-standard
+      number/URL was NOT independently located on this portal this pass
+      (trade-press coverage only) — treat that specific document as
+      needs-human-check even though the portal itself (homepage, "Know
+      Your Standards" search) is confirmed live. Append to config/domains/
+      india.yaml. verified: partial — portal confirmed live via Browser
+      tool; specific CER-standard page not located.
+
+  - name: "NEN — De Europese norm voor datacenters EN 50600 (Netherlands)"
+    id: "nen_en_50600"
+    enabled: false
+    base_url: "https://www.nen.nl"
+    start_paths:
+      - "/ict/datacenters/en-50600"
+    region:
+      - "eu"
+      - "eu_west"
+      - "netherlands"
+    category: "standards"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "standard"
+    language: "nl"
+    notes: |
+      Wave 2 (standards-bodies.md #8). Free directory page listing the
+      full current EN 50600 part structure (parts 1, 2.1-2.5, 3.1,
+      4.1-4.5 including Renewable Energy Factor and Energy Reuse Factor)
+      plus three free-standing technical-report guidance documents — a
+      better single-page index than most other national bodies checked.
+      Individual standards purchase-gated. Append to config/domains/
+      netherlands.yaml. verified: yes — fetched directly, confirmed free
+      directory content and full part listing.
+
+  - name: "SIS (Swedish Institute for Standards) — SS-EN 50600 series"
+    id: "sis_en_50600"
+    enabled: false
+    base_url: "https://www.sis.se"
+    start_paths:
+      - "/en/produkter/information-technology-office-machines/general/ssen506001/"
+    region:
+      - "nordic"
+      - "sweden"
+    category: "standards"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "standard"
+    language: "en"
+    notes: |
+      Wave 2 (standards-bodies.md #9). Lowest marginal value of the
+      national-body entries — the specific product ID checked
+      (SS-EN 50600-1) is itself withdrawn/superseded (645 SEK, no free
+      abstract on this stale page); a live search would need to find the
+      current edition's product page. Included for completeness since the
+      brief named SIS explicitly. Append to config/domains/sweden.yaml.
+      verified: yes (stale product page) — fetched directly, confirmed
+      title/price/withdrawn status.
+
+  - name: "BSI Knowledge — BS EN 50600-4-6:2020 (Energy Reuse Factor, UK)"
+    id: "bsi_en_50600_4_6"
+    enabled: false
+    base_url: "https://knowledge.bsigroup.com"
+    start_paths:
+      - "/products/information-technology-data-centre-facilities-and-infrastructures-energy-reuse-factor"
+    region:
+      - "uk"
+    category: "standards"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "standard"
+    language: "en"
+    notes: |
+      Wave 2 (standards-bodies.md #10). Unlike several other EN 50600
+      product pages checked this pass (marked withdrawn), this page
+      confirms Current status (Aug 2020 pub date) with a real free
+      abstract describing ERF's purpose/audience (installers,
+      manufacturers, designers, facility managers, network operators).
+      Full standard purchase-gated (price not shown, check at build
+      time). Append to config/domains/uk.yaml. verified: yes — fetched
+      directly, confirmed "Current" status and free abstract.
+
+  - name: "AFNOR Editions boutique — NF EN 50600 series (France)"
+    id: "afnor_en_50600"
+    enabled: false
+    base_url: "https://www.boutique.afnor.org"
+    start_paths:
+      - "/"
+    region:
+      - "eu"
+      - "eu_central"
+      - "france"
+    category: "standards"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "standard"
+    language: "fr"
+    notes: |
+      Wave 2 (standards-bodies.md #11). Same EN 50600 series, France-
+      specific storefront, named by the brief. Homepage confirmed live and
+      real; specific part URLs (e.g. /en-gb/standard/nf-en-5060021/...)
+      found via search returned the homepage instead when re-fetched this
+      pass (needs a numeric product-ID suffix, not just the slug) — treat
+      individual part URLs as needs-human-check, do not hardcode one.
+      Append to config/domains/france.yaml. verified: partial — boutique
+      homepage confirmed live; specific part URL not independently
+      re-confirmed.
+
+  - name: "DIN Media — DIN EN 50600 series (Germany)"
+    id: "din_en_50600"
+    enabled: false
+    base_url: "https://www.dinmedia.de"
+    start_paths:
+      - "/en/standard/din-en-50600-4-6/327766295"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "standards"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "standard"
+    language: "de"
+    notes: |
+      Wave 2 (standards-bodies.md #12). Note: din.de (DIN's own org site)
+      does NOT host the actual standard catalog — that lives on the
+      separate dinmedia.de storefront; do not confuse the two when
+      building. DIN is the committee holder for CLC/TC 215 (DKE is DIN's
+      electrotechnical arm — see cenelec_clc_tc215 above), making this a
+      natural companion entry. Confirmed current status, EUR93.27 price
+      for DIN EN 50600-4-6:2020-11, page count, and a "Relationship to
+      other standards" cross-reference section. Append to config/domains/
+      germany.yaml. verified: yes — fetched directly.
+
+  - name: "The Green Grid"
+    id: "the_green_grid"
+    enabled: false
+    base_url: "https://thegreengrid.org"
+    start_paths:
+      - "/resources"
+    region:
+      - "eu"
+    category: "standards"
+    tags:
+      - "efficiency"
+      - "research"
+    policy_types:
+      - "guidance"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (standards-bodies.md #13). INDUSTRY BODY, not government/IGO
+      — flagged per the brief's explicit judgment-call instruction rather
+      than dropped: this is the organization that originated PUE (2007),
+      ERE, ERF, WUE, CUE, and DCeP — the metrics ISO/IEC 30134, EN 50600-
+      4-x, and China's GB 40879 (which names TGG/Green Grid as PUE's
+      originator) all formalize. Recent activity: new "Water Usage Impact"
+      metric (Oct 2025), public statement (Jun 2025) backing US EPA
+      ENERGY STAR, active engagement with US EPA/EU Lot 9/China's
+      CNIS/India's TEC named on the current homepage. Note: www. redirects
+      to the bare apex domain — use thegreengrid.org, not www.thegreengrid.org.
+      Recommend region ["supranational","global"] once those enum values
+      land (flagged wave 1); new config/domains/supranational.yaml
+      recommended alongside ashrae_standards/iec_webstore_30134/
+      uptime_institute. verified: yes — fetched homepage and /resources
+      directly via Browser tool.
+
+  - name: "Uptime Institute"
+    id: "uptime_institute"
+    enabled: false
+    base_url: "https://uptimeinstitute.com"
+    start_paths:
+      - "/publications"
+    region:
+      - "eu"
+    category: "standards"
+    tags:
+      - "efficiency"
+      - "research"
+    policy_types:
+      - "guidance"
+      - "report"
+    language: "en"
+    notes: |
+      Wave 2 (standards-bodies.md #14). INDUSTRY BODY, flagged per the
+      brief's judgment-call instruction, not dropped — publishes the
+      "Tier Standard" referenced across data-center regulatory/industry
+      discourse worldwide, plus a "Heat Reuse: A Management Primer" report
+      directly on this project's subject matter (~60 documented European
+      heat-recovery projects, discusses the EU EED recast's 1MW
+      waste-heat-recovery mandate — found via search, specific report URL
+      not independently re-fetched this pass, treat as needs-human-check).
+      Individual reports may gate behind an email/registration wall (not
+      confirmed either way). Recommend region ["supranational","global"]
+      once those enum values land; new config/domains/supranational.yaml
+      recommended. verified: partial — /publications confirmed live via
+      WebFetch (listed Tier Standard titles); heat-reuse primer URL not
+      re-fetched.
+
+  - name: "JDCC (Japan Data Center Council) PUE Guideline"
+    id: "jdcc_pue_guideline"
+    enabled: false
+    base_url: "https://www.jdcc.or.jp"
+    start_paths:
+      - "/pue_guide/"
+    region:
+      - "apac"
+      - "japan"
+    category: "standards"
+    tags:
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "guidance"
+    language: "ja"
+    notes: |
+      Wave 2 (standards-bodies.md #15). INDUSTRY BODY, flagged per the
+      brief's judgment-call instruction, not dropped — unlike Green
+      Grid/Uptime, JDCC's PUE guideline ties directly into a live Japanese
+      government mandate: Japan's revised Energy Conservation Law
+      (effective Apr 2023) requires qualifying DC operators to report PUE,
+      targeting top-15% domestic operators at PUE<=1.4 by 2030 and a hard
+      PUE<=1.3 requirement for DCs commencing operation 2029+. JDCC's
+      guideline is the industry-side compliance benchmark. Append to
+      config/domains/apac.yaml (Japan already has entries there).
+      verified: yes — fetched /pue_guide/ directly via Browser tool.
