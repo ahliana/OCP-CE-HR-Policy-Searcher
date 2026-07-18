@@ -40,11 +40,12 @@ jurisdictions:
   # "Global" bucket in the legend). The aliases fold BOTH of our missing values
   # (`supranational`, `global`) into this one row.
   #
-  # MAP-OWNER DECISION NEEDED: how to display a members-less global bucket -
-  # a "Global / international" chip/legend entry beside the map, vs. shading all
-  # countries. The existing eu/europe rows already prove the map handles
-  # iso_numeric: null jurisdictions, so this only needs a rendering choice, not
-  # new plumbing.
+  # RESOLVED with the map track (2026-07-18): the map renders non-country
+  # jurisdictions via a "supranational tray" - /api/coverage returns a
+  # `supranational` array, the frontend shows each as an off-map clickable chip
+  # (name + policy count) opening the same side panel. So this `global` row
+  # (and eu) render as tray chips, no map highlight, nothing drops. No further
+  # decision needed; the row lands as-is when the IGO sources promote.
   - slug: global
     name: Global / International
     kind: group

@@ -46,6 +46,18 @@ Per the multi-track plan (`C:\Files\Code\OCP\20260718_0200_PolicyPulse_Track_Coo
   new *country* not yet in the registry, fill `iso3` + `iso_numeric` (the map's join key).
 - This branch stays docs-only for now, so it cannot conflict with the map or registry
   work. Map is FINALIZED and ready to build (Phase 1 = `GET /api/coverage`).
+- **RESOLVED with the map track (2026-07-18):** non-country jurisdictions render via a
+  **supranational tray** - `/api/coverage` returns a `supranational` array, shown as
+  off-map clickable chips. So the staged `global` IGO bucket lands cleanly (tray chip),
+  and `manitoba` fills + rolls up to Canada via `country_of`. Nothing from the corpus
+  drops off the map. Promotion instruction from the map track: **for any new COUNTRY
+  not yet in the registry, fill `iso3` + `iso_numeric`** (the map's world-atlas join
+  key), not just the slug. Subnational/group rows don't need iso_numeric.
+- **Shared-working-tree rule (coordination doc):** both sessions use one physical
+  checkout; a `git checkout`/`switch` to another branch here rewrites files for the
+  other session mid-edit. The **research track owns the primary checkout** - stay on
+  `feature/source-expansion-research`, never switch branches in it; other tracks use a
+  `git worktree`. (Rebasing in place is fine; it stays on this branch.)
 
 ### ALREADY BUILT on `feature/source-expansion-wave1` - do NOT rebuild
 
