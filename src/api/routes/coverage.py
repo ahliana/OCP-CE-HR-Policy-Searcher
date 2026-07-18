@@ -12,12 +12,15 @@ Attribution rules (uniform for policies and sources):
 - ``resolve_text`` / registry slug -> a ``Jurisdiction``.
 - ``country_of`` rolls ``country``/``us_state``/``subnational`` up to a
   country, keyed by ``iso_numeric`` (the world-atlas join key).
-- Jurisdictions that do not roll up to a country (``supranational``/``group``,
-  e.g. the EU, or a future ``global`` IGO bucket) become ``supranational``
-  entries, keyed by slug. "EU" is never hardcoded — whatever kinds the
-  registry returns are handled.
+- Jurisdictions with no map shape become ``supranational`` (off-map) entries
+  keyed by slug: ``supranational``/``group`` kinds (the EU, a future ``global``
+  IGO bucket) AND countries the registry carries without an ``iso_numeric``
+  (e.g. Kosovo). "EU" is never hardcoded — whatever the registry returns is
+  handled, and null-iso countries never land in ``countries`` under a None key.
 - Source counts attribute a domain to a country once per country, however many
-  of its ``region`` tags roll up there.
+  of its ``region`` tags roll up there. Off-map entries carry a ``sources``
+  count too, but only for null-iso countries; supranational/group entries stay
+  policy-driven (a broad ``region`` tag like ``nordic`` is not a chip).
 """
 
 from fastapi import APIRouter, Depends
@@ -52,8 +55,14 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
     country_policies: dict[str, list[dict]] = {}
     country_names: dict[str, str] = {}
     country_sources: dict[str, set[str]] = {}
-    supra_policies: dict[str, list[dict]] = {}
-    supra_names: dict[str, str] = {}
+    # "off-map" = jurisdictions with no choropleth shape: supranational/group
+    # (the EU, a future global IGO bucket) AND countries the registry carries
+    # without an iso_numeric (e.g. Kosovo, code XK). All are keyed by slug and
+    # rendered as chips beside the map, never as a country fill — and never
+    # under a None iso key, where null-iso territories would silently collide.
+    offmap_policies: dict[str, list[dict]] = {}
+    offmap_names: dict[str, str] = {}
+    offmap_sources: dict[str, set[str]] = {}
     unresolved_policies: list[str] = []
     unresolved_slugs: set[str] = set()
 
@@ -64,12 +73,16 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
             unresolved_policies.append(raw)
             continue
         country = jurisdictions.country_of(jur)
-        if country is not None:
+        if country is not None and country.iso_numeric:
             country_names.setdefault(country.iso_numeric, country.name)
             country_policies.setdefault(country.iso_numeric, []).append(policy)
+        elif country is not None:
+            # A real country the registry has no iso_numeric for (Kosovo).
+            offmap_names.setdefault(country.slug, country.name)
+            offmap_policies.setdefault(country.slug, []).append(policy)
         elif jur.kind in ("supranational", "group"):
-            supra_names.setdefault(jur.slug, jur.name)
-            supra_policies.setdefault(jur.slug, []).append(policy)
+            offmap_names.setdefault(jur.slug, jur.name)
+            offmap_policies.setdefault(jur.slug, []).append(policy)
         else:
             # Resolved but neither a country nor a supra/group kind — should
             # not happen with the current registry, but never silently drop it.
@@ -83,12 +96,17 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
                 unresolved_slugs.add(slug)
                 continue
             country = jurisdictions.country_of(jur)
-            if country is not None:
+            if country is not None and country.iso_numeric:
                 country_names.setdefault(country.iso_numeric, country.name)
                 country_sources.setdefault(country.iso_numeric, set()).add(did)
+            elif country is not None:
+                # Null-iso country source (Kosovo) -> off-map, keyed by slug,
+                # so a country tracked-but-with-no-shape still shows coverage.
+                offmap_names.setdefault(country.slug, country.name)
+                offmap_sources.setdefault(country.slug, set()).add(did)
             # Group/supranational region tags (eu, nordic, apac, ...) do not
-            # attribute a source to a country; totals.sources still counts the
-            # domain. Supranational entries are policy-driven (see above).
+            # attribute a source anywhere; totals.sources still counts the
+            # domain. Those off-map entries stay policy-driven.
 
     countries = [
         {
@@ -104,14 +122,15 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
 
     supranational = [
         {
-            "name": supra_names[slug],
+            "name": offmap_names[slug],
             "slug": slug,
-            "policies": len(pols),
-            "top_policy_names": _top_policy_names(pols),
+            "sources": len(offmap_sources.get(slug, set())),
+            "policies": len(offmap_policies.get(slug, [])),
+            "top_policy_names": _top_policy_names(offmap_policies.get(slug, [])),
         }
-        for slug, pols in supra_policies.items()
+        for slug in (offmap_names.keys() | offmap_sources.keys())
     ]
-    supranational.sort(key=lambda s: (-s["policies"], s["name"]))
+    supranational.sort(key=lambda s: (-s["policies"], -s["sources"], s["name"]))
 
     return {
         "countries": countries,

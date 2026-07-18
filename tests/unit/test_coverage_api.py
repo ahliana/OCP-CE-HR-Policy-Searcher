@@ -183,6 +183,52 @@ class TestDiagnostics:
         assert cov["diagnostics"]["unresolved_region_slugs"] == []
 
 
+class TestNullIsoCountries:
+    """A country the registry has no iso_numeric for (Kosovo today) belongs in
+    the off-map tray keyed by slug - never in countries under a None key, and
+    never colliding with another null-iso territory."""
+
+    def _add_country(self, slug, name, iso3, code):
+        from src.core.jurisdictions import Jurisdiction
+        jurisdictions._load()
+        jurisdictions._by_slug[slug] = Jurisdiction(
+            slug=slug, name=name, kind="country",
+            iso3=iso3, iso_numeric=None, code=code,
+        )
+        for key in (slug, jurisdictions._normalize(name)):
+            jurisdictions._alias_index[key] = slug
+        jurisdictions._alias_by_len = sorted(
+            jurisdictions._alias_index.items(), key=lambda kv: -len(kv[0])
+        )
+
+    def test_null_iso_country_goes_offmap_not_countries(self):
+        self._add_country("kosovo", "Kosovo", "XKX", "XK")
+        cov = compute_coverage([_pol("Kosovo", "k1")], [])
+        assert cov["countries"] == []
+        ks = _by_slug(cov["supranational"], "kosovo")
+        assert ks is not None and ks["policies"] == 1
+        assert "iso_numeric" not in ks
+
+    def test_null_iso_countries_do_not_collide(self):
+        self._add_country("kosovo", "Kosovo", "XKX", "XK")
+        self._add_country("northern_cyprus", "Northern Cyprus", "XNC", "XN")
+        cov = compute_coverage(
+            [_pol("Kosovo", "k"), _pol("Northern Cyprus", "n")], []
+        )
+        assert {s["slug"] for s in cov["supranational"]} == {
+            "kosovo", "northern_cyprus"
+        }
+        assert all(s["policies"] == 1 for s in cov["supranational"])
+        assert all(c["iso_numeric"] is not None for c in cov["countries"])
+
+    def test_null_iso_country_source_counted_offmap(self):
+        self._add_country("kosovo", "Kosovo", "XKX", "XK")
+        cov = compute_coverage([], [{"id": "d1", "region": ["kosovo"]}])
+        ks = _by_slug(cov["supranational"], "kosovo")
+        assert ks is not None and ks["sources"] == 1 and ks["policies"] == 0
+        assert cov["countries"] == []
+
+
 # --- Route wiring (registration + response shape) ---
 
 class _FakeStore:
@@ -229,7 +275,7 @@ class TestRouteWiring:
                             "top_policy_names"}
         eu = _by_slug(body["supranational"], "eu")
         assert eu["policies"] == 1
-        assert set(eu) == {"name", "slug", "policies", "top_policy_names"}
+        assert set(eu) == {"name", "slug", "sources", "policies", "top_policy_names"}
 
     def test_unresolved_endpoint(self, client):
         resp = client.get("/api/coverage/unresolved")
