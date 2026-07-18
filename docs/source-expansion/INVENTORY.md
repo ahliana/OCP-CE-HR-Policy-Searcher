@@ -32,16 +32,18 @@ Wave 1 (11 region files) + Wave 2 (7 files: legislation-apis, grid-operators,
 standards-bodies, countries-wave2, deep-subnational, us-local,
 multilateral-portals) + Wave 3 (7 files: water-cooling, carbon-ets,
 dc-incentives, permitting-eia, more-legislation-apis, digital-infra-strategies,
-municipal-heat-zoning) combined:
+municipal-heat-zoning) + Wave 4 (5 files: new-jurisdictions, longtail-countries,
+special-zones, noise-zoning, legislation-apis-4) combined:
 
-| Metric | Wave 1 | Wave 2 | Wave 3 | Combined |
-|---|---|---|---|---|
-| **Total verified candidates (unique, deduped)** | **154** | **158** | **99** | **411** |
-| Tier a (drops into existing client) | 0 | 0 | 0 | 0 |
-| Tier b (plain crawl domain) | 138 | 141 | 91 | 370 |
-| Tier c (needs a new structured client) | 16 | 17 | 8 | 41 |
-| Duplicates merged | 1 | 3 | 1 | 5 |
-| Unverified / needs-human-check items (appendix) | 45 | 75 (+8 "checked, none found") | 39 | 159 (+8) |
+| Metric | Wave 1 | Wave 2 | Wave 3 | Wave 4 | Combined |
+|---|---|---|---|---|---|
+| **Total verified candidates (unique, deduped)** | **154** | **158** | **99** | **89** (94 raw, 5 merged) | **500** |
+| Tier a (drops into existing client) | 0 | 0 | 0 | 2 | 2 |
+| Tier b (plain crawl domain) | 138 | 141 | 91 | 81 | 451 |
+| Tier c (needs a new structured client) | 16 | 17 | 8 | 6 | 47 |
+| Duplicates merged | 1 | 3 | 1 | 5 | 10 |
+| Unverified / needs-human-check items (appendix) | 45 | 75 (+8 "checked, none found") | 39 | 48 (+13 "checked/none-found or not-yet-enacted") | 207 (+21) |
+| New jurisdiction-registry slugs added (map-critical) | 0 | 0 | 0 | 63 (27 country + 36 subnational) | 63 |
 
 Wave-3's 1 merge: `loudoun_county_dc_standards` (permitting-eia.md #9) was an
 EXACT duplicate (same base_url, same both start_paths) of wave-1's
@@ -1375,3 +1377,427 @@ tier-c specs) against the live code enums (imported directly from
 Nothing here blocks review; the two flagged dedup cases (1 dropped, 1
 borderline) and the enum-addition recommendations are the items a human
 needs to settle before any wave-3 entry is enabled.
+
+---
+
+## Wave 4
+
+Fourth research pass: 5 additional research files under
+`docs/source-expansion/regions-wave4/` (`new-jurisdictions.md`,
+`longtail-countries.md`, `special-zones.md`, `noise-zoning.md`,
+`legislation-apis-4.md`), explicitly "map-maximizing" - targeting NEW
+subnational jurisdictions and NEW countries not yet represented anywhere in
+`config/domains/**` or the wave 1-3 drafts, special economic zone/free zone
+authorities as a distinct governance layer, data-center noise/zoning/land-use
+law, and a retry + new-country pass over structured legislation/gazette
+APIs. Same transcription-and-organization scope as waves 1-3 - no new
+sources invented, nothing enabled. **This wave is also the map-critical
+delivery**: `docs/source-expansion/jurisdiction-additions-wave4.yaml` adds
+63 new distinct jurisdiction-registry slugs (27 countries, 26 with confirmed
+ISO 3166-1 codes and 1 - Kosovo - flagged for human ISO lookup; 36
+subnational rows under 9 existing country parents plus China, added here as
+a new country).
+
+### Wave 4 totals
+
+| Metric | Count |
+|---|---|
+| **Total verified candidates (unique, deduped)** | **89** (94 raw, 5 merged) |
+| Tier a (drops into existing client - the 2 Argentina CKAN instances) | 2 |
+| Tier b (plain crawl domain) | 81 |
+| Tier c (needs a new structured client) | 6 |
+| Cross-wave duplicates merged | 5 (all in new-jurisdictions.md, vs. wave-1/wave-2 drafts) |
+| Unverified / needs-human-check items (appendix) | 48 |
+| Additionally: "checked, confirmed no source exists" / "not yet enacted" (not counted as candidates or unverified) | 13 |
+| **New jurisdiction-registry slugs added** | **63** (27 new countries + 36 new subnational) |
+| - of which new countries | 27 (26 with confirmed ISO codes, 1 - Kosovo - flagged, no code assigned) |
+| - of which new subnational | 36 (across Germany x6, China x6, India x5, Italy x4, Belgium x3, Spain x3, Japan x3, Switzerland x2, Australia x2, Canada x2) |
+
+### By source file
+
+| Source file | Verified | Tier a | Tier b | Tier c | Unverified |
+|---|---|---|---|---|---|
+| new-jurisdictions.md | 31 (36 raw, 5 merged) | 0 | 31 | 0 | 6 |
+| longtail-countries.md | 23 | 0 | 23 | 0 | 6 (+6 checked/none-found) |
+| special-zones.md | 10 | 0 | 10 | 0 | 6 |
+| noise-zoning.md | 17 | 0 | 17 | 0 | 16 (+7 not-yet-enacted) |
+| legislation-apis-4.md | 8 | 2 | 0 | 6 | 14 |
+| **Total** | **89** (94 raw, 5 merged) | **2** | **81** | **6** | **48 (+13)** |
+
+Note on `longtail-countries.md`'s count: the source file numbers 20 primary
+candidates, but 3 of those bundle a separately-verified "companion"
+candidate at a distinct `base_url` (Turkmenistan's Ministry of Energy,
+Maldives' Ministry of Climate Change/Environment/Energy, Cote d'Ivoire's
+ARTCI regulator) - each companion is drafted as its own crawl entry with its
+own `id`, bringing the file's total to 23 distinct drafted sources. One
+companion (Montenegro's Directorate for Energy Efficiency) was explicitly
+NOT verified by the source agent (403 on every attempt) and is not drafted -
+it stays in the unverified appendix only.
+
+### Wave 4 dedup findings
+
+Each of the 5 wave-4 research files performed its own `base_url` dedup pass
+against `config/domains/**` and all wave 1-3 drafts before researching (each
+file's own header/dedup section documents this - see e.g.
+`new-jurisdictions.md`'s "36 new distinct jurisdiction slugs verified live in
+this wave" framing, or `special-zones.md`'s explicit "No existing entries use
+any zone-authority base_url... all candidates below are net-new" claim).
+Consolidating those 5 independent passes during wave-4 assembly with a
+programmatic base_url diff (PyYAML parse of all 4 wave-4 files against every
+`config/domains/**/*.yaml` file and every wave 1-3 draft crawl file)
+surfaced **5 near-exact duplicates missed by the source agent's own dedup**,
+all in `new-jurisdictions.md`, all against wave-1 (`dach.yaml`,
+`east-asia.yaml`) or wave-2 (`oceania-south-asia.yaml`) entries that share
+the exact same `base_url` AND `start_path` (or a start_path that is a
+literal subset) under a different `id` - the same failure mode wave 3 first
+documented for `loudoun_county_dc_standards`: the agent's own dedup checked
+whether the *base_url* collided, but two entries can share a domain under
+different ids while one's start_path is silently identical/subset of the
+other's.
+
+| # | Wave-4 id (dropped) | Wave-1/2 id (kept) | base_url | Resolution |
+|---|---|---|---|---|
+| 1 | `sachsen_anhalt_waermeplanung` | `sachsen_anhalt_energy` (dach.yaml) | `https://mwu.sachsen-anhalt.de` | Wave-4's single start_path (`/energie/kommunale-waermeplanung`) is IDENTICAL to one of the wave-1 entry's two start_paths. Dropped - the wave-1 entry already covers this exact page (plus one more). |
+| 2 | `beijing_dc_optimization_plan` | `beijing_gov_dc` (east-asia.yaml) | `https://www.beijing.gov.cn` | Wave-4's single start_path is IDENTICAL to one of the wave-1 entry's two start_paths. Dropped. |
+| 3 | `western_australia_energy_policy` | `energy_policy_wa` (oceania-south-asia.yaml) | `https://www.wa.gov.au` | EXACT duplicate - same base_url, same single start_path (`/organisation/energy-policy-wa`). Dropped entirely, not re-drafted. |
+| 4 | `queensland_energy_roadmap` | `qld_treasury_energy` (oceania-south-asia.yaml) | `https://www.treasury.qld.gov.au` | Wave-4's single start_path is IDENTICAL to one of the wave-2 entry's two start_paths. Dropped. |
+| 5 | `brandenburg_landesrecht` | `brandenburg_recht` (dach.yaml) | `https://bravors.brandenburg.de` | EXACT duplicate - same base_url, both use the root `/` start_path. Dropped entirely, not re-drafted. |
+
+**Important consequence for the map-critical deliverable**: dropping these 5
+crawl entries does NOT remove the need for their 5 matching
+jurisdiction-registry rows (`sachsen_anhalt`, `beijing`, `western_australia`,
+`queensland`, `brandenburg`) in `jurisdiction-additions-wave4.yaml` - none of
+the 5 kept wave-1/2 entries tag the Land/state/province-level slug in their
+own `region:` list (verified directly: all 5 tag only country-level values
+like `["eu","eu_central","germany"]` or `["apac","australia"]`), so the
+jurisdiction-registry gap these 5 slugs fill is real and pre-existing
+regardless of which specific crawl entry demonstrates it. Recommendation
+carried in `new-jurisdictions.yaml`'s header comment: retag those 5
+existing wave-1/2 entries' `region:` lists to add the subnational slug once
+the registry rows are merged, so each jurisdiction keeps a live source.
+
+Two additional base_url matches were found and confirmed NOT to be
+duplicates (genuinely additive, same "multiple entries per domain, distinct
+document" pattern already established for `eur-lex.europa.eu`/`gov.uk` in
+the live config): `schleswig_holstein_ewkg` (new) vs. `schleswig_holstein_recht`
+(dach.yaml) - deeper/different legal-text path on the same host; and
+`mecklenburg_vorpommern_klimaschutzgesetz` (new) vs. `mv_energy` (dach.yaml)
+- different ministry department page on the same host. `us_va_pwc_dcozod`
+(noise-zoning.md, new) vs. `us_prince_william_county_va`
+(us-states.yaml) is also additive by design, already flagged inline in that
+entry's own notes (current live overlay-district ZTA vs. the archived
+2023-2025 advisory-group process).
+
+One judgment call carried instead of a literal duplicate: `longtail-
+countries.md` and `new-jurisdictions.md` both touch Mongolia and Cote
+d'Ivoire respectively at a country level already used by an EARLIER wave's
+config (Mongolia's `erc_mn`, wave 2; Cote d'Ivoire's `dge_ci`/`anare_ci`,
+wave 2) - in both cases the wave-4 candidate is a genuinely distinct
+`base_url`/department (Mongolia: MCUD building-codes ministry vs. ERC
+tariff regulator; Cote d'Ivoire: digital-transition ministry + ARTCI
+telecom regulator vs. the energy ministry), so both are additive, not
+duplicates - same "multiple entries, same country, different department"
+pattern already established for `eur-lex.europa.eu` and `gov.uk` in the live
+config.
+
+### Master table — ranked best-first, tier-c first then tier-b
+
+Full technical spec + draft `api_sources.yaml` entries for every tier-c row:
+`docs/source-expansion/draft/new-clients-wave4.md`. Full YAML for every
+tier-b row (exact `_template.yaml` schema, `enabled: false`):
+`docs/source-expansion/draft/crawl/wave4/<source-file-name>.yaml`.
+
+#### Tier c / tier a (structured API, 8 rows)
+
+| # | Name | id | Level | Access | Effort | Source file | Why |
+|---|---|---|---|---|---|---|---|
+| 1 | Senato della Repubblica Linked Open Data SPARQL endpoint (Italy) | `italy_senato_sparql` | national | none | c | legislation-apis-4.md | Italy had ZERO structured legislative API before this - keyless SPARQL, live on-topic query verified end-to-end |
+| 2 | Austrian Parliament Filter API | `austria_parlament_filter_api` | national | none | c | legislation-apis-4.md | Retried from an earlier wave's unverified flag - now confirmed live, 100,231-record keyless index |
+| 3 | SIDOF - Sistema de Informacion del Diario Oficial de la Federacion (Mexico) | `mx_sidof_gazette_api` | national | none | c | legislation-apis-4.md | The actual Mexican federal gazette (DOF), equivalent to the US Federal Register client from wave 3 |
+| 4 | Open Gazettes South Africa (OpenUp/SAFLII archive) | `za_open_gazettes_archive` | national | none | c | legislation-apis-4.md | Genuine national + all-9-provincial gazette archive, ~40,000 gazettes, keyless bulk JSONLINES index |
+| 5 | dados.gov.pt (Portugal national open-data portal, udata) | `dados_gov_pt` | national | none | c | legislation-apis-4.md | Fills the Portugal gap this wave specifically asked to retry; recommend a shared `udata_api` client with wave-2's `data_gouv_fr_api` |
+| 6 | Datos Argentina national CKAN (incl. InfoLEG normativa nacional) | `datos_gob_ar` | national | none | a/c hybrid | legislation-apis-4.md | THIS is the InfoLEG API retry ask - uses the EXISTING `ckan_action_api` client, no new code |
+| 7 | Camara de Diputados de la Nacion Open Data (Argentina, HCDN) | `datos_hcdn_gob_ar` | national | none | a/c hybrid | legislation-apis-4.md | Legislative-branch's own portal (Leyes/Leyes Sancionadas) - also uses the existing `ckan_action_api` client |
+| 8 | Open Government Data (OGD) Platform India | `in_data_gov_ogd_api` | national | api_key (free, `DATA_GOV_IN_API_KEY`) | c (HOLD) | legislation-apis-4.md | Gateway confirmed live/key-enforced; HOLD until a real key is issued and a relevant resource ID is found |
+
+#### Tier b (plain crawl domain), grouped by source file, ranked best-first within each
+
+##### new-jurisdictions.md — 31 (36 raw, 5 merged into wave-1/wave-2 - see dedup findings above)
+
+| # | Name | id | Level | Why |
+|---|---|---|---|---|
+| 1 | Wallonia - Data Centers (dedicated SPW Energie page) | `wallonia_energie_datacenters` | subnational (Belgium) | A DEDICATED government web page specifically for data centers - strongest single find of this wave for direct on-topic relevance |
+| 2 | Brussels-Capital - Mandatory Data Centre Energy Reporting | `brussels_dc_reporting_obligation` | subnational (Belgium) | Binding, DC-specific mandatory energy/sustainability reporting regime implementing EU Delegated Regulation 2024/1364 |
+| 3 | Shanghai - Data Center Construction Guidelines | `shanghai_dc_construction_guideline` | subnational (China) | New builds must target PUE <=1.25, retrofits <=1.4, phase-out list for small/old DCs |
+| 4 | Guangdong - Data Center Energy Guarantee / Layout Requirements | `guangdong_dc_energy_policy` | subnational (China) | PUE below 1.3 mandate, tiered electricity pricing, new-cabinet approval caps |
+| 5 | Emilia-Romagna - Energia Regionale (Data Valley heat reuse) | `emilia_romagna_energia_portal` | subnational (Italy) | Self-branded "Data Valley" strategy - strongest Italian regional case for DC-waste-heat-to-district-heating |
+| 6 | Veneto - Incentivi Regionali (incl. Teleriscaldamento) | `veneto_incentivi_energia` | subnational (Italy) | Dedicated district-heating-network grant program, direct hit on waste-heat-reuse taxonomy |
+| 7 | Aargau - Energiegesetz / Grossverbraucher | `aargau_energiegesetz` | subnational (Switzerland) | Large-consumer regime requires waste-heat-potential analysis (KZV target agreements) |
+| 8 | Ticino - Legge cantonale sull'energia (LEn) | `ticino_legge_energia` | subnational (Switzerland) | Only major Italian-speaking canton not yet represented; large-consumer threshold captures large DCs |
+| 9 | Madhya Pradesh IT/ITeS/ESDM Investment Promotion Policy 2023 | `madhya_pradesh_it_ites_esdm_policy` | subnational (India) | Explicitly covers IT/ESDM/ITeS/BPO AND data centres with capital/electricity/stamp-duty incentives |
+| 10 | Andhra Pradesh ITE&C Dept (Data Center Policy 4.0, 2024-29) | `andhra_pradesh_itec_dept` | subnational (India) | 200MW target, AI-enabled DC incentives, Deemed Discom status for large DCs |
+| 11 | Bihar IT Policy 2024 | `bihar_it_policy_2024` | subnational (India) | 30% capital subsidy, interest subvention, lease-rental subsidy, energy-bill reimbursement, explicitly covers data centres |
+| 12 | Punjab Industrial and Business Development Policy | `punjab_industrial_business_policy` | subnational (India) | Customizable, up-to-15-year incentive packages naming data centres as a target sector |
+| 13 | Kerala Information Technology Policy 2023 | `kerala_it_policy_2023` | subnational (India) | Official state IT Policy referenced by the MeitY state-wise DC Policy tracker |
+| 14 | Schleswig-Holstein - EWKG | `schleswig_holstein_ewkg` | subnational (Germany) | Buildings must cover >=15% heat demand via renewables/waste heat; real Norderstedt server-park precedent |
+| 15 | Mecklenburg-Vorpommern - Klimaschutzgesetz | `mecklenburg_vorpommern_klimaschutzgesetz` | subnational (Germany) | Only German coastal/northern Land not yet represented; heat-planning-law framework |
+| 16 | Thueringen - Energieministerium | `thueringen_energieministerium` | subnational (Germany) | Covers heat-transition (Waermewende) policy and industrial waste-heat utilization |
+| 17 | Rheinland-Pfalz - Energieagentur RLP | `rheinland_pfalz_energieagentur` | subnational (Germany) | Land-level implementing/advisory layer for federal EnEfG waste-heat reuse obligations |
+| 18 | Northwest Territories - 2030 Energy Strategy | `nwt_energy_strategy` | subnational (Canada) | First Canadian territory represented in the registry |
+| 19 | Prince Edward Island - IRAC | `pei_irac_energy` | subnational (Canada) | #2-ranked province in the 2024 Canadian Energy Efficiency Scorecard |
+| 20 | Valencia - IVACE Energy Efficiency Aid Program | `valencia_ivace_energy_efficiency` | subnational (Spain) | Explicitly funds waste-heat recovery ("Recuperacion de calores residuales") |
+| 21 | Basque Country / Euskadi - Energy Strategy 2030 (3E2030) + EVE | `euskadi_energy_strategy_2030` | subnational (Spain) | Dedicated energy agency (EVE) with an active industrial-efficiency grant line |
+| 22 | Castilla y Leon - EREN Energy DataHub | `castilla_y_leon_eren_datahub` | subnational (Spain) | Open-data transparency tool over regional energy consumption |
+| 23 | Lazio - Sostenibilita Energetica | `lazio_sostenibilita_energetica` | subnational (Italy) | Top-2 Italian region by DC grid-connection requests; EUR40M FESR grant line |
+| 24 | Piemonte - Sviluppo Energetico Sostenibile | `piemonte_sviluppo_energetico` | subnational (Italy) | EUR53.6M FESR fund for business efficiency + renewable promotion |
+| 25 | Flanders - Energiedecreet | `flanders_energiedecreet` | subnational (Belgium) | Completes the Belgian regional trio; legal basis transposing the EU DC energy-efficiency reporting directive |
+| 26 | Gansu - Qingyang "East Data West Compute" Hub Support Measures | `gansu_computing_hub_policy` | subnational (China) | One of 8 national computing hub nodes; demand-charge exemptions, discounted renewable power |
+| 27 | Qinghai - Green Computing Industry Development Measures | `qinghai_green_computing_policy` | subnational (China) | China's first "green computing-power demonstration province"; 80%+ green power guarantee |
+| 28 | Hebei - Electronic Information Industry / Zhangjiakou DC Cluster | `hebei_electronic_info_industry` | subnational (China) | Hosts the Zhangjiakou computing-hub cluster (partial - general opinion, not the DC-specific plan) |
+| 29 | Hokkaido - Data Center Siting Guide | `hokkaido_dc_siting_guide` | subnational (Japan) | Japan's #1 DC-attraction target after METI's Hokkaido/Kyushu subsidy program |
+| 30 | Fukuoka - Prefectural Business Location Information Site | `fukuoka_business_location_incentives` | subnational (Japan) | METI's other named target region for the national DC subsidy program |
+| 31 | Kanagawa - SME Energy-Saving Equipment Subsidy | `kanagawa_sme_energy_subsidy` | subnational (Japan) | Complements the national MIC/MOE DC Zero-Emission/Resilience subsidy program |
+
+Dropped (merged into earlier waves, not drafted - see dedup findings table
+above): `sachsen_anhalt_waermeplanung`, `beijing_dc_optimization_plan`,
+`western_australia_energy_policy`, `queensland_energy_roadmap`,
+`brandenburg_landesrecht`.
+
+(`new-jurisdictions.yaml` contains exactly 31 drafted domains, ranked
+best-first above; see that file directly for the complete, unbroken list
+with full field detail.)
+
+##### longtail-countries.md — 23
+
+| # | Name | id | Level | Why |
+|---|---|---|---|---|
+| 1 | Mauritius Energy Efficiency Management Office (EEMO) | `mauritius_eemo_energy_efficiency` | national | Most mature statutory EE regime found across this entire wave; a regulation literally targeting non-essential grid-powered activity |
+| 2 | Panama JTIA - Sustainable Building Regulation (RES v.2) | `panama_jtia_res` | national | Only concrete, mandatory, verified energy-efficiency-in-buildings regulation found for Panama |
+| 4 | Kyrgyzstan Ministry of Energy - Normative Legal Acts database | `kyrgyzstan_minenergo_nla` | national | Only continuously-updated national legal-acts index for Kyrgyzstan energy/heat policy, dedicated Heat Energy category |
+| 5 | Turkmenistan Government Portal - Legislation feed | `turkmenistan_govportal_legislation` | national | Only verified live source carrying Turkmenistan's actual current energy-efficiency law text |
+| 6 | Mongolia MCUD (Ministry of Urban Development, Construction and Housing) | `mongolia_mcud` | national | Building EE certification + draft national Law on Heat Supply, distinct from the already-planned tariff regulator |
+| 7 | Zimbabwe ZERA - Policies/Standards | `zimbabwe_zera_energy_efficiency` | national | Best African EE regulator find in this wave outside Mauritius |
+| 8 | Pacific Community (SPC) Regional Energy Policy Hub | `pacific_prdr_se4all_energy_hub` | supranational | Practical route to Fiji's energy-efficiency policy while gov.fj is down; potential aggregator for the wider Pacific SIDS |
+| 9 | Tajikistan MEWR (Ministry of Energy and Water Resources) | `tajikistan_mewr` | national | Only ministry-level source for Tajikistan's energy-saving law and Dushanbe district-heating policy - zero prior coverage |
+| 10 | PNG DICT - Government Cloud Policy | `png_dict_government_cloud_policy` | national | Explicitly titled "Cloud Policy" touching data-center/hosting standards - rare and directly on-topic |
+| 11 | Turkmenistan Ministry of Energy (companion) | `turkmenistan_minenergo` | national | Law on Electric Power Industry, heat/electric supply contracts and tariffs |
+| 12 | Belarus Ministry of Energy | `belarus_minenergo` | national | Only real government source for Belarus heat-supply/energy-saving law |
+| 13 | Kosovo Ministry of Economy | `kosovo_me_gov` | national | Binding EE + building-performance laws; POLITICAL-SENSITIVITY FLAG on the region slug itself (no official ISO code) |
+| 14 | Montenegro Ministry of Energy and Mining | `montenegro_men` | national | Explicit, dated EU-transposition roadmap for building efficiency standards |
+| 15 | Mozambique MIREME | `mozambique_mireme_energy_efficiency` | national | Only confirmed government-issued energy efficiency strategy document found for Mozambique |
+| 16 | Cote d'Ivoire Ministere de la Transition Numerique | `cotedivoire_transition_numerique_ministry` | national | ICT-side data-center/cloud-hosting policy angle, distinct from the energy ministry |
+| 17 | Maldives Utility Regulatory Authority (URA) | `maldives_ura` | national | Legal authority issuing Energy Efficiency Certificates |
+| 18 | Djibouti ARMD (multisectoral regulator) | `djibouti_armd_regulator` | national | Only regulator in Djibouti with combined ICT+energy jurisdiction |
+| 19 | Brunei Department of Energy | `brunei_energy_gov_bn` | national | Real EE statute (Cap. 233) and active building-guideline regulatory work |
+| 20 | Maldives Ministry of Climate Change, Environment and Energy (companion) | `maldives_environment_gov_mv` | national | Runs the "Hakathari" EE Standards and Labelling Programme |
+| 21 | Bhutan MoENR | `bhutan_moenr` | national | National EE policy body with a live MEPS/S&L program |
+| 22 | Cote d'Ivoire ARTCI (companion) | `cotedivoire_artci_ict_regulator` | national | Telecom/ICT regulator most likely to issue future DC-touching infrastructure rules |
+| 23 | Cameroon ARSEL | `cameroon_arsel_electricity_regulator` | national | Confirmed national EE policy/strategy/action-plan document exists (domain-verified, document 404'd - partial) |
+
+##### special-zones.md — 10
+
+| # | Name | id | Level | Why |
+|---|---|---|---|---|
+| 1 | Stockholm Data Parks | `stockholm_data_parks` | local | HIGHEST-VALUE FIND OF THE WAVE - a zone authority mandating heat reuse as a siting condition |
+| 2 | Dubai Silicon Oasis Authority - Sustainability | `dso_ae_sustainability` | local | Closest thing to a DC-hosting free zone publishing its own sustainability scorecard in the Gulf |
+| 3 | SEZ at Duqm - Environmental Guidelines (Oman) | `duqm_om_environmental_guidelines` | national | A genuine SEZ regulatory authority publishing its own binding environmental/resource-efficiency guidelines |
+| 4 | Qatar Free Zones Authority - Sustainability | `qfz_qa_sustainability` | national | Holds a genuine ISO 50001 energy-management certification |
+| 5 | Cyberview Sdn Bhd - Sustainability (Cyberjaya) | `cyberview_my_sustainability` | local | The actual zone-level authority steering Cyberjaya's DC-specific cooling/power infrastructure |
+| 6 | PEZA - Implementing Rules and Regulations (Philippines) | `peza_ph_irr` | national | Binding environmental-compliance gate for any ecozone facility, actively recruiting DC investment |
+| 7 | SCZONE (Egypt) | `sczone_eg` | national | Only MENA zone authority naming "Data Centers" as an explicit targeted sector on its own site |
+| 8 | NEOM - Environment (Our World) | `neom_sa_environment` | subnational | Largest announced sustainable-DC project ($5B DataVolt, Oxagon) tied to a special zone in this wave |
+| 9 | Tanger Med Special Agency - Energy Transition | `tangermed_ma_energy` | national | Real zone-utility-run renewable-energy program for tenants |
+| 10 | Khalifa Economic Zones Abu Dhabi (KEZAD) | `kezad_ae` | local | Lowest-confidence UAE entry - successor to KIZAD, needs a deeper crawl for tenant-facing content |
+
+##### noise-zoning.md — 17
+
+| # | Name | id | Level | Why |
+|---|---|---|---|---|
+| 1 | Aurora, IL - "Gold Standard" Data Center & Warehouse Regulations | `us_il_aurora` | local | Single most comprehensive quantified bundled (noise+zoning+energy+water) DC ordinance found in this entire wave |
+| 2 | Haarlemmermeer (NL) - Datacenterbeleid & Omgevingsplan | `nl_haarlemmermeer_datacenters` | local | Strongest single energy/PUE/heat-reuse bundle found in the whole Europe pass this wave (PUE<1.2 mandate, MVA caps) |
+| 3 | Fort Worth, TX - Data Centers policy hub | `us_tx_fort_worth` | local | Only major DFW-metro city with a dedicated live regulatory hub bundling zoning+noise+water+econ-dev |
+| 4 | Prince William County, VA - CURRENT DCOZOD | `us_va_pwc_dcozod` | local | Live, evolving overlay-district zoning text plus codified ordinance section |
+| 5 | DeKalb County, GA - Data Center Text Amendment | `us_ga_dekalb` | local | Most detailed, quantified GA county-level draft standard found |
+| 6 | Chesapeake, VA - Data Center Ordinance and Policy | `us_va_chesapeake` | local | Only Hampton Roads/Peninsula jurisdiction with a fully live docket page moving toward 2026 adoption |
+| 7 | Fauquier County, VA - Zoning Ordinance (PCID + noise standards) | `us_va_fauquier` | local | Live ordinance text for one of Virginia's most-cited "strictest" DC zoning regimes |
+| 8 | Stafford County, VA - Data Center Applications/Regulations | `us_va_stafford` | local | Concrete, dated, numeric setback/buffer escalation with named grandfathered projects |
+| 9 | Henrico County, VA - Data Center Design Guidelines | `us_va_henrico` | local | Adopted (not just proposed) comprehensive-plan-level policy plus a pending overlay |
+| 10 | Culpeper County, VA - Culpeper Technology Zone | `us_va_culpeper` | local | Notably different regulatory model - permissive by-right zone vs. restrictive overlay |
+| 11 | Montgomery County, MD - ZTA 26-01 | `us_md_montgomery` | local | Bundles noise-ordinance compliance and a generator-emissions condition directly into zoning |
+| 12 | Inzai City, Chiba Prefecture (Japan) - District Plans | `japan_inzai_district_plans` | local | Rare primary government document naming data centers as a restricted land-use category |
+| 13 | Singapore URA - B1 Allowable Uses (Data Centres) | `singapore_ura_b1_data_centres` | national | The zoning-authority angle, distinct from IMDA's national DC moratorium/sustainability policy |
+| 14 | Frankfurt am Main - Steuerung von Rechenzentren | `de_frankfurt_rechenzentrenkonzept` | local | The genuine site-steering/zoning document requested for Germany |
+| 15 | Fingal County Development Plan - Ch.13 Zoning (Ireland) | `ie_fingal_cdp_ch13_zoning` | local | Concrete documentary evidence of a zoning-level data-center prohibition |
+| 16 | Varde Kommune (Denmark) - Microsoft DC lokalplan process | `dk_varde_datacenterprojekter` | local | Denmark had zero zoning/lokalplan entries in existing coverage |
+| 17 | Kouvola (Finland) - Lossitie asemakaava | `fi_kouvola_lossitie_asemakaava` | local | Genuine site-specific municipal asemakaava for a named hyperscale DC campus |
+
+### Wave 4 tier-c client index
+
+| source_type (proposed) | API base | Auth | Format |
+|---|---|---|---|
+| `italy_senato_sparql` | dati.senato.it | none | JSON (SPARQL 1.1 results) |
+| `austria_parlament_filter_api` | www.parlament.gv.at | none | JSON |
+| `ckan_action_api` (shared, +2 instances: Argentina x2) | datos.gob.ar / datos.hcdn.gob.ar | none | JSON (CKAN Action API) - NO NEW CLIENT CODE |
+| `udata_api` (recommend generalizing, +1 instance: Portugal) | dados.gov.pt | none | JSON (udata, shared shape with wave-2's data_gouv_fr_api) |
+| `mx_sidof_gazette_api` | sidof.segob.gob.mx | none | JSON |
+| `za_open_gazettes_archive` | archive.opengazettes.org.za | none | JSON Lines (bulk index) |
+| `in_data_gov_ogd_api` | api.data.gov.in | api_key (free, `DATA_GOV_IN_API_KEY`) | JSON - HOLD |
+
+### Wave 4 appendix: unverified / needs-human-check (48 items + 13 checked/none-found or not-yet-enacted)
+
+Every item each wave-4 agent explicitly flagged as unverified, could not
+reach, or chose not to propose as a candidate - consolidated with the reason
+each failed verification. None of these are in the wave-4 draft crawl YAMLs
+or `new-clients-wave4.md`; they need a human (or a differently-configured
+fetch) before being turned into a candidate. Full detail for every row lives
+in the corresponding `docs/source-expansion/regions-wave4/*.md` file's own
+"Unverified" section.
+
+#### new-jurisdictions.md (6)
+
+| Item | Reason |
+|---|---|
+| Sichuan, China (`fgw.sc.gov.cn`) | Every attempt (base domain + deep link) timed out over 15-25s - unreachable, not bot-blocked; content well-documented via WebSearch |
+| Victoria, Australia (`djsir.vic.gov.au`) | HTTP 403 on every attempt (curl with browser UA and WebFetch) - genuinely bot-blocked, hosts the "Sustainable Data Centre Action Plan" |
+| Northern Territory, Australia (`digitalterritory.nt.gov.au`) | HTTP 403 on every attempt - Digital Territory Strategy / NEXTDC Darwin D1 buildout |
+| Saarland, Germany (`saarland.de`) | HTTP 403 site-wide on every path, including the bare homepage - looks like a site-wide bot block |
+| Yukon, Canada (`yukon.ca`) | HTTP 403 on every attempt, including a spoofed browser user-agent |
+| Andhra Pradesh Data Center Policy 4.0 PDF (`apedb.ap.gov.in`) | Timed out on every attempt; AP itself IS verified via the alternate `apit.ap.gov.in` domain (drafted) |
+
+#### longtail-countries.md (6 pending + 6 checked/none-found)
+
+| Item | Reason |
+|---|---|
+| Northern Cyprus (TRNC) - KKTC Ekonomi ve Enerji Bakanligi | Domain/ministry identity confirmed live but no energy-specific laws visible in the one legislation section fetched; POLITICAL-SENSITIVITY FLAG (contested territory) |
+| Malta (extra) - Building and Construction Authority (BCA), EPC regulation | Every fetch attempt (root, 2 subpages, 2 PDFs) returned HTTP 403; corroborated only via WebSearch snippets |
+| Laos - Ministry of Energy and Mines (MEM) | Domain confirmed genuinely real (TLS cert proof) but every content fetch returned HTTP 500 |
+| Greenland - Naalakkersuisut, Business and Energy portfolio | Root domain live; the specific energy-department subpage returned blank content (likely JS-rendered SPA) |
+| Costa Rica (extra) - DIGECA National District Cooling Strategy | URLs found via search could not be reached (ECONNREFUSED/navigation denied) on two separate attempts |
+| Montenegro - Directorate for Energy Efficiency (companion) | HTTP 403 on every direct fetch; corroborated only via search |
+| *checked, no on-topic coverage found*: Uganda, Angola, DRC, Pacific SIDS bloc (Vanuatu/Samoa/Solomon Islands/etc.), Iceland (extra), Costa Rica ARESEP (extra) | 6 items - live/real government sites checked, but no efficiency/DC-relevant content found; not counted as unverified-pending |
+
+#### special-zones.md (6)
+
+| Item | Reason |
+|---|---|
+| Konza Technopolis Development Authority (Kenya) | `konza.go.ke` HTTP 403; `dev.konza.go.ke` DNS failure |
+| NEOM Interim Sustainability Requirements (doc NEOM-NEV-PRC-501-01.00) | Only accessible copy is a third-party Scribd upload, not neom.com itself - authenticity/currency cannot be confirmed |
+| King Abdullah Economic City (KAEC), Saudi Arabia | `kaec.net` HTTP 403 (likely bot-detection/WAF) |
+| NEPZA - Nigeria Export Processing Zones Authority | Live and on-topic for free-zone regulation generally, but no energy-efficiency/DC-specific content found on the fetched page |
+| BP Batam / Nongsa Digital Park (Indonesia) | The one live page is a news article, not a policy/regulation document; Nongsa Digital Park's own site is a private operator, out of scope |
+| Chile/Colombia/Brazil free-trade-zone (zona franca) authorities | No government zone-authority page publishing its own DC energy/sustainability rules found - only private operators/promoters, out of scope |
+
+#### noise-zoning.md (16 pending + 7 not-yet-enacted)
+
+| Item | Reason |
+|---|---|
+| Coweta County, GA data-center ordinance + moratorium | Well corroborated by news but both guessed county-site paths 404'd; root domain loads fine - needs the reorganized path or the Municode mirror |
+| James City County, VA - Ordinance 31A-364 | County PDF downloaded but is an image-scanned PDF with no extractable text; standards secondary-sourced only |
+| York County, VA - ZT-200-24 | Official PDF downloaded but image-scanned, not text-extractable; `yorkcounty.gov/185/Zoning` itself doesn't mention data centers |
+| Tucson, AZ - "Data Center Code Update" Planning Commission memo | WebFetch 403'd; browser tool triggered a forced-download prompt then an unrelated redirect anomaly |
+| Elk Grove Village, IL - Chapter 10 (Noise Control) | amlegal.com code host is "Under Revision", redirects to unfetched elkgrove.org document IDs |
+| South Dublin County Development Plan - Policy EDE7 | Text corroborated verbatim across multiple search snippets, but the actual adopted-plan PDF would not render; likely the single highest-value Ireland candidate once confirmed |
+| Amsterdam paraplubestemmingsplan Datacenters + Vestigingsbeleid 2020-2030 | Landing page and PDF title page live, but the PDF body would not OCR through WebFetch |
+| Espoo (Finland) - Suosaari/Laajalahti data-center zoning amendment | Existence/parcel/operator corroborated via search synthesis only, not a direct fetch of espoo.fi |
+| Rollag kommune (Norway) - Numedal Naeringspark detaljreguleringsplan | Municipal notice page returned only header/title content, no body text |
+| Frankfurt parcel-level Bebauungsplan | No adopted/draft B-Plan tied to a specific Frankfurt DC campus found - developer marketing content isn't a municipal planning document |
+| Singapore - BCA/IMDA Green Mark for Data Centres (GMDC:2024) | Scheme's existence corroborated by 3 sources, but the actual criteria PDF 404'd on every attempt; a reported PUE<=2.2 figure is NOT independently confirmed |
+| NSW, Australia - Mamre Road Precinct DCP 2021 | Confirmed to exist and be actively applied, but every DCP-document fetch returned only navigation shells, not text |
+| UK Western Crescent local plans (Slough/Hillingdon/Hounslow/Spelthorne) | All 4 boroughs actively grappling with DC policy, but no specific citable policy number/text retrievable for any of the four |
+| Dublin City Development Plan 2022-2028 | No data-centre-specific zoning/siting policy located |
+| Victoria, Australia - state-level DC planning provisions | No dedicated Victorian Planning Provision/Practice Note found - what exists is per-project Ministerial permits, out of scope |
+| Osaka Prefecture, Japan - Digital Infrastructure strategy page | Wrong document type (strategy, not ordinance) - no zoning designations or numeric standards |
+| *not yet enacted / no ordinance exists*: Plano TX, Richardson TX, Virginia Beach VA, Santa Clara CA, San Jose CA, DuPage County IL, Franklin Park IL | 7 items - checked, confirmed no DC-specific ordinance/zoning category exists yet; tracked for a future wave, not counted as unverified-pending |
+
+#### legislation-apis-4.md (14)
+
+Full table already reproduced in `docs/source-expansion/draft/
+new-clients-wave4.md`'s "Wave 4 unverified appendix" section (Austria
+data.gv.at, Belgium data.gov.be/dekamer.be/Senate, Italy Camera dei
+Deputati, Mexico SIL, India eGazette/India Code/PRS, Indonesia, Malaysia,
+Singapore, Ireland Iris Oifigiuil, Portugal parlamento.pt/DRE.pt).
+
+### Wave 4 jurisdiction-registry additions
+
+Full detail: `docs/source-expansion/jurisdiction-additions-wave4.yaml`
+(NOT merged into `config/jurisdictions.yaml` from this docs-only branch,
+per the task's append-only-at-promotion-time constraint - same pattern as
+`jurisdiction-additions.yaml` from waves 1-3).
+
+- **27 new countries**: china, mauritius, panama, trinidad_and_tobago,
+  turkmenistan, papua_new_guinea, fiji, kyrgyzstan, tajikistan, mongolia,
+  zimbabwe, djibouti, belarus, kosovo, montenegro, brunei, bhutan, maldives,
+  mozambique, cote_d_ivoire, cameroon, malaysia, oman, qatar, egypt, morocco,
+  philippines. 26 have confirmed ISO 3166-1 alpha-3 + numeric codes; 1
+  (kosovo) is flagged under "NEEDS HUMAN ISO LOOKUP" in that file rather
+  than guessed, since ISO 3166-1 has not assigned Kosovo an official code
+  (contested recognition) - the same political-sensitivity pattern
+  `longtail-countries.md` itself flagged for the unrelated Northern
+  Cyprus/TRNC candidate.
+- **36 new subnational rows**, all with confirmed ISO 3166-2 codes, under 9
+  already-existing country parents plus the newly-added `china`: Germany
+  (brandenburg, rheinland_pfalz, schleswig_holstein, thueringen,
+  sachsen_anhalt, mecklenburg_vorpommern), China (guangdong, beijing,
+  shanghai, hebei, gansu, qinghai), India (madhya_pradesh, andhra_pradesh,
+  kerala, punjab, bihar), Italy (lazio, piemonte, veneto, emilia_romagna),
+  Belgium (wallonia, flanders, brussels), Spain (basque_country,
+  castilla_y_leon, valencia), Japan (hokkaido, fukuoka, kanagawa),
+  Switzerland (ticino, aargau), Australia (western_australia, queensland),
+  Canada (prince_edward_island, northwest_territories).
+- **MERGE-TIME CONFLICT FLAGGED**: the 3 new Belgian subnational rows
+  (wallonia, flanders, brussels) collide with alias strings that already
+  exist under the country-level `belgium` row in the live
+  `config/jurisdictions.yaml` (e.g. "wallonia", "flanders", "brussels
+  capital region" currently resolve to `belgium` itself). The registry
+  owner must remove those region-name aliases from `belgium`'s alias list
+  in the same merge that adds the 3 new rows - detailed in
+  `jurisdiction-additions-wave4.yaml`'s inline comment.
+- **No `argentina` country slug added**: the two Argentina CKAN tier-c
+  candidates (`datos_gob_ar`, `datos_hcdn_gob_ar`) tag `region:
+  [south_america]` per the source research (following the existing
+  Chile precedent), not a dedicated `argentina` slug - flagged as an
+  observation in `new-clients-wave4.md` for the registry team, not acted on
+  since no wave-4 entry actually requests that specific slug.
+
+### Wave 4 enum-additions recap
+
+Unlike waves 1-3, wave 4 needed **zero** new `VALID_REGIONS`/
+`VALID_CATEGORIES`/`VALID_TAGS`/`VALID_POLICY_TYPES` values mapped to a
+"closest allowed" substitute - every `category`/`tags`/`policy_types` value
+used across all 4 draft crawl YAMLs and the tier-c spec already exists
+verbatim in `src/core/config.py`'s enums (the wave-4 research agents
+evidently worked from the live enums directly rather than the
+`_template.yaml` comment block's smaller illustrative list, consistent with
+this file's own "Schema note" at the top). The only registry gap wave 4
+surfaces is the **jurisdiction-registry** one (`config/jurisdictions.yaml`
+lacking rows for 63 slugs used) - addressed above and in
+`jurisdiction-additions-wave4.yaml`, not an enum gap in `config.py`.
+
+### Orchestrator validation — Wave 4 (2026-07-18)
+
+- **86 tier-b crawl entries across 4 files + 8 tier-c specs (6 needing new
+  client code, 2 routing through the existing `ckan_action_api` client),
+  all `enabled: false`.** All required fields (name/id/base_url/start_paths)
+  present in every tier-b entry.
+- **0 id collisions** with existing `config/domains/**` ids or any wave 1-3
+  draft id (spot-checked every wave-4 id against the combined wave 1-3 id
+  list plus every existing per-country YAML file touched: belgium, germany,
+  switzerland, italy, spain, australia, canada, india, mexico, ireland,
+  netherlands, nordic, uae, saudi_arabia, south_africa).
+- **0 base_url collisions** with existing config or wave 1-3 drafts.
+- **1 known internal duplication risk explicitly avoided**: `japan_inzai_
+  district_plans` (noise-zoning.md) and the 3 Japan prefecture entries in
+  new-jurisdictions.yaml (hokkaido/fukuoka/kanagawa) all target
+  `region: ["apac","japan"]`-family tags but distinct `base_url`s (Inzai is
+  a Chiba-prefecture municipality, not one of the 3 newly-added
+  prefectures) - no overlap, confirmed by direct base_url comparison.
+- **Schema note carried forward**: as with waves 1-3, an unrecognized
+  `region` value only produces a config-loader warning, never a hard
+  failure - moot this wave since 0 new enum values were needed (see above),
+  but the 63 new jurisdiction-registry slugs still need the
+  `jurisdiction-additions-wave4.yaml` merge before the map can render them.
+
+Nothing here blocks review; the two flagged items a human needs to settle
+before any wave-4 entry is enabled/promoted are (1) the Belgian alias-
+conflict merge note above, and (2) the Kosovo ISO-code political-sensitivity
+decision in `jurisdiction-additions-wave4.yaml`.

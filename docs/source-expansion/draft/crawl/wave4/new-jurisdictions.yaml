@@ -1,0 +1,1024 @@
+# =============================================================================
+# DRAFT WAVE 4 - New Subnational Jurisdictions (Map-Maximizing)
+# Source: docs/source-expansion/regions-wave4/new-jurisdictions.md
+# The source file reports 36 verified candidates; 31 are drafted below as
+# tier (b) plain crawl domains. 5 were caught during assembly-time dedup as
+# near-exact duplicates of entries already drafted in WAVE 1/2 files that
+# the source agent's own base_url-only dedup pass (checked against
+# config/domains/** and draft/crawl/**/*.yaml) did not catch because the
+# duplicate shares the domain under a DIFFERENT id with the SAME or a
+# subset start_path - same failure mode wave 3 documented for
+# `loudoun_county_dc_standards`. See "Wave 4 dedup findings" in
+# docs/source-expansion/INVENTORY.md for the full merge table. Dropped (not
+# drafted here):
+#   - `sachsen_anhalt_waermeplanung` (dup of dach.yaml's `sachsen_anhalt_energy`,
+#     same base_url + start_path `/energie/kommunale-waermeplanung`)
+#   - `beijing_dc_optimization_plan` (dup of east-asia.yaml's `beijing_gov_dc`,
+#     same base_url + start_path)
+#   - `western_australia_energy_policy` (dup of oceania-south-asia.yaml's
+#     `energy_policy_wa`, identical base_url + start_path)
+#   - `queensland_energy_roadmap` (dup of oceania-south-asia.yaml's
+#     `qld_treasury_energy`, same base_url + start_path)
+#   - `brandenburg_landesrecht` (dup of dach.yaml's `brandenburg_recht`,
+#     identical base_url + root start_path)
+# IMPORTANT: dropping these 5 crawl entries does NOT remove the need for
+# their 5 jurisdiction-registry rows (sachsen_anhalt, beijing,
+# western_australia, queensland, brandenburg) in
+# jurisdiction-additions-wave4.yaml - none of the 5 pre-existing wave-1/2
+# entries tag the subnational slug in their own `region:` list (verified:
+# they tag only country-level values), so the map-registry gap is real
+# regardless of which crawl entry demonstrates it. Recommend the registry
+# owner ALSO retag those 5 existing wave-1/2 entries' `region:` lists to
+# add the subnational slug, so each jurisdiction has a live source once the
+# registry rows are merged.
+#
+# All 31 entries below are effort tier (b) - plain crawl domains. Every
+# `region:` value's subnational slug is NEW - see
+# docs/source-expansion/jurisdiction-additions-wave4.yaml for the matching
+# registry rows (parent country already exists in config/jurisdictions.yaml
+# for all except China, which is also added as a new country row there).
+# enabled: false everywhere. Append targets noted per entry (mostly existing
+# country files; india.yaml/switzerland.yaml/spain.yaml/italy.yaml/
+# belgium.yaml/australia.yaml/germany.yaml/canada.yaml already exist - a new
+# china.yaml and japan.yaml are implied since neither exists today).
+# =============================================================================
+
+domains:
+  # --- INDIA (append to config/domains/india.yaml) ---
+  - name: "Madhya Pradesh IT/ITeS/ESDM Investment Promotion Policy 2023"
+    id: "madhya_pradesh_it_ites_esdm_policy"
+    enabled: false
+    base_url: "https://invest.mp.gov.in"
+    start_paths:
+      - "/wp-content/uploads/2024/07/Madhya-Pradesh-IT-ITes-ESDM-Investment-Promotion-Policy-2023.pdf"
+    region:
+      - "apac"
+      - "india"
+      - "madhya_pradesh"
+    category: "economic_dev"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "strategy"
+    language: "en"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #1). MP's official investment-promotion
+      policy explicitly covers IT, ESDM, ITeS, BPO/BPM, AND data centres,
+      with capital/electricity/stamp-duty incentives - a genuinely new
+      Indian state, not in waves 1-3. verified: yes - curl returned HTTP 200
+      on the exact PDF URL; content corroborated via WebSearch (official
+      notification Oct 6 2023). MP also has a newer 2025 "Global Capability
+      Centers Policy" per press coverage - worth a follow-up crawl once a
+      direct government URL surfaces.
+
+  - name: "Andhra Pradesh ITE&C Department (Data Center Policy 4.0, 2024-29)"
+    id: "andhra_pradesh_itec_dept"
+    enabled: false
+    base_url: "https://apit.ap.gov.in"
+    start_paths:
+      - "/assets/files/Policy Guidelines.pdf"
+      - "/?page_id=1762"
+    region:
+      - "apac"
+      - "india"
+      - "andhra_pradesh"
+    category: "economic_dev"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "strategy"
+    language: "en"
+    requires_playwright: true
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #2). AP Cabinet approved "AP Data Center
+      Policy 4.0 (2024-29)" Nov 6 2024 - 200MW target, AI-enabled DC
+      incentives, five-year term, plus a newer policy granting large data
+      centres Deemed Distribution Company (Discom) status. `apit.ap.gov.in`
+      is an Angular SPA - direct fetch returns only the shell, hence
+      requires_playwright. verified: yes for apit.ap.gov.in (HTTP 200,
+      confirmed official ITE&C Department page) and the PDF path. The
+      primary Policy-4.0 host, apedb.ap.gov.in, timed out every attempt this
+      session - quarantined separately, see unverified appendix.
+
+  - name: "Kerala Information Technology Policy 2023"
+    id: "kerala_it_policy_2023"
+    enabled: false
+    base_url: "https://itpolicy.startupmission.in"
+    start_paths:
+      - "/it-policy.pdf"
+    region:
+      - "apac"
+      - "india"
+      - "kerala"
+    category: "policy"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+    policy_types:
+      - "strategy"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #3). Kerala's official state IT Policy
+      2023, referenced by the MeitY state-wise Data Center Policy tracker as
+      covering ITeS/data-centre incentives. PDF is scanned/image-based
+      (Samsung-scanner-produced, 52pp, 1.2MB) - not machine-text-extractable
+      as-is, flag for OCR at ingestion time. verified: yes - HTTP 200, PDF
+      downloads in full; on-topic coverage confirmed via WebSearch
+      cross-reference.
+
+  - name: "Punjab Industrial and Business Development Policy"
+    id: "punjab_industrial_business_policy"
+    enabled: false
+    base_url: "https://punjabinfotech.in"
+    start_paths:
+      - "/assets/pdf/Industrial_Policy_2022.pdf"
+    region:
+      - "apac"
+      - "india"
+      - "punjab"
+    category: "economic_dev"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "en"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #4). Dedicated state industrial policy
+      explicitly calling out data centres as a target capital-intensive
+      sector with customizable, up-to-15-year incentive packages. Punjab
+      launched an updated "Industrial & Business Development Policy 2026"
+      per news coverage, but that 2026 PDF was not locatable at a stable
+      government URL this pass - recommend a follow-up check on
+      investpunjab.gov.in / fasttrack.punjab.gov.in (both timed out this
+      session). PDF here is scanned, not text-extractable in this pass.
+      verified: yes - punjabinfotech.in (official Government of Punjab
+      entity) returned HTTP 200; the 2022 policy PDF also returned HTTP 200
+      (4.2MB).
+
+  - name: "Bihar IT Policy 2024"
+    id: "bihar_it_policy_2024"
+    enabled: false
+    base_url: "https://investit.bihar.gov.in"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+      - "india"
+      - "bihar"
+    category: "economic_dev"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "en"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #5). Bihar IT Policy 2024 (Jan 2024-Dec
+      2029): 30% capital subsidy up to Rs 30 Cr, 10% interest subvention,
+      50% lease-rental subsidy, 25% annual energy-bill reimbursement for 5
+      years - explicitly covers data centres. TLS certificate on this domain
+      is currently EXPIRED (curl reports "certificate has expired") - site
+      is reachable and title confirms "Government of Bihar", but the
+      crawler will need to tolerate/ignore the cert error (a known pattern
+      with other Indian state sites in this project). verified: yes - HTTP
+      200 with expired-cert warning; content corroborated via WebSearch.
+
+  # --- CHINA (new file config/domains/china.yaml - no such file exists yet) ---
+  - name: "Gansu - Qingyang 'East Data West Compute' Hub Support Measures"
+    id: "gansu_computing_hub_policy"
+    enabled: false
+    base_url: "https://www.gsei.com.cn"
+    start_paths:
+      - "/html/1678/2022-09-20/content-397414.html"
+    region:
+      - "apac"
+      - "china"
+      - "gansu"
+    category: "economic_dev"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+      - "renewable_energy"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "zh"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #6). Gansu is one of the 8 national
+      computing hub nodes under "East Data West Compute"; this notice
+      details the province's "40 measures" incl. demand-charge exemptions
+      through 2025 and discounted renewable power for data centres in the
+      Qingyang cluster. Hosted on Gansu Economic Information Network (a
+      semi-official government-content portal), not the provincial DRC's
+      own domain - the Qingyang municipal government site
+      (zgqingyang.gov.cn) returned HTTP 403 (bot-blocked) every attempt;
+      recommend a human/different-IP re-check of that primary source.
+      verified: yes - HTTP 200, WebFetch confirmed on-topic content
+      directly.
+
+  - name: "Qinghai - Measures to Promote Green Computing Industry Development"
+    id: "qinghai_green_computing_policy"
+    enabled: false
+    base_url: "https://www.qhzwfw.gov.cn"
+    start_paths:
+      - "/lssltjhzl/031001/031001002/20240407/132a9a49-90fb-4425-bba0-64ce7267c238.html"
+    region:
+      - "apac"
+      - "china"
+      - "qinghai"
+    category: "economic_dev"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+      - "renewable_energy"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "zh"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #7). Qinghai was named China's first
+      "green computing-power collaborative demonstration province" (2024, 4
+      national ministries). Guarantees 80%+ green-power supply to data
+      centres at preferential rates, offers investment subsidies up to 10%
+      for new/expanded data centres, exempts green data centres from EIA
+      review. Effective 2024-04-01 through 2029-03-31, hosted on the
+      provincial e-government service portal. verified: yes - HTTP 200 via
+      curl.
+
+  - name: "Guangdong - Data Center Energy Guarantee / Layout Requirements"
+    id: "guangdong_dc_energy_policy"
+    enabled: false
+    base_url: "https://drc.gd.gov.cn"
+    start_paths:
+      - "/ywtz/content/post_3271730.html"
+      - "/ywtz/content/post_4077316.html"
+    region:
+      - "apac"
+      - "china"
+      - "guangdong"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "pue_limits"
+      - "efficiency"
+      - "renewable_energy"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "zh"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #8). Guangdong requires PUE below 1.3 for
+      traditional data centres by end of the 14th Five-Year Plan, applies
+      tiered/differentiated electricity pricing keyed to operating PUE, caps
+      new-cabinet approvals based on existing-DC utilization rates - a
+      substantive, DC-specific regulatory regime from China's largest
+      tech-manufacturing province. Hosted on Guangdong DRC's own domain.
+      verified: yes - both URLs returned HTTP 200 via curl.
+
+  - name: "Shanghai - Data Center Construction Guidelines / Coordinated Development"
+    id: "shanghai_dc_construction_guideline"
+    enabled: false
+    base_url: "https://sheitc.sh.gov.cn"
+    start_paths:
+      - "/xxfw/20210407/3774163f0b3f4bb399e15ad592f7c2f8.html"
+    region:
+      - "apac"
+      - "china"
+      - "shanghai"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "pue_limits"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "zh"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #10). Shanghai's data-centre construction
+      guideline requires new builds to target PUE <=1.25 in the 15th
+      Five-Year Plan period and retrofits to reach <=1.4, with differential
+      electricity pricing and a phase-out list for small/old/scattered data
+      centres. Hosted on Shanghai Economic and Informatization Commission's
+      own domain; a second relevant notice lives at shanghai.gov.cn (also
+      verified 200). verified: yes - HTTP 200 on both the primary URL and
+      the shanghai.gov.cn mirror.
+
+  - name: "Hebei - Electronic Information Industry / Zhangjiakou DC Cluster (partial)"
+    id: "hebei_electronic_info_industry"
+    enabled: false
+    base_url: "https://gxt.hebei.gov.cn"
+    start_paths:
+      - "/hbgyhxxht/zfxxgk/fdzdgknr/ghjhzc/cyzc/2025042121531749289/index.html"
+    region:
+      - "apac"
+      - "china"
+      - "hebei"
+    category: "economic_dev"
+    tags:
+      - "data_center_specific"
+      - "efficiency"
+    policy_types:
+      - "strategy"
+    language: "zh"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #11). Hebei hosts the Zhangjiakou
+      cluster, one of the 8 national computing hubs (Beijing-Tianjin-Hebei
+      node), targeting 700k standard racks and PUE <=1.25 by 2025 with 70%+
+      renewable energy use. This entry is Hebei's GENERAL
+      electronic-information-industry development opinion (confirmed live,
+      on-topic-adjacent) - the MORE specific "Zhangjiakou Data Center
+      Cluster Construction Plan" is the stronger DC-specific document but
+      its known hosts (echinagov.com, hebfb.apps.hebei.com.cn) either 403'd
+      or were untested this session - flagged for a follow-up check.
+      verified: yes for the base_url/start_path shown (HTTP 200, title
+      confirmed). The Zhangjiakou-specific plan text itself is unverified
+      this session.
+
+  # --- JAPAN (new file config/domains/japan.yaml - no such file exists yet) ---
+  - name: "Hokkaido - Data Center Siting Guide (Dept. of Industrial Promotion)"
+    id: "hokkaido_dc_siting_guide"
+    enabled: false
+    base_url: "https://www.pref.hokkaido.lg.jp"
+    start_paths:
+      - "/kz/ssg/sgr/dc_guide.html"
+    region:
+      - "apac"
+      - "japan"
+      - "hokkaido"
+    category: "economic_dev"
+    tags:
+      - "data_center_specific"
+      - "incentives"
+      - "renewable_energy"
+    policy_types:
+      - "guidance"
+      - "incentive"
+    language: "ja"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #12). Hokkaido is Japan's #1
+      data-centre-attraction target after METI's Hokkaido/Kyushu subsidy
+      program (up to 50% of setup cost, plus a reported ¥30bn subsidy
+      to SoftBank's Hokkaido DC); the prefecture also runs its own
+      Enterprise Location Promotion Subsidy for new/expanded DCs and call
+      centres. Same pref.<name>.lg.jp domain pattern as the already-covered
+      Osaka/Chiba/Saitama prefectures. verified: yes - HTTP 200.
+
+  - name: "Fukuoka - Prefectural Business Location Information Site"
+    id: "fukuoka_business_location_incentives"
+    enabled: false
+    base_url: "https://www.kigyorichi.pref.fukuoka.lg.jp"
+    start_paths:
+      - "/ja/"
+    region:
+      - "apac"
+      - "japan"
+      - "fukuoka"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "ja"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #13). Fukuoka/Kyushu is METI's other
+      named target region (with Hokkaido) for the national DC subsidy
+      program; this is the prefecture's own incentive-program portal.
+      Kitakyushu City (within Fukuoka) separately offers up to 6-year
+      fixed-asset tax exemption specifically to attract data centres, per
+      news coverage - worth a municipal-level follow-up. verified: yes -
+      HTTP 200.
+
+  - name: "Kanagawa - SME Energy-Saving Equipment Subsidy"
+    id: "kanagawa_sme_energy_subsidy"
+    enabled: false
+    base_url: "https://www.pref.kanagawa.jp"
+    start_paths:
+      - "/docs/ap4/cnt/f7226/shouenesetubihojokin.html"
+    region:
+      - "apac"
+      - "japan"
+      - "kanagawa"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "ja"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #14). Subsidy covers up to ¥5M (1/3
+      rate) for energy-saving equipment incl. HVAC - general SME program,
+      not DC-exclusive, but directly on-taxonomy (energy-efficiency
+      incentive). Complements the national MIC/MOE "Data Center
+      Zero-Emission and Resilience Enhancement" subsidy program with a
+      prefecture-level efficiency incentive route. verified: yes - HTTP
+      200.
+
+  # --- SPAIN (append to config/domains/spain.yaml) ---
+  - name: "Basque Country / Euskadi - Energy Strategy 2030 (3E2030) + EVE"
+    id: "euskadi_energy_strategy_2030"
+    enabled: false
+    base_url: "https://www.euskadi.eus"
+    start_paths:
+      - "/plan-departamental/15-estrategia-energetica-de-euskadi-2030-3e-2030/web01-s1leheko/es/"
+    region:
+      - "eu"
+      - "eu_south"
+      - "spain"
+      - "basque_country"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "renewable_energy"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "incentive"
+    language: "es"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #15). Basque Country's 3E2030 strategy
+      targets 12% energy savings by 2030 vs. 2021, run by a dedicated energy
+      agency (EVE - Ente Vasco de la Energia, www.eve.eus, also verified
+      live) with an active industrial-efficiency grant line (EUR22M in
+      2025). verified: yes - HTTP 200 for both euskadi.eus strategy page and
+      eve.eus.
+
+  - name: "Castilla y Leon - EREN Energy DataHub"
+    id: "castilla_y_leon_eren_datahub"
+    enabled: false
+    base_url: "https://energia.jcyl.es"
+    start_paths:
+      - "/web/es/ahorro-eficiencia-energetica/datahub-energetico-junta-castilla.html"
+    region:
+      - "eu"
+      - "eu_south"
+      - "spain"
+      - "castilla_y_leon"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "reporting"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "es"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #16). EREN's (Ente Publico Regional de la
+      Energia) public energy DataHub is an open-data transparency tool over
+      the region's energy consumption - fits reporting/efficiency taxonomy,
+      a genuinely new Spanish CCAA. EREN is separately reported to be
+      modernizing its own backup data centre for energy efficiency (an
+      internal case study, not a public policy document). verified: yes -
+      HTTP 200.
+
+  - name: "Valencia - IVACE Energy Efficiency Aid Program"
+    id: "valencia_ivace_energy_efficiency"
+    enabled: false
+    base_url: "https://www.ivace.es"
+    start_paths:
+      - "/index.php/es/ayudas/energia/ayudas-ahorro-y-eficiencia-energetica-energias-renovables-y-autoconsumo-solicitud-abierta/56966-ayudas-en-materia-de-eficiencia-energetica-en-empresas-2025"
+    region:
+      - "eu"
+      - "eu_south"
+      - "spain"
+      - "valencia"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "es"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #17). IVACE (Instituto Valenciano de
+      Competitividad Empresarial) is the Valencian government's
+      business-competitiveness institute; 2025 call: EUR2.52M budget (FEDER
+      co-financed), up to 35-55% of eligible cost, max EUR400k/project,
+      window Sep 30-Dec 30 2025. Explicitly funds waste-heat recovery
+      ("Recuperacion de calores residuales"). Use ivace.es (its own
+      dedicated domain) as base_url - the main gva.es/sede.gva.es domains
+      both timed out repeatedly this session. verified: yes - HTTP 200.
+
+  # --- ITALY (append to config/domains/italy.yaml) ---
+  - name: "Lazio - Sostenibilita Energetica"
+    id: "lazio_sostenibilita_energetica"
+    enabled: false
+    base_url: "https://www.regione.lazio.it"
+    start_paths:
+      - "/cittadini/tutela-ambientale-difesa-suolo/sostenibilita-energetica"
+    region:
+      - "eu"
+      - "eu_south"
+      - "italy"
+      - "lazio"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "district_heating"
+      - "incentives"
+    policy_types:
+      - "regulation"
+      - "incentive"
+    language: "it"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #18). Includes a EUR40M FESR 2021-2027
+      grant line ("Efficienza energetica e rinnovabili per le imprese");
+      Regional Regulation 30/2020 on building energy efficiency also lives
+      on this domain. Lazio is (with Lombardy) one of the top-2 Italian
+      regions by data-centre grid-connection requests (2025: 55GW
+      nationally). verified: yes - HTTP 200.
+
+  - name: "Piemonte - Sviluppo Energetico Sostenibile"
+    id: "piemonte_sviluppo_energetico"
+    enabled: false
+    base_url: "https://www.regione.piemonte.it"
+    start_paths:
+      - "/web/temi/sviluppo/sviluppo-energetico-sostenibile"
+    region:
+      - "eu"
+      - "eu_south"
+      - "italy"
+      - "piemonte"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "renewable_energy"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "it"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #19). EUR53.6M FESR 2021-2027 fund split
+      between business energy-efficiency (EUR28.1M) and renewable-energy
+      promotion (EUR25.5M) actions. Piedmont is reported (local press) to be
+      facing "billions in data centre investment" pressure alongside
+      sustainability questions. verified: yes - HTTP 200.
+
+  - name: "Veneto - Incentivi Regionali (incl. Teleriscaldamento)"
+    id: "veneto_incentivi_energia"
+    enabled: false
+    base_url: "https://www.regione.veneto.it"
+    start_paths:
+      - "/web/energia/incentivi-regionali"
+    region:
+      - "eu"
+      - "eu_south"
+      - "italy"
+      - "veneto"
+    category: "district_heating"
+    tags:
+      - "district_heating"
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "it"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #20). EUR7M FESR 2021-2027 call
+      specifically for new/expanded district heating and cooling networks
+      (up to 65% grant for micro/small enterprises, EUR100k-3M/project), two
+      application windows through Feb 2026. A dedicated district-heating
+      grant program is a direct hit on the waste-heat-reuse taxonomy - among
+      the strongest Italian finds in this wave. verified: yes - HTTP 200.
+
+  - name: "Emilia-Romagna - Energia Regionale (Data Valley heat reuse)"
+    id: "emilia_romagna_energia_portal"
+    enabled: false
+    base_url: "https://energia.regione.emilia-romagna.it"
+    start_paths:
+      - "/"
+    region:
+      - "eu"
+      - "eu_south"
+      - "italy"
+      - "emilia_romagna"
+    category: "energy_ministry"
+    tags:
+      - "district_heating"
+      - "data_center_specific"
+      - "efficiency"
+    policy_types:
+      - "strategy"
+      - "report"
+    language: "it"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #21). Region hosts CINECA's Leonardo
+      supercomputer (Bologna), reportedly concentrating 80%+ of Italy's
+      national computing capacity and ~20% of Europe's; an active
+      RSE/University of Bologna/Politecnico di Milano study is evaluating
+      Leonardo's waste-heat reuse for district heating. Emilia-Romagna's
+      self-branded "Data Valley" strategy (launched 2015) is the single
+      strongest Italian regional case for the exact DC-waste-heat-to-
+      district-heating use case this project tracks. verified: yes - HTTP
+      200 on the region's energy-portal domain.
+
+  # --- SWITZERLAND (append to config/domains/switzerland.yaml) ---
+  - name: "Ticino - Legge cantonale sull'energia (LEn)"
+    id: "ticino_legge_energia"
+    enabled: false
+    base_url: "https://m3.ti.ch"
+    start_paths:
+      - "/CAN/RLeggi/public/index.php/raccolta-leggi/legge/num/523"
+    region:
+      - "eu_central"
+      - "switzerland"
+      - "ticino"
+    category: "cantonal_authority"
+    tags:
+      - "mandatory"
+      - "efficiency"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "it"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #22). Revised LEn (May 4 2021) and Energy
+      Use Regulation (RUEn, revised Mar 15 2023) entered into force Jan 1
+      2024, aligned to MoKEn/MuKEn 2014 model; large-consumer threshold (>5
+      GWh thermal or >0.5 GWh electrical/year) triggers a mandatory
+      energy-optimization analysis - would directly capture large DCs.
+      Ticino is the only major Italian-speaking canton not yet represented.
+      verified: yes - HTTP 200.
+
+  - name: "Aargau - Energiegesetz / Grossverbraucher (Large Consumers)"
+    id: "aargau_energiegesetz"
+    enabled: false
+    base_url: "https://www.ag.ch"
+    start_paths:
+      - "/de/themen/umwelt-natur/energie/planung-und-energienachweise/grossverbraucher"
+    region:
+      - "eu_central"
+      - "switzerland"
+      - "aargau"
+    category: "cantonal_authority"
+    tags:
+      - "mandatory"
+      - "efficiency"
+      - "district_heating"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "de"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #23). Aargau's "Grossverbraucher"
+      (large-consumer) regime requires target agreements (KZV) including
+      waste-heat-potential analysis - directly relevant to data-centre heat
+      reuse; Aargau is a populous canton not yet represented. Canton's own
+      legal-text mirror at gesetzessammlungen.ag.ch/app/de/texts_of_law/773.200
+      also verified live; new Energiegesetz/Verordnung took effect Apr 1
+      2025. verified: yes - HTTP 200 on both the ag.ch topic page and the
+      gesetzessammlungen.ag.ch legal-text mirror.
+
+  # --- BELGIUM (append to config/domains/belgium.yaml) ---
+  - name: "Wallonia - Data Centers (dedicated SPW Energie page)"
+    id: "wallonia_energie_datacenters"
+    enabled: false
+    base_url: "https://energie.wallonie.be"
+    start_paths:
+      - "/home/au-quotidien/dans-la-pme/conseils-pour-mon-type-dentreprise/data-centers.html"
+    region:
+      - "eu"
+      - "eu_west"
+      - "belgium"
+      - "wallonia"
+    category: "energy_ministry"
+    tags:
+      - "data_center_specific"
+      - "efficiency"
+      - "reporting"
+    policy_types:
+      - "guidance"
+      - "report"
+    language: "fr"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #24). A DEDICATED Wallonia government web
+      page specifically for data centres, covering energy-efficiency
+      guidance and the European Code of Conduct for Data Centre energy
+      efficiency - the strongest single find of this wave for direct
+      on-topic relevance. SPW (Service Public de Wallonie) Energie's own
+      site; separate Walloon Government reflection underway on data-centre
+      siting criteria and an Elia-style "swim lanes" power-allocation
+      mechanism at regional level. Existing belgium.yaml only tags region
+      ["eu","eu_west","belgium"] with no regional split - this is a
+      genuinely new sub-slug. verified: yes - HTTP 200, content directly
+      confirmed by page title and WebSearch snippet.
+
+  - name: "Brussels-Capital - Mandatory Data Centre Energy Reporting"
+    id: "brussels_dc_reporting_obligation"
+    enabled: false
+    base_url: "https://environnement.brussels"
+    start_paths:
+      - "/pro/reglementation-et-inspection/obligations-et-autorisations/rapportage-pour-les-centres-de-donnees"
+    region:
+      - "eu"
+      - "eu_west"
+      - "belgium"
+      - "brussels"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "reporting"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "law"
+    language: "fr"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #25). A binding, DC-specific mandatory
+      energy/sustainability reporting regime at regional level, directly
+      implementing the EU data centre reporting delegated regulation.
+      Implements CoBrACE + EU Delegated Regulation 2024/1364 - data centres
+      with >=500kW installed IT power must report annually to Bruxelles
+      Environnement by March 31; contact reportingdc@environnement.brussels
+      listed for reference IDs. verified: yes - HTTP 200, content directly
+      confirmed (WebSearch quoted the specific 500kW threshold, March 31
+      deadline, legal basis).
+
+  - name: "Flanders - Energiedecreet (legal basis for DC energy-efficiency reporting)"
+    id: "flanders_energiedecreet"
+    enabled: false
+    base_url: "https://codex.vlaanderen.be"
+    start_paths:
+      - "/portals/codex/documenten/1018092.html"
+    region:
+      - "eu"
+      - "eu_west"
+      - "belgium"
+      - "flanders"
+    category: "legislative"
+    tags:
+      - "mandatory"
+      - "reporting"
+      - "efficiency"
+    policy_types:
+      - "law"
+    language: "nl"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #26). Codified Energiedecreet (general
+      energy-policy decree) text; VEKA (Vlaams Energie- en Klimaatagentschap)
+      is the implementing agency. A Flemish datacenter-specific reporting
+      obligation (>=500kW IT power, reporting due 2026) transposing the same
+      EU delegated regulation as Brussels is confirmed via WebSearch but the
+      specific VEKA/energiesparen.be sub-page hosting it was not pinned down
+      this session (draft decree only approved in principle by the Flemish
+      Government Jul 14 2025) - recommend a follow-up search once VEKA
+      publishes a dedicated landing page. Completes the Belgian regional
+      trio (with Wallonia and Brussels). verified: yes for the codex text
+      itself (HTTP 200). The DC-specific implementing sub-page is not yet
+      pinned to a verified URL - treat the DC-reporting angle as needing a
+      follow-up check even though the base_url/decree itself is verified
+      live.
+
+  # --- AUSTRALIA (append to config/domains/australia.yaml) ---
+  # --- GERMANY (append to config/domains/germany.yaml) ---
+  - name: "Rheinland-Pfalz - Energieagentur RLP"
+    id: "rheinland_pfalz_energieagentur"
+    enabled: false
+    base_url: "https://www.energieagentur.rlp.de"
+    start_paths:
+      - "/"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+      - "rheinland_pfalz"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "planning"
+    policy_types:
+      - "guidance"
+      - "program"
+    language: "de"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #30). State-run energy/climate agency;
+      federal EnEfG waste-heat reuse obligations for data centres (>=300kW)
+      apply here, with RLP as the Land-level implementing/advisory layer.
+      landesrecht.rlp.de (state legal database, same pattern as other
+      Laender) also verified live and is a good secondary/legislative-
+      category source for the same Land. verified: yes - HTTP 200 for both
+      energieagentur.rlp.de and landesrecht.rlp.de.
+
+  - name: "Schleswig-Holstein - EWKG (Energiewende- und Klimaschutzgesetz)"
+    id: "schleswig_holstein_ewkg"
+    enabled: false
+    base_url: "https://www.gesetze-rechtsprechung.sh.juris.de"
+    start_paths:
+      - "/bssh/document/jlr-EWKSGSHrahmen/part/X"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+      - "schleswig_holstein"
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "district_heating"
+    policy_types:
+      - "law"
+    language: "de"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #31). EWKG requires buildings (pre-2009,
+      on heating-system replacement) to cover >=15% of annual heat demand
+      via renewables/electricity/unavoidable waste heat; a concrete
+      implementation example already exists (Stadtwerke Norderstedt
+      district-heating network fed by a server-park's waste heat). Direct
+      legal hook for data-centre waste-heat-to-district-heating
+      requirements, with a real operating precedent in-state. The
+      schleswig-holstein.de government energy/climate page also verified
+      live as a secondary source. verified: yes - HTTP 200 on the official
+      Land legal-text server.
+
+  - name: "Thueringen - Energieministerium (Umwelt/Klimaschutz)"
+    id: "thueringen_energieministerium"
+    enabled: false
+    base_url: "https://umwelt.thueringen.de"
+    start_paths:
+      - "/aktuelles/anzeigen-medieninformationen/energieministerium-und-spitzenverband-der-stadtwerke-energiewende-vorantreiben"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+      - "thueringen"
+    category: "energy_ministry"
+    tags:
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "report"
+    language: "de"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #32). ThuerKlimaG (state climate law,
+      since 2018) sets binding GHG targets and a near-climate-neutral
+      building-stock goal by 2050; heat-network waste-heat share is
+      separately tracked. State ministry portal directly covers
+      heat-transition (Waermewende) policy and industrial waste-heat
+      utilization in heat networks. thega.de (Thuringian Energy and
+      GreenTech Agency) also verified live as a complementary practitioner-
+      facing source. Note: an earlier wave flagged umwelt.thueringen.de as
+      blocked by a Link11 bot-protection CAPTCHA - this wave's fetch
+      succeeded directly; re-verify at build time. verified: yes - HTTP 200
+      for both umwelt.thueringen.de and thega.de.
+
+  - name: "Mecklenburg-Vorpommern - Klimaschutzgesetz"
+    id: "mecklenburg_vorpommern_klimaschutzgesetz"
+    enabled: false
+    base_url: "https://www.regierung-mv.de"
+    start_paths:
+      - "/Landesregierung/lm/Klima/Klimaschutz/klimaschutzgesetz/"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+      - "mecklenburg_vorpommern"
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "district_heating"
+    policy_types:
+      - "law"
+    language: "de"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #34). Climate Protection Act
+      (climate-neutral state target 2040, state administration 2030); a
+      companion Waermeplanungsgesetz (heat-planning law, under the Interior
+      Ministry) requires municipalities >100k pop. to plan by Jun 2026,
+      <=100k by Jun 2028, and the energy ministry designates district-
+      heating/hydrogen expansion zones. Only German coastal/northern Land
+      not yet represented. verified: yes - HTTP 200.
+
+  # --- CANADA (append to config/domains/canada.yaml) ---
+  - name: "Prince Edward Island - IRAC (Island Regulatory and Appeals Commission)"
+    id: "pei_irac_energy"
+    enabled: false
+    base_url: "https://irac.pe.ca"
+    start_paths:
+      - "/"
+    region:
+      - "north_america"
+      - "canada"
+      - "prince_edward_island"
+    category: "regulatory"
+    tags:
+      - "reporting"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #35). IRAC regulates PEI Energy
+      Corporation and approves its Electricity Efficiency & Conservation
+      Plan (2022-2025 plan targets 34.45 GWh net savings). PEI ranked #2
+      nationally in the 2024 Canadian Energy Efficiency Scorecard; IRAC is
+      the regulator of record for its efficiency/conservation filings - a
+      genuinely new Canadian jurisdiction. PEI released a new Energy
+      Strategy in October 2025 (per Efficiency Canada scorecard coverage) -
+      a direct government URL for that specific document was not pinned
+      down this session; recommend a follow-up search on
+      princeedwardisland.ca once located. verified: yes - HTTP 200.
+
+  - name: "Northwest Territories - 2030 Energy Strategy"
+    id: "nwt_energy_strategy"
+    enabled: false
+    base_url: "https://www.inf.gov.nt.ca"
+    start_paths:
+      - "/sites/inf/files/resources/gnwt_inf_7272_energy_strategy_web-eng.pdf"
+    region:
+      - "north_america"
+      - "canada"
+      - "northwest_territories"
+    category: "energy_ministry"
+    tags:
+      - "planning"
+      - "efficiency"
+    policy_types:
+      - "strategy"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (new-jurisdictions wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (new-jurisdictions.md #36). GNWT Dept. of Infrastructure's
+      "2030 Energy Strategy: A Path to More Affordable, Secure and
+      Sustainable Energy"; territory also runs an Energy Efficiency
+      Incentive Program, Energy Conservation Program, and Alternative
+      Energy Technologies Program via the Arctic Energy Alliance (rebates
+      up to $50,000 for business/non-profit/community-government efficiency
+      projects). First Canadian territory represented in the registry.
+      verified: yes - HTTP 200, full PDF downloads.

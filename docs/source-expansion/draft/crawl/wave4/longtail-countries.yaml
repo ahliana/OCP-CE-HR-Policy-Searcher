@@ -1,0 +1,741 @@
+# =============================================================================
+# DRAFT WAVE 4 - Long-Tail Countries
+# Source: docs/source-expansion/regions-wave4/longtail-countries.md
+# All 23 entries are effort tier (b) - plain crawl domains (includes the
+# primary 20 numbered candidates plus 3 separately-verified companion
+# candidates called out in the same file: turkmenistan_minenergo,
+# maldives_environment_gov_mv, cotedivoire_artci_ict_regulator). Every
+# `region:` country slug below is NEW except cote_d_ivoire (already used
+# region-wise by earlier waves' config/domains entries, dge_ci/anare_ci, but
+# NOT yet a row in config/jurisdictions.yaml either - see
+# jurisdiction-additions-wave4.yaml) and mongolia (same situation - erc_mn
+# already drafted in a prior wave under config/domains/mongolia.yaml, but
+# also not yet a jurisdictions.yaml row). enabled: false everywhere. New
+# per-country files implied for every country here (none of these countries
+# has an existing config/domains/<country>.yaml file today).
+# =============================================================================
+
+domains:
+  - name: "Mauritius Energy Efficiency Management Office (EEMO)"
+    id: "mauritius_eemo_energy_efficiency"
+    enabled: false
+    base_url: "https://eemo.govmu.org"
+    start_paths:
+      - "/"
+      - "https://publicutilities.govmu.org/Pages/Legislation/Energy.aspx"
+    region:
+      - "africa"
+      - "mauritius"
+    category: "regulatory_authority"
+    tags:
+      - "mandatory"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #1). Created under the Energy Efficiency
+      Act 2011. Live regulations include Minimum Energy Performance
+      Standards for refrigerating appliances (2026), the Energy Efficiency
+      (Control of Non-Essential Grid-Powered Activities) Regulations (2026)
+      - name alone suggests direct relevance to always-on server/DC-type
+      grid loads - plus sector guidelines, energy-audit procedures, an
+      appliance-labelling scheme, Energy Observatory Reports (2015-2022).
+      Companion page publicutilities.govmu.org/Pages/Legislation/Energy.aspx
+      hosts the Act + 3 named regulations. Most mature statutory EE regime
+      found across this entire wave. verified: yes - fetched both pages
+      directly.
+
+  - name: "Panama JTIA - Sustainable Building Regulation (RES v.2)"
+    id: "panama_jtia_res"
+    enabled: false
+    base_url: "https://jtiapanama.org.pa"
+    start_paths:
+      - "/"
+      - "https://nube.jtiapanama.org.pa/archivos/leyes_decretos/archivo_06032023_114855.pdf"
+    region:
+      - "north_america"
+      - "panama"
+    category: "building_codes"
+    tags:
+      - "mandatory"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "standard"
+    language: "es"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #2). Panama's mandatory national
+      Sustainable Building Regulation (RES v.2, 2022, in force since 1 Aug
+      2023), issued by JTIA (public-law engineering/architecture board, Law
+      15/1959) under authority of Law 69/2012 (UREE). Sets minimum
+      energy-efficiency requirements for new construction nationwide,
+      including industrial/commercial buildings - would apply to
+      data-center construction. Only concrete, mandatory, verified
+      energy-efficiency-in-buildings regulation found for Panama. verified:
+      yes - navigated jtiapanama.org.pa (200) and fetched the gazette PDF
+      (200, correct file).
+
+  - name: "Trinidad and Tobago Bureau of Standards (TTBS) - Energy Efficiency Building Code"
+    id: "trinidad_tobago_ttbs_eebc"
+    enabled: false
+    base_url: "https://gottbs.com"
+    start_paths:
+      - "/2022/01/25/draft-national-standard-for-public-comment-trinidad-and-tobago-energy-efficiency-building-code/"
+      - "/product/trinidad-and-tobago-energy-efficiency-building-code-2023-edition/"
+    region:
+      - "north_america"
+      - "trinidad_and_tobago"
+    category: "standards"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "standard"
+    language: "en"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #3). Trinidad and Tobago Energy
+      Efficiency Building Code (EEBC), 2023 edition, adapted from the
+      CARICOM Regional Energy Efficiency Building Code (based on ASHRAE
+      90.1-2016) - minimum energy-efficiency design/construction
+      requirements for new buildings and major retrofits, directly relevant
+      to any DC building shell in-country. Free scope/summary pages only;
+      full standard text is a one-time paid PDF (~$1,190 USD), not a
+      login/subscription. Only genuine, mandatory building-level
+      energy-efficiency standard found for Trinidad & Tobago, timely given
+      the country's active 2026 push for AI/data-center MOUs. verified: yes
+      - fetched both pages (200/200).
+
+  - name: "Turkmenistan Government Portal - Legislation feed"
+    id: "turkmenistan_govportal_legislation"
+    enabled: false
+    base_url: "https://turkmenistan.gov.tm"
+    start_paths:
+      - "/ru/razdel/zakonodatelstvo"
+      - "/ru/post/82397/zakon-turkmenistana-ob-energosberezhenii-i-energoeffektivnosti"
+    region:
+      - "turkmenistan"
+    category: "legislative"
+    tags:
+      - "mandatory"
+      - "efficiency"
+    policy_types:
+      - "law"
+    language: "ru"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #4). Law "On Energy Saving and Energy
+      Efficiency" (adopted 2024-03-30, published 2024-04-09) - mandatory
+      energy audits (every 5 years for state-funded efficiency projects),
+      building energy-efficiency classes, "energy passports," mandatory
+      metering for new/renovated construction, state incentives. robots.txt
+      fully permissive, sitemap.xml provided. Feed mixes all government
+      sectors - a topic/keyword filter is essential. Only verified live
+      source carrying Turkmenistan's actual current energy-efficiency law
+      text. Language note: keywords.yaml Turkmen coverage should be checked
+      (portal also has Turkmen-language content). verified: yes - fetched
+      the specific law page directly and the legislation feed page
+      (confirmed live, updated to July 2026).
+
+  - name: "Ministry of Energy of Turkmenistan"
+    id: "turkmenistan_minenergo"
+    enabled: false
+    base_url: "https://minenergo.gov.tm"
+    start_paths:
+      - "/rules/23"
+    region:
+      - "turkmenistan"
+    category: "energy_ministry"
+    tags:
+      - "district_heating"
+    policy_types:
+      - "regulation"
+    language: "tk"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #4, companion candidate). Law on
+      Electric Power Industry articles covering heat/electric energy supply
+      contracts and tariffs. Companion to turkmenistan_govportal_legislation
+      - same country, distinct ministry-hosted domain. verified: yes -
+      fetched /index.php/lang/en and /rules/23 directly.
+
+  - name: "PNG Department of Information & Communications Technology - Government Cloud Policy"
+    id: "png_dict_government_cloud_policy"
+    enabled: false
+    base_url: "https://www.ict.gov.pg"
+    start_paths:
+      - "/Policy/"
+      - "/Policies/Cloud%20Policy/Final%20Government%20Cloud%20Policy%202023%20V2.7%20-%20Final.pdf"
+    region:
+      - "apac"
+      - "papua_new_guinea"
+    category: "policy"
+    tags:
+      - "data_center_specific"
+    policy_types:
+      - "guidance"
+      - "strategy"
+    language: "en"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #5). Government Cloud Policy (2023,
+      v2.7) governing agency use of cloud/hosting infrastructure, plus
+      Digital Government Act (2022) and Digital Transformation Policy
+      (2020). Policy landing page references upcoming "Government Digital
+      Standards" explicitly covering cloud services and data centers (in
+      stakeholder review). Not an energy-efficiency mandate, but directly
+      on-topic for data-center governance - genuinely rare for this region.
+      Crawl-friendly robots.txt, sitemap published. verified: yes - fetched
+      /Policy/ directly, got real linked document titles/URLs; PDF resolved
+      (200, correct content-type/size) though text didn't extract cleanly.
+
+  - name: "Pacific Community (SPC) Regional Energy Policy Hub - PRDR SE4ALL"
+    id: "pacific_prdr_se4all_energy_hub"
+    enabled: false
+    base_url: "https://prdrse4all.spc.int"
+    start_paths:
+      - "/list/publication"
+      - "/countries/fiji"
+      - "/countries/papua-new-guinea"
+    region:
+      - "apac"
+      - "fiji"
+    category: "coordination_body"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "strategy"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #6). Pacific Community/SPC
+      intergovernmental body; documents copyright to the national
+      departments (e.g. "Copyright: Fiji Department of Energy"). Confirmed
+      live: Fiji National Energy Policy 2023-2030 (60pp PDF) with a
+      dedicated Energy Efficiency pillar. Practical route to Fiji policy
+      content while Fiji's own .gov.fj estate is down/mid-migration as of
+      Jul 2026. Also doubles as an aggregator that could plausibly cover
+      the wider Pacific SIDS long tail. COMPLIANCE FLAG: robots.txt
+      explicitly disallows ClaudeBot, GPTBot, CCBot, Google-Extended,
+      Bytespider, Amazonbot (`ai-train=no, use=reference`) while allowing
+      general search indexing - read the ToS before wiring up scheduled
+      fetches. Sits behind a Cloudflare JS challenge (plain fetch gets 403;
+      browser/JS-capable renderer clears it). verified: yes - fetched via
+      browser after clearing the Cloudflare check.
+
+  - name: "Ministry of Energy of the Kyrgyz Republic - Normative Legal Acts database"
+    id: "kyrgyzstan_minenergo_nla"
+    enabled: false
+    base_url: "https://minenergo.gov.kg"
+    start_paths:
+      - "/normativeLegalAct"
+    region:
+      - "kyrgyzstan"
+    category: "district_heating"
+    tags:
+      - "mandatory"
+      - "efficiency"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "ky"
+    requires_playwright: true
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #7). Law No.88 "On Energy Saving"
+      (1998, amended through 2024), Law No.56 "On Energy," Law "On Electric
+      Power Industry," plus ministerial orders/rules in a dedicated Heat
+      Energy category - steam/hot-water pipeline construction and
+      safe-operation rules, technical-maintenance instructions for central
+      heating/hot-water systems. District-heating tariffs set by this
+      ministry's Fuel-Energy Complex regulation dept. Actively maintained
+      (newest entries dated 2026-07-01). WebFetch repeatedly failed with a
+      TLS certificate-chain error - confirmed live via browser rendering;
+      requires_playwright/browser-based fetcher recommended. Language note:
+      law texts commonly bilingual Kyrgyz/Russian - confirm keywords.yaml
+      Kyrgyz coverage, not just Russian. verified: yes - loaded via browser
+      tool, saw the live filterable table with dated entries.
+
+  - name: "Ministry of Energy and Water Resources of the Republic of Tajikistan (MEWR)"
+    id: "tajikistan_mewr"
+    enabled: false
+    base_url: "http://www.mewr.tj"
+    start_paths:
+      - "/"
+    region:
+      - "tajikistan"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "district_heating"
+    policy_types:
+      - "law"
+      - "report"
+    language: "ru"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #8). Law No.29 "On Energy Saving"
+      (2002), Law "On Energy" (2000), Law "On Use of Renewable Energy
+      Sources" (2010), ministry decrees/reports on district heating in
+      Dushanbe (~9% of population, Dushanbe-2 CHP plant), power-sector
+      reform master plans. https attempt intermittently ECONNREFUSED - http
+      fallback succeeded; build with retry logic. robots.txt permissive
+      (only blocks MJ12bot/SemrushBot/AhrefsBot). Only ministry-level
+      government source for Tajikistan's energy-saving law and Dushanbe
+      district-heating policy; country currently has zero PolicyPulse
+      coverage. verified: yes - fetched http://www.mewr.tj/ directly,
+      confirmed official ministry site with News, Legislation database,
+      Government decrees/orders, Energy Saving and Energy Efficiency
+      section.
+
+  - name: "Ministry of Urban Development, Construction and Housing (Mongolia, MCUD)"
+    id: "mongolia_mcud"
+    enabled: false
+    base_url: "https://mcud.gov.mn"
+    start_paths:
+      - "/a/809"
+      - "/p/149"
+    region:
+      - "apac"
+      - "mongolia"
+    category: "building_codes"
+    tags:
+      - "efficiency"
+      - "district_heating"
+    policy_types:
+      - "certification"
+      - "standard"
+    language: "mn"
+    requires_playwright: true
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #9, "Mongolia extra"). Distinct from
+      the already-planned erc_mn (tariffs/Ulaanbaatar DH network, wave 2).
+      Building Energy Efficiency Certificate Issuance Procedure (joint
+      order, Dec 2021) establishing green-building energy-class
+      certification (Class B/C) tied to green lending; Construction
+      Codes/Standards on building-envelope thermal insulation (MNS
+      25-01-20, effective 2021); draft national "Law on Heat Supply"
+      mirrored from Parliament's drafting system (under Parliament
+      consideration as of Feb 2026, NOT YET ENACTED, flag as draft status -
+      confirmed at https://d.parliament.mn/tusul/1b66bb01-5e66-4c57-8c40-e25c65e0e65e).
+      Homepage renders nav-only on a plain fetch (JS-driven routing) -
+      crawl via the /a/{id} and /p/{id} sequential-ID pattern plus
+      discovered /resource/mcud/File/ links, not just the homepage; robots
+      permissive. Language note: Mongolian (Cyrillic), keywords.yaml
+      Mongolian coverage should be checked. verified: yes - fetched /a/809
+      (full Building EE Certificate content), /p/149 (department page),
+      /robots.txt (permissive), /?locale=en (confirmed ministry
+      branding/nav).
+
+  - name: "Zimbabwe Energy Regulatory Authority (ZERA) - Policies/Standards"
+    id: "zimbabwe_zera_energy_efficiency"
+    enabled: false
+    base_url: "https://www.zera.co.zw"
+    start_paths:
+      - "/policies/"
+      - "/standards/"
+      - "/acts/"
+      - "/wp-content/uploads/simple-file-list/POLICIES/NEEP-2-compressed.pdf"
+    region:
+      - "africa"
+      - "zimbabwe"
+    category: "regulatory_authority"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #10). ZERA's statutory mandate (Energy
+      Regulatory Authority Act, Cap 13:23) explicitly includes energy
+      efficiency; site hosts the National Energy Efficiency Policy (MEPS
+      for refrigerators/HVAC/lighting), Energy Policy, National Renewable
+      Energy Policy, Biofuels Policy. Substantial, regulator-confirmed EE
+      framework - best African EE regulator find in this wave outside
+      Mauritius. PDFs may need OCR (some scanned/image-based). verified:
+      yes - fetched /policies/ (5 docs listed), /standards/, and the NEEP
+      PDF itself (resolved, valid 2.2MB PDF).
+
+  - name: "Autorite de Regulation Multisectorielle de Djibouti (ARMD)"
+    id: "djibouti_armd_regulator"
+    enabled: false
+    base_url: "https://www.armd.dj/en"
+    start_paths:
+      - "/en"
+    region:
+      - "africa"
+      - "middle_east"
+      - "djibouti"
+    category: "regulatory_authority"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "fr"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #11). ARMD is the single regulator for
+      telecommunications, ICT, energy/electricity, renewable energy, and
+      gas - explicitly relevant given Djibouti's role as a submarine-cable
+      landing hub and its stated "digital and energy hub of the Red Sea"
+      mandate. Only regulator in Djibouti with combined ICT+energy
+      jurisdiction. Relatively new institution (created 2020, council
+      seated 2024/2025), low document volume so far, no rate limiting
+      observed. verified: yes - fetched armd.dj/en, confirmed mandate and
+      publications sections live.
+
+  - name: "Ministry of Energy of the Republic of Belarus"
+    id: "belarus_minenergo"
+    enabled: false
+    base_url: "https://www.minenergo.gov.by"
+    start_paths:
+      - "/"
+    region:
+      - "eu_east"
+      - "belarus"
+    category: "energy_ministry"
+    tags:
+      - "district_heating"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "law"
+    language: "ru"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #12). Council of Ministers Resolution
+      No. 609 (11 Sep 2019) "On Issues in the Field of Heat Supply" governs
+      consumer/heat-supplier relations, heating-network connection,
+      heat-energy payment; Law "On Energy Saving" (1998, amended
+      2014/2015); new Sustainable Energy and Energy Efficiency state
+      program for 2026-2030. Only real government source for Belarus
+      heat-supply/energy-saving law. Note: Resolution 609's own text was
+      only found on a non-authoritative mirror (cis-legislation.com) - use
+      minenergo.gov.by as the crawl root, not that mirror. RUP
+      "Minskenergo" (web.minskenergo.by) is a state-owned operating
+      utility, not a policy body - checked, not proposed. verified: yes -
+      fetched minenergo.gov.by directly, confirmed official ministry
+      identity and normative-acts references.
+
+  - name: "Ministry of Economy (Ministria e Ekonomise), Kosovo"
+    id: "kosovo_me_gov"
+    enabled: false
+    base_url: "https://me.rks-gov.net"
+    start_paths:
+      - "/en/"
+      - "/en/legjislacioni/"
+    region:
+      - "kosovo"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "law"
+    language: "sq"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #13). Law No. 06/L-079 on Energy
+      Efficiency (established the Kosovo Energy Efficiency Fund); Law No.
+      08/L-242 on Energy Performance of Buildings. Kosovo runs coal/
+      petroleum-based district heating in 4 municipalities; a Dec 2022
+      project added solar-assisted district heating for ~38,000 residents
+      (first in the Western Balkans). Active site, news dated through July
+      2026, no obvious rate limits. Direct national ministry hosting
+      binding EE and building-performance laws plus district-heating
+      context. POLITICAL-SENSITIVITY FLAG: Kosovo has no official ISO
+      3166-1 country code (contested recognition) - see
+      jurisdiction-additions-wave4.yaml's "NEEDS HUMAN ISO LOOKUP" section
+      before this region slug is promoted to the live registry. verified:
+      yes - fetched /en/ and the legislation page directly, confirmed
+      official gov domain and Department of Energy structure (specific law
+      PDFs sit one click deeper than rendered in this pass).
+
+  - name: "Montenegro Ministry of Energy and Mining"
+    id: "montenegro_men"
+    enabled: false
+    base_url: "https://www.gov.me/en/men"
+    start_paths:
+      - "/en/men"
+    region:
+      - "eu_south"
+      - "montenegro"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "strategy"
+    language: "sr"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #14). Oversees energy, energy
+      efficiency, mining, geology, hydrocarbons, concessions. Montenegro is
+      transposing EPBD (EU 2024/1275) and EED (EU 2023/1791) with a roadmap
+      requiring law amendments by 31 March 2027 (zero-emission building
+      standards, MEPS, energy-poverty measures). Pljevlja district-heating
+      project (6.3km new pipelines) also referenced. National ministry with
+      an explicit, dated EU-transposition roadmap for building efficiency
+      standards. A companion candidate (Directorate for Energy Efficiency,
+      energetska-efikasnost.me) is NOT independently verified this pass
+      (403 every attempt) - not drafted here, see unverified appendix.
+      verified: yes - fetched directly, confirmed ministry scope statement.
+
+  - name: "Brunei Department of Energy"
+    id: "brunei_energy_gov_bn"
+    enabled: false
+    base_url: "https://www.energy.gov.bn"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+      - "brunei"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "law"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #15). Energy Efficiency (Standards and
+      Labelling) Act, Chapter 233. EEC (Energy Efficiency and Conservation)
+      Unit developing a full EE/conservation regulatory framework via a
+      National EEC Committee. Joint EEC Building Guidelines for
+      non-residential buildings (mandatory for government buildings,
+      voluntary for commercial). Publishes an "Energy Efficiency and
+      Conservation Handbook." Fills an uncovered SE Asian jurisdiction with
+      a real EE statute and active building-guideline regulatory work.
+      verified: yes - fetched directly, confirmed official PMO department
+      site and the Cap. 233 Act reference plus EEC guideline content.
+
+  - name: "Ministry of Energy and Natural Resources, Bhutan (MoENR)"
+    id: "bhutan_moenr"
+    enabled: false
+    base_url: "https://www.moenr.gov.bt"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+      - "bhutan"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "strategy"
+      - "standard"
+    language: "en"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #16). National Energy Policy 2025
+      ("Empowering Energy Security & Sustainable Growth"); Energy
+      Innovation & Management Division sets Minimum Energy Performance
+      Standards (MEPS), runs energy audits of residential/commercial
+      buildings and industry, launched a Standards and Labeling (S&L)
+      Scheme; also references a National Energy Efficiency and Conservation
+      Policy. National EE policy body with a live MEPS/S&L program.
+      verified: yes - fetched twice, confirmed live content described
+      above.
+
+  - name: "Maldives Utility Regulatory Authority (URA)"
+    id: "maldives_ura"
+    enabled: false
+    base_url: "https://www.ura.gov.mv"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+      - "maldives"
+    category: "regulatory_authority"
+    tags:
+      - "mandatory"
+      - "efficiency"
+    policy_types:
+      - "law"
+      - "certification"
+    language: "en"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #17). Administers the Maldives Energy
+      Act (Law No. 18/2021, in force 11 Oct 2021) - issues Energy
+      Efficiency Certificates, can mandate energy audits for users above
+      100 kWh/month via registered auditors, sets standards for
+      energy/electricity, water & sanitation, waste, petroleum. The actual
+      legal authority issuing efficiency certificates - more precise than
+      the parent ministry page for the certificate mechanism itself. The
+      direct PDF link to the Act itself 404'd - may need sourcing via
+      FAOLEX/ESCAP as a fallback. verified: yes for domain/identity/
+      regulatory scope (homepage fetched directly); the specific Act PDF
+      link was not verified (404).
+
+  - name: "Ministry of Climate Change, Environment and Energy (Maldives)"
+    id: "maldives_environment_gov_mv"
+    enabled: false
+    base_url: "https://www.environment.gov.mv"
+    start_paths:
+      - "/v2/en/department/170"
+    region:
+      - "apac"
+      - "maldives"
+    category: "environment_ministry"
+    tags:
+      - "efficiency"
+      - "renewable_energy"
+    policy_types:
+      - "program"
+      - "strategy"
+    language: "en"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #17, companion candidate). Runs the
+      "Hakathari" Energy Efficiency Standards and Labelling Programme (1-5
+      star appliance ratings), Energy Roadmap 2024-2033. Companion to
+      maldives_ura, same country. verified: yes - fetched directly.
+
+  - name: "Mozambique Ministry of Mineral Resources and Energy (MIREME)"
+    id: "mozambique_mireme_energy_efficiency"
+    enabled: false
+    base_url: "https://mireme.gov.mz"
+    start_paths:
+      - "/documento/"
+    region:
+      - "africa"
+      - "mozambique"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "strategy"
+      - "law"
+    language: "pt"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #18). Resolucao n.o 44/2023 de 25 de
+      Outubro - Estrategia de Eficiencia Energetica (first coordinated EE
+      program for Mozambique), plus Renewable Energy Policy and Electricity
+      Law 12/2022. ARENE (the separate electricity/fuels regulator) was
+      checked - has a legislation section but no EE content, so MIREME is
+      the correct target. Only confirmed government-issued,
+      government-hosted energy efficiency strategy document found for
+      Mozambique. WordPress site, no robots block observed. verified: yes -
+      fetched /documento/ directly, saw the Resolucao 44/2023 entry listed
+      with dated companion resolutions.
+
+  - name: "Ministere de la Transition Numerique et de l'Innovation Technologique (Cote d'Ivoire)"
+    id: "cotedivoire_transition_numerique_ministry"
+    enabled: false
+    base_url: "https://telecom.gouv.ci/new/"
+    start_paths:
+      - "/index.php/accueil"
+      - "/publications/sous-categorie/1"
+    region:
+      - "africa"
+      - "cote_d_ivoire"
+    category: "policy"
+    tags:
+      - "data_center_specific"
+    policy_types:
+      - "strategy"
+    language: "fr"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #19, "Cote d'Ivoire extra"). Distinct
+      from Cote d'Ivoire's energy ministry (already covered in a prior
+      wave, dge_ci/anare_ci). Hosts the Strategie Nationale de la
+      Gouvernance des Donnees (SNGD 2030) - covers cloud/data hosting
+      policy and the national data center - plus a National AI Strategy,
+      National Cybersecurity Strategy 2021-2025, and an e-waste management
+      plan for ICT equipment. Genuinely distinct from the energy ministry -
+      covers the ICT-side data-center/cloud-hosting policy angle. PDFs
+      large image-based scans, likely need OCR. verified: yes - fetched the
+      accueil page (confirmed ministry identity + publication titles) and
+      directly fetched the SNGD 2030 PDF (resolved live, 7.7MB, on-domain).
+
+  - name: "ARTCI - Autorite de Regulation des Telecommunications/TIC de Cote d'Ivoire"
+    id: "cotedivoire_artci_ict_regulator"
+    enabled: false
+    base_url: "https://www.artci.ci"
+    start_paths:
+      - "/"
+    region:
+      - "africa"
+      - "cote_d_ivoire"
+    category: "regulatory_authority"
+    tags:
+      - "planning"
+    policy_types:
+      - "regulation"
+    language: "fr"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #19, companion candidate). Telecom/ICT
+      regulator publishing legal texts, decisions, service specifications,
+      infrastructure/QoS observatory data - no explicit data-center-energy
+      document surfaced yet, but it's the regulator most likely to issue
+      future DC-touching infrastructure rules. verified: yes for domain
+      root; one specific deep-link path tried was dead (not used as a
+      start_path).
+
+  - name: "Cameroon ARSEL - Electricity/Energy-Efficiency Regulator"
+    id: "cameroon_arsel_electricity_regulator"
+    enabled: false
+    base_url: "https://arsel-cm.org"
+    start_paths:
+      - "/documents/en/"
+    region:
+      - "africa"
+      - "cameroon"
+    category: "regulatory_authority"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "strategy"
+      - "regulation"
+    language: "fr"
+    verified_by: "source-expansion-research (longtail-countries wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (longtail-countries.md #20). ARSEL commissioned Cameroon's
+      national EE policy/strategy/action plan for the electricity sector
+      (target: 25% electricity-consumption reduction by 2025, covering
+      public buildings, industry/services efficiency, household awareness,
+      regulatory reform). Search-indexed deep links to the specific EE PDF
+      and category subpages 404'd on direct fetch (site appears
+      restructured since being indexed) - only the base domain and
+      /documents/en/ index are confirmed live; crawl should re-discover the
+      document from the live index rather than trusting cached URLs. MINEE
+      (minee.cm, Ministry of Water and Energy) also verified live as a
+      bilingual fallback/complement (not separately drafted here).
+      verified: PARTIAL - domain and /documents/en/ index confirmed live;
+      the specific EE PDF itself 404'd on 3 attempted paths, so this is
+      domain-verified rather than document-verified.

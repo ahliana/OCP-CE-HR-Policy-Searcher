@@ -1,0 +1,626 @@
+# =============================================================================
+# DRAFT WAVE 4 - Data-Center Noise / Land-Use / Zoning
+# Source: docs/source-expansion/regions-wave4/noise-zoning.md
+# All 17 entries are effort tier (b) - plain crawl domains (0 tier-a, 0
+# tier-c per the source file's own "Summary of what was NOT found": noise/
+# zoning/land-use content is universally HTML hub pages + linked PDFs, never
+# a queryable API). NOTE: this source file's own per-entry writeup omits an
+# explicit region/category/tags/policy_types block (unlike the other 4
+# wave-4 files) - those fields below are inferred from each entry's
+# "coverage"/jurisdiction/append-target description, mapped to the existing
+# VALID_REGIONS/VALID_CATEGORIES/VALID_TAGS/VALID_POLICY_TYPES sets in
+# src/core/config.py. All US states used here (illinois, texas, virginia,
+# georgia, maryland) already exist in VALID_REGIONS via the 50-state
+# auto-registration; no new jurisdiction slugs are needed for this file.
+# enabled: false everywhere.
+# =============================================================================
+
+domains:
+  - name: "Aurora, IL - 'Gold Standard' Data Center & Warehouse Regulations"
+    id: "us_il_aurora"
+    enabled: false
+    base_url: "https://www.aurora-il.org"
+    start_paths:
+      - "/Property-Business/Zoning-and-Planning/New-Data-Center-and-Warehouse-Regulations"
+    region:
+      - "us"
+      - "us_states"
+      - "illinois"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "planning"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #1). Append to a new config/domains/us/
+      illinois.yaml section (existing file only has ICC + ilga.gov).
+      Confirm exact host - agent verified via aurora.il.us; both resolve to
+      the City of Aurora. Adopted March 25, 2026 via four ordinances
+      (O26-021 through O26-024) after a 180-day moratorium. All new data
+      centers become conditional use requiring public hearing + Council
+      approval. Bundles noise/vibration performance standards, energy
+      limits (modular nuclear prohibited), water-use limits (evaporative
+      cooling prohibited), an on-site renewable requirement (25% of peak
+      load) or battery storage (50% of peak load/15 min), and annual
+      energy/water/noise reporting plus continuous vibration monitoring.
+      The single most comprehensive quantified bundled (noise + zoning +
+      energy + water) data-center ordinance found in this entire wave,
+      adopted 2026. WebFetch returned 403 on this domain; browser-tool
+      fetch succeeded cleanly. verified: yes - browser-fetched directly,
+      confirmed page title, ordinance numbers, adoption narrative.
+
+  - name: "Haarlemmermeer (Netherlands) - Datacenterbeleid & Omgevingsplan"
+    id: "nl_haarlemmermeer_datacenters"
+    enabled: false
+    base_url: "https://www.haarlemmermeergemeente.nl"
+    start_paths:
+      - "/omgevingsplan"
+      - "/informeer-online/meer-grip-op-vestiging-datacenters"
+    region:
+      - "eu"
+      - "eu_west"
+      - "netherlands"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "pue_limits"
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "regulation"
+    language: "nl"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #2). Append to netherlands.yaml. Legal text
+      also mirrored at
+      https://lokaleregelgeving.overheid.nl/CVDR646404. Designates four
+      data-center concentration areas (Polanenpark, Corneliahoeve,
+      Schiphol-Rijk, Schiphol Trade Park) with hard MVA capacity caps
+      (100/100/350/200), prohibits data centers outside those zones,
+      mandates PUE < 1.2 and the LEAP framework for 20-40% energy
+      reduction, requires either a district-heating waste-heat connection
+      or reserved space for future waste-heat delivery, requires facilities
+      over 80 MVA to build their own 150kV substation. Municipal cap of 750
+      MVA through 2030 - the strongest single energy/PUE/heat-reuse bundle
+      found in the whole Europe pass this wave. Haarlemmermeer
+      (Amsterdam Science Park/Schiphol area) is the largest data-center
+      siting fight in the Netherlands, not previously covered. Policy under
+      active revision (5th concentration area being added). verified: yes -
+      fetched CVDR646404 directly; quoted PUE<1.2 requirement, MVA caps,
+      waste-heat conditions verbatim from the live legal text.
+
+  - name: "Fort Worth, TX - Data Centers policy hub"
+    id: "us_tx_fort_worth"
+    enabled: false
+    base_url: "https://www.fortworthtexas.gov"
+    start_paths:
+      - "/departments/city-manager/datacenters"
+    region:
+      - "us"
+      - "us_states"
+      - "texas"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandatory"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #3). Append to config/domains/us/texas.yaml.
+      Active rulemaking (Fort Worth's first data-center-specific ordinance
+      proposal). Draft requires industrial zoning only, 250 ft residential
+      setback, 50 ft landscape buffer, rooftop cooling equipment behind an
+      acoustic barrier 1-1.5x equipment height, and bans cryptocurrency
+      mining. Links directly to the Zoning Ordinance, Industrial Districts
+      chapter, and city Noise Ordinance. Zoning Commission denied the draft
+      7-4 (~Jul 8 2026); sent back to Council for an Aug 4 work session/Aug
+      11 final vote - actively updated "Key Dates" timeline, good
+      re-crawl candidate. Only major DFW-metro city with a dedicated live
+      regulatory hub bundling zoning + noise + water + economic-development
+      threads. WebFetch 403'd, browser tool succeeded. verified: yes -
+      browser-fetched; confirmed page title and full timeline/proposed-
+      regulation links.
+
+  - name: "Prince William County, VA - CURRENT Data Center Opportunity Zone Overlay District (DCOZOD)"
+    id: "us_va_pwc_dcozod"
+    enabled: false
+    base_url: "https://www.pwcva.gov"
+    start_paths:
+      - "/department/planning-office/dpa2026-00006-data-center-opportunity-zone-overlay-district-dcozod"
+    region:
+      - "us"
+      - "us_states"
+      - "virginia"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "planning"
+      - "incentives"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #4). Append to config/domains/us/
+      virginia.yaml - distinct path from the already-covered archived
+      advisory-group entry (which only covers the disbanded 2023-2025
+      process). Live Zoning Text Amendment (initiated Mar 3 2026;
+      re-initiated under Resolution 26-374, Jun 9 2026) to shrink/redefine
+      the Data Center Opportunity Zone Overlay District boundaries. Outside
+      the Overlay, data centers in B-1, O(L)/O(H)/O(M)/O(F), M-1, M-2 now
+      require a Special Use Permit. Underlying codified Zoning Ordinance
+      Section 32-509 sets a 1.0-FAR bonus for in-district data centers.
+      Planning Commission hearing scheduled Jul 15 2026. Municode ordinance
+      text also at
+      library.municode.com/va/prince_william_county
+      (CH32ZO_ARTVOVDI_PT509DACEOPZOOVDI). verified: yes - WebFetch
+      succeeded directly; confirmed as a current planning-initiative page
+      with the ZTA timeline and district list.
+
+  - name: "DeKalb County, GA - Data Center Text Amendment (Engage DeKalb)"
+    id: "us_ga_dekalb"
+    enabled: false
+    base_url: "https://engagedekalb.dekalbcountyga.gov"
+    start_paths:
+      - "/data-center-text-amendment"
+    region:
+      - "us"
+      - "us_states"
+      - "georgia"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandatory"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #5). New entry, config/domains/us/
+      georgia.yaml. Board of Commissioners denied the draft Text Amendment
+      Jun 23 2026, but a data-center moratorium remains in force (extended
+      through ~Mar 2027). The denied draft (kept as the working framework
+      for redrafts) defines five size tiers, a 500 ft minimum setback from
+      residential zones (750 ft from parks/trails), 20 ft landscaped
+      buffers with 8 ft walls for large tiers, required closed-loop
+      cooling, and noise assessments measured at both A-weighted and
+      C-weighted frequencies - directly bundling cooling/energy conditions
+      into the siting standard. Most detailed, quantified GA county-level
+      draft standard found, distinct jurisdiction from the already-covered
+      City of South Fulton. verified: yes - WebFetch succeeded directly;
+      standards list and contact confirmed on the live page.
+
+  - name: "Chesapeake, VA - Data Center Ordinance and Policy"
+    id: "us_va_chesapeake"
+    enabled: false
+    base_url: "https://www.cityofchesapeake.net"
+    start_paths:
+      - "/3783/Data-Center-Ordinance-and-Policy"
+    region:
+      - "us"
+      - "us_states"
+      - "virginia"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandatory"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #6). New entry, config/domains/us/
+      virginia.yaml (locality section). Council adopted an Initiating
+      Resolution Jan 13 2026; draft ordinance PLN-TXT-2026-001/policy
+      PLN-TXT-2026-002 would convert data centers from by-right to
+      conditional-use in industrial districts and the Fentress Airfield
+      Overlay District. Planning Commission voted 9-0 to recommend approval
+      Jul 9 2026. Reported (secondary-sourced) 500 ft structure setback/100
+      ft property-line setback from residential. Only Hampton
+      Roads/Peninsula jurisdiction with a fully live, official city-hosted
+      docket page moving toward adoption in 2026. Some linked news mirrors
+      (wavy.com) 403'd - use the .gov page itself. verified: yes - WebFetch
+      succeeded directly; resolution dates, docket numbers, zoning-district
+      list confirmed.
+
+  - name: "Fauquier County, VA - Zoning Ordinance (PCID data-center provisions + noise standards)"
+    id: "us_va_fauquier"
+    enabled: false
+    base_url: "https://www.fauquiercounty.gov"
+    start_paths:
+      - "/government/departments-a-g/community-development/codes-ordinances/zoning-ordinance"
+    region:
+      - "us"
+      - "us_states"
+      - "virginia"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "planning"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #7). New entry, config/domains/us/
+      virginia.yaml (locality section). Live ordinance (amended through
+      Apr 9 2026). Data centers restricted to Business Park (BP) and
+      Planned Commercial Industrial Development (PCID) districts (Article
+      4, Part 6). A 2024 zoning text amendment requires special-exception
+      approval for any data-center building/assemblage over 50,000 sq ft in
+      the PCID (Vint Hill), reviewed against "height, setback, noise,
+      design and community compatibility." Ordinance separately contains
+      Article 9, Part 7 (Noise Standards) and Part 8 (Earthborn Vibration
+      Standards), applicable countywide including to data centers. Live
+      ordinance text for one of Virginia's most-cited "strictest"
+      data-center zoning regimes. WebFetch returned 403 (WAF-like block);
+      browser tool succeeded; periodic amendment updates - good re-crawl
+      candidate. verified: yes - browser-fetched; Article/Part table of
+      contents confirmed live.
+
+  - name: "Stafford County, VA - Data Center Applications / Regulations"
+    id: "us_va_stafford"
+    enabled: false
+    base_url: "https://www.staffordcountyva.gov"
+    start_paths:
+      - "/government/departments_p-z/planning_and_zoning/data_centers/index.php"
+    region:
+      - "us"
+      - "us_states"
+      - "virginia"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "planning"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #8). New entry, config/domains/us/
+      virginia.yaml (locality section). Ordinance O23-24 (Oct 2023) added
+      data-center definitions/regulations to County Code Sections 28-25,
+      28-35, 28-39 (original: 100 ft setback within Urban Service Areas/200
+      ft outside, 50 ft vegetated buffer). Ordinance O25-29/O25-29(R)
+      (Oct-Dec 2025) tightened this: residential setback raised 100->500
+      ft, vegetative buffer 50->200 ft, with grandfathering for five named
+      projects. Also covers noise mitigation, security fencing, tree
+      preservation. Concrete, dated, numeric setback/buffer escalation with
+      named grandfathered projects. verified: yes - WebFetch succeeded
+      directly; ordinance numbers and setback figures confirmed from live
+      page content.
+
+  - name: "Henrico County, VA - Data Center Design Guidelines / Technology Boulevard Overlay"
+    id: "us_va_henrico"
+    enabled: false
+    base_url: "https://henrico.gov"
+    start_paths:
+      - "/public-data/data-center-design-guidelines/"
+    region:
+      - "us"
+      - "us_states"
+      - "virginia"
+    category: "regulatory"
+    tags:
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #9). New entry, config/domains/us/
+      virginia.yaml (locality section). Jun 10 2025: Board of Supervisors
+      adopted the "Data Center Comprehensive Plan Amendment" as an appendix
+      to the Vision 2026 Comprehensive Plan, governing new data-center
+      development countywide. A pending "Technology Boulevard Special Focus
+      Area" overlay (~3,100 acres around White Oak Technology Park) would
+      be the only area where data centers can be built without a
+      provisional-use permit/public hearing; Planning Commission
+      recommended approval May 15 2025. Confirms an adopted (not just
+      proposed) comprehensive-plan-level policy plus tracks the pending
+      White Oak overlay - a Richmond-metro locality not yet covered.
+      verified: yes - browser-fetched; page confirmed with adoption date
+      and content described above.
+
+  - name: "Culpeper County, VA - Planning & Zoning / Culpeper Technology Zone"
+    id: "us_va_culpeper"
+    enabled: false
+    base_url: "https://web.culpepercounty.gov"
+    start_paths:
+      - "/planning"
+    region:
+      - "us"
+      - "us_states"
+      - "virginia"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandatory"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #10). New entry, config/domains/us/
+      virginia.yaml (locality section). Hosts the "03.2025 Updated Culpeper
+      Technology Zone.pdf" plus the current Zoning and Subdivision
+      Ordinances. The Culpeper Tech Zone (CTZ) is a 690-acre by-right
+      data-center district (Zoning Ordinance Section 7.1A-2-2.5, Light
+      Industrial permitted use) capping individual developments at 300 MW
+      with required own substations. A Planning Commission-advanced
+      amendment would add a conditional-use-permit requirement outside the
+      by-right tech zone. A notably different regulatory model (permissive
+      by-right zone vs. restrictive overlay) worth contrasting with
+      Loudoun/Prince William. WebFetch 403'd; browser tool succeeded.
+      verified: yes - browser-fetched; confirmed live with the tech-zone
+      PDF and Zoning Ordinance links.
+
+  - name: "Montgomery County, MD - ZTA 26-01 data-center zoning"
+    id: "us_md_montgomery"
+    enabled: false
+    base_url: "https://www.montgomerycountymd.gov"
+    start_paths:
+      - "/mcgportalapps/Press_Detail.aspx?Item_ID=48105"
+      - "/news/montgomery-county-executive-marc-elrich-signs-executive-order-temporarily-pause-data-center-permitting"
+    region:
+      - "us"
+      - "us_states"
+      - "maryland"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "planning"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #11). New entry, config/domains/us/
+      maryland.yaml (Frederick County is a different, already-covered MD
+      county). ZTA 26-01 (introduced Jan 20 2026) would restrict data
+      centers to industrial zones only (currently permitted countywide as
+      "communications facilities"). Bundled provisions: 500 ft setback on
+      sites abutting residential zoning, proof of noise-ordinance
+      compliance, vegetative screening/lighting requirements,
+      Tier-4-EPA-compliant low-emission diesel backup generators,
+      environmentally-sensitive-area protections. County Executive Elrich
+      separately signed a six-month moratorium on new data-center permit
+      processing. Live legislative process bundling noise-ordinance
+      compliance and a generator-emissions condition directly into zoning
+      siting standards. verified: yes - WebFetch succeeded directly; ZTA
+      number and setback/generator figures confirmed from live
+      press-release text.
+
+  - name: "Inzai City, Chiba Prefecture (Japan) - District Plans data-center restriction"
+    id: "japan_inzai_district_plans"
+    enabled: false
+    base_url: "https://www.city.inzai.lg.jp"
+    start_paths:
+      - "/0000000440.html"
+      - "/0000019530.html"
+    region:
+      - "apac"
+      - "japan"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "planning"
+    policy_types:
+      - "regulation"
+    language: "ja"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #12). New entry, config/domains/apac.yaml (or
+      a new japan.yaml, matching the new-jurisdictions.md wave-4 file,
+      which already implies one for Hokkaido/Fukuoka/Kanagawa). No
+      prefecture-level jurisdiction slug (chiba) was requested by this
+      source file, so region is left at country level. The Takenishi
+      Gakuendai district plan (Musai Gakuendai) and its Operating
+      Standards (rev. May 2024) explicitly list "offices limited to data
+      center use" as a PROHIBITED building type in the Public Benefit
+      Facility District (Category-2 Residential zoning), near Chiba New
+      Town Chuo Station, a major DC-cluster station. Also specifies minimum
+      site area (400m2), wall setbacks (5m/2m/1m by frontage),
+      building-color/design standards, hedge/fence height limits (2m max).
+      A rare primary government document naming data centers as a specific
+      restricted land-use category tied to a residential zone. District
+      plans amended a few times a year - monthly re-crawl of the index is
+      sufficient. verified: yes - fetched both PDFs directly and read the
+      Japanese text; confirmed the data-center clause and numeric
+      standards; also fetched 0000019530.html confirming the 2025
+      public-comment process.
+
+  - name: "Singapore - URA Development Control Handbook, B1 Allowable Uses (Data Centres)"
+    id: "singapore_ura_b1_data_centres"
+    enabled: false
+    base_url: "https://www.ura.gov.sg"
+    start_paths:
+      - "/guidelines/development-control/development-control-handbooks/non-residential/b1/allowable-uses/"
+      - "/Corporate/Guidelines/Development-Control"
+    region:
+      - "apac"
+      - "singapore"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #13). New entry, config/domains/apac.yaml.
+      Data centres/data farms classified as an industrial "e-business" use
+      permitted within the 60% predominant-use quantum in Business Park,
+      B1, and B2 zoned developments. Data centres require prior planning
+      permission with technical-agency consultation (NEA, PUB, SCDF, LTA)
+      before URA approves the use - case-by-case siting review, not
+      automatic like other e-business uses. Page also gives URA's operative
+      definition of "data centre." The URA zoning-authority angle (which
+      zones permit DCs and the extra approval hurdle they face), distinct
+      from IMDA's national DC moratorium/sustainability policy. Content
+      tied to Master Plan review cycles (~5 years) - quarterly re-check
+      sufficient. verified: yes - fetched directly; confirmed the B1/B2
+      allowable-use table entry, prior-planning-permission requirement,
+      technical-agency consultation language.
+
+  - name: "Frankfurt am Main (Germany) - Steuerung von Rechenzentren (data-center zoning concept)"
+    id: "de_frankfurt_rechenzentrenkonzept"
+    enabled: false
+    base_url: "https://www.stadtplanungsamt-frankfurt.de"
+    start_paths:
+      - "/steuerung_von_rechenzentren_22137.html"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+      - "hessen"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "waste_heat"
+    policy_types:
+      - "regulation"
+      - "strategy"
+    language: "de"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #14). New entry, config/domains/germany.yaml
+      - distinct document type from the already-covered
+      klimaschutz-frankfurt.de heat-planning entry. City council-adopted
+      (Jun 9 2022) Data Center Concept classifying industrial areas into
+      suitable/restricted/exclusion zones for independent data centers
+      (suitable: Sossenheim, Rodelheim, Griesheim, Gallus, Ostend,
+      Fechenheim, Seckbach). States binding land-use plans (Bebauungsplaene)
+      will progressively implement these zones. Commits to a citywide
+      waste-heat (Abwaerme) feasibility study for DC heat reuse and future
+      urban-quality/climate/resource-consumption guidelines. No
+      parcel-specific Bebauungsplan number is published yet (see the
+      unverified appendix). The genuine site-steering/zoning document
+      requested for Germany - distinct in both domain and document type
+      from Frankfurt's existing municipal heat-planning entry. Frankfurt is
+      in the Hesse Land (existing hessen subnational slug already used).
+      verified: yes - fetched directly; zone classifications and
+      binding-plan-implementation language quoted from the live page.
+
+  - name: "Fingal County Development Plan - Chapter 13 Land Use Zoning (Ireland)"
+    id: "ie_fingal_cdp_ch13_zoning"
+    enabled: false
+    base_url: "https://consult.fingal.ie"
+    start_paths:
+      - "/en/consultation/draft-fingal-county-development-plan-2023-2029/chapter/chapter-13-land-use-zoning"
+    region:
+      - "eu"
+      - "eu_west"
+      - "ireland"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "planning"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #15). New entry, config/domains/ireland.yaml.
+      No Fingal-specific subnational jurisdiction slug was requested by
+      this source file (Ireland has no county-level slugs in the registry
+      today) - tagged at country level. Data centres explicitly listed as
+      "Not Permitted" in the High Technology (HT) zoning matrix, as well as
+      in Local Centre, General Employment, and High Amenity zones - despite
+      HT lands historically hosting established data centres. Concrete
+      documentary evidence of a zoning-level data-center prohibition in one
+      of Ireland's most DC-dense counties - a useful counterpoint to South
+      Dublin's conditional-permit approach (see the unverified appendix,
+      South Dublin EDE7). verified: yes - fetched directly; confirmed "Data
+      Centre" listed under "Not Permitted" in the HT-zone use matrix.
+
+  - name: "Varde Kommune (Denmark) - Microsoft data-center lokalplan process"
+    id: "dk_varde_datacenterprojekter"
+    enabled: false
+    base_url: "https://www.vardekommune.dk"
+    start_paths:
+      - "/borger/bolig-og-byggeri/datacenterprojekter/microsoft-ansoegninger-til-datacentre-2/"
+    region:
+      - "eu"
+      - "nordic"
+      - "denmark"
+    category: "regulatory"
+    tags:
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "da"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #16). New entry, config/domains/nordic.yaml
+      (or a new denmark.yaml). Council decision (Jun 24 2026) to initiate
+      lokalplan + kommuneplantillaeg work for two Microsoft data-center
+      sites (Tinghoej and Lunde). Siting criteria explicitly listed: grid
+      access/energy capacity, security/risk profile, fiber connectivity,
+      zoned-land sufficiency, skilled-labour access. Links
+      application-update PDFs and a Code of Conduct document. Denmark had
+      zero zoning/lokalplan entries in existing coverage; a live,
+      actively-updated planning process for two hyperscale sites. verified:
+      yes - fetched directly; siting-criteria language quoted from the live
+      page.
+
+  - name: "Kouvola (Finland) - Lossitie asemakaava (atNorth data-center site)"
+    id: "fi_kouvola_lossitie_asemakaava"
+    enabled: false
+    base_url: "https://www.kouvola.fi"
+    start_paths:
+      - "/asuminen-ja-ymparisto/kaavoitus-ja-kaupunkisuunnittelu/ajankohtaiset-asemakaavat/lossitie/"
+    region:
+      - "eu"
+      - "nordic"
+      - "finland"
+    category: "regulatory"
+    tags:
+      - "planning"
+    policy_types:
+      - "regulation"
+    language: "fi"
+    verified_by: "source-expansion-research (noise-zoning wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (noise-zoning.md #17). New entry, config/domains/nordic.yaml.
+      Site-specific detailed zoning plan (asemakaava 35/003) for ~35.3 ha in
+      Ummeljoki/Myllykoski, rezoning land to industrial/storage/business
+      use for atNorth's FIN04A data-center campus (legally valid since Mar
+      9 2026). Includes a riparian buffer requirement along the Kymijoki
+      river. Linked kaavaselostus (plan description) and
+      cultural-landscape assessment. Noise/PUE/waste-heat specifics were
+      not visible on the summary page itself - flagged for a follow-up read
+      of the linked PDF. A genuine site-specific municipal asemakaava for a
+      named hyperscale DC campus - a distinct document type from the
+      Nordic district-heating entries already covered. verified: yes, for
+      existence/process/siting (landing page fetched directly). The linked
+      kaavaselostus PDF did not render readable text - noise/energy
+      specifics inside it are unconfirmed; recommend a human/OCR follow-up
+      before treating those as sourced.

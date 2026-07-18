@@ -1,0 +1,392 @@
+# =============================================================================
+# DRAFT WAVE 4 - Special Economic Zones / Free Zones / Digital Parks
+# Source: docs/source-expansion/regions-wave4/special-zones.md
+# All 10 entries are effort tier (b) - plain crawl domains (0 tier-a, 0
+# tier-c per the source file's own totals). Append targets: uae.yaml and
+# saudi_arabia.yaml already exist (new sections); oman.yaml, qatar.yaml,
+# malaysia.yaml, egypt.yaml, morocco.yaml, philippines.yaml are new files
+# (none exist today). sweden's entry appends to nordic.yaml (subnational/
+# local block) or a new sweden.yaml, per the source file's own note.
+# enabled: false everywhere.
+# =============================================================================
+
+domains:
+  - name: "Stockholm Data Parks"
+    id: "stockholm_data_parks"
+    enabled: false
+    base_url: "https://stockholmdataparks.com"
+    start_paths:
+      - "/"
+      - "/about/"
+    region:
+      - "eu"
+      - "nordic"
+      - "sweden"
+    category: "district_heating"
+    tags:
+      - "efficiency"
+      - "planning"
+      - "incentives"
+    policy_types:
+      - "program"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (special-zones wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (special-zones.md #1) - SINGLE HIGHEST-VALUE FIND of this
+      wave. Joint program of the City of Stockholm, district-heat utility
+      Stockholm Exergi, grid operator Ellevio, and dark-fiber provider
+      Stokab that designates industrial-park sites for data centers ON
+      CONDITION they sell waste heat into the city district-heating network
+      via Stockholm Exergi's Open District Heating platform. Goal: 10% of
+      Stockholm's heating from recovered DC waste heat, part of the city's
+      fossil-fuel-free-by-2040 plan. Site literally frames it as "a data
+      center industry where no heat is wasted" - 20+ connected suppliers
+      recovering enough heat for 30,000+ apartments. This is the clearest
+      "zone authority mandates heat reuse" governance layer found in this
+      wave. Site is a WordPress blog/news structure - content is a running
+      news feed of new heat-reuse connections, best captured via periodic
+      recrawl of several start_paths. Append to a new Stockholm section in
+      nordic.yaml (existing nordic.yaml is Nordic-wide/national) or a new
+      sweden.yaml. verified: yes - fetched directly, confirmed live and
+      jointly run as described.
+
+  - name: "Dubai Silicon Oasis Authority - Sustainability"
+    id: "dso_ae_sustainability"
+    enabled: false
+    base_url: "https://www.dso.ae"
+    start_paths:
+      - "/sustainability"
+    region:
+      - "middle_east"
+      - "uae"
+      - "dubai"
+    category: "economic_dev"
+    tags:
+      - "efficiency"
+      - "renewable_energy"
+      - "reporting"
+    policy_types:
+      - "report"
+      - "standard"
+    language: "en"
+    verified_by: "source-expansion-research (special-zones wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (special-zones.md #2). Dubai free zone authority (under Dubai
+      Development Authority) self-reporting 60+ LEED-certified buildings on
+      the zone, 100% energy-efficient LED street lighting, multiple
+      solar-powered buildings, a 115.7 million kg cumulative CO2 reduction
+      figure, an "Industrial Symbiosis" tenant-waste-exchange partnership
+      (The Surpluss); the zone already hosts a live 6MW Tier III data
+      center (du Data Center, Silicon Oasis). Closest thing to a
+      DC-hosting free zone publishing its own sustainability scorecard in
+      the Gulf. Note: DSOA's old domain dsoa.ae 301-redirects to dso.ae -
+      use dso.ae as base_url. Append to uae.yaml (new Dubai Silicon Oasis
+      section). verified: yes - fetched directly, confirmed live, figures
+      quoted above.
+
+  - name: "Cyberview Sdn Bhd - Sustainability (Cyberjaya master developer)"
+    id: "cyberview_my_sustainability"
+    enabled: false
+    base_url: "https://www.cyberview.com.my"
+    start_paths:
+      - "/sustainability/"
+    region:
+      - "apac"
+      - "malaysia"
+    category: "economic_dev"
+    tags:
+      - "efficiency"
+      - "renewable_energy"
+      - "planning"
+      - "data_center_specific"
+    policy_types:
+      - "strategy"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (special-zones wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (special-zones.md #3). Cyberview (not MDEC) is the actual
+      zone-authority/master-developer for Cyberjaya, Malaysia's largest
+      data-center hub, Malaysia-government-owned. Page references an ESG
+      framework, a "carbon-neutral by 2030" ambition for Cyberjaya, and
+      (per secondary search results, not yet confirmed on-page) a
+      centralized chilled-water district-cooling scheme run by Pendinginan
+      Megajana Sdn Bhd serving 45+ buildings, plus active exploration of
+      renewable/green-power access specifically for Cyberjaya data
+      centers. Distinct from MDEC (national digital-economy agency,
+      already reference-checked in wave 3) - Cyberview is the zone-level
+      authority steering Cyberjaya's DC-specific cooling/power
+      infrastructure. Page itself is thin - the ESG framework and ESG
+      bulletins are linked sub-resources a crawl should pick up at depth 2;
+      treat the specific cooling/carbon figures as lower-confidence than
+      the base URL itself (sourced from search snippets, not yet
+      re-confirmed on-page). Append to a new malaysia.yaml (wave 3 proposed
+      my_mida_desac for the same new file). verified: yes - fetched
+      directly, confirmed live and on-topic.
+
+  - name: "SEZ at Duqm - Environmental Guidelines (Oman)"
+    id: "duqm_om_environmental_guidelines"
+    enabled: false
+    base_url: "https://duqm.gov.om"
+    start_paths:
+      - "/en/environmental-guidelines"
+      - "/en/sezad/environment/links-downloads"
+    region:
+      - "middle_east"
+      - "oman"
+    category: "regulatory_authority"
+    tags:
+      - "mandates"
+      - "efficiency"
+      - "carbon"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (special-zones wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (special-zones.md #4). Oman's national Special Economic Zone
+      Authority at Duqm (SEZAD) publishes real guideline PDFs directly: an
+      Environmental & Social Impact Assessment (ESIA) Guideline (2022), a
+      Climate Change Guideline covering "Identification of Risks and
+      Impacts & Resource Efficiency - Greenhouse Gases" (2021), and a
+      "Cumulative Impact Assessment, Resource Efficiency, and Pollution
+      Prevention Guideline" - all binding on companies developing in the
+      zone. A genuine SEZ REGULATORY AUTHORITY publishing its own
+      environmental/resource-efficiency guideline documents - closest
+      match in the Gulf to a zone authority with actual (if generic, not
+      DC-specific) mandatory guidance. PDFs are large scanned/composite
+      documents - a screening pass should extract linked PDF text properly,
+      not rely on a general-purpose web-fetch summarizer. Append to a new
+      oman.yaml. verified: yes - index page fetched directly and confirmed
+      live, listing named/dated guideline documents with working download
+      links; one linked PDF fetched (confirmed resolves, ~8MB) but text
+      content could not be cleanly extracted by the summarizing fetch tool
+      used in this pass.
+
+  - name: "Qatar Free Zones Authority - Sustainability"
+    id: "qfz_qa_sustainability"
+    enabled: false
+    base_url: "https://qfz.gov.qa"
+    start_paths:
+      - "/why-qfz/sustainability/"
+    region:
+      - "middle_east"
+      - "qatar"
+    category: "regulatory_authority"
+    tags:
+      - "efficiency"
+      - "renewable_energy"
+      - "reporting"
+    policy_types:
+      - "standard"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (special-zones wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (special-zones.md #5). Qatar's national free-zones authority
+      (covering Ras Bufontas and Um Alhoul zones) reports holding ISO 50001
+      (Energy Management), ISO 14001 (Environmental Management), and ISO
+      45001 certifications; page describes zone power from natural gas
+      (lowest-carbon fossil option per QFZA framing) and new warehouse
+      rooftops with ~40% solar-panel coverage; a 2025 Samsung C&T MOU
+      explicitly names data centers as a target for future
+      sustainable-infrastructure collaboration. A national free-zone
+      regulator holding a genuine ISO 50001 energy-management certification
+      (a formal, auditable energy standard) and actively courting
+      data-center investment under that banner. Page is bilingual (ar/en) -
+      confirm the correct language-specific path when building start_paths.
+      Append to a new qatar.yaml. verified: yes - fetched directly,
+      confirmed live and on-topic.
+
+  - name: "NEOM - Environment (Our World)"
+    id: "neom_sa_environment"
+    enabled: false
+    base_url: "https://www.neom.com"
+    start_paths:
+      - "/en-us/about/our-values/code-of-conduct/our-world/environment"
+    region:
+      - "middle_east"
+      - "saudi_arabia"
+    category: "economic_dev"
+    tags:
+      - "efficiency"
+      - "renewable_energy"
+      - "strategy"
+    policy_types:
+      - "strategy"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (special-zones wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (special-zones.md #6). Giga-project/special zone directly
+      under Saudi PIF; Oxagon is NEOM's industrial/data-center hub, site of
+      the $5B DataVolt AI data-center project (net-zero, 100%
+      renewable-powered) - the single largest announced sustainable-DC
+      project tied to a special zone in this entire wave. Page itself is
+      high-level (values/CSR framing) rather than a technical standard;
+      secondary sources reference NEOM's "Interim Sustainability
+      Requirements for the Built Environment" (doc code NEOM-NEV-PRC-501)
+      invoking LEED, Envision, Mostadam, the International Green
+      Construction Code, Saudi Green Building Code 1001, and Saudi Energy
+      Code 601 - that specific document was NOT found hosted on neom.com
+      this pass (only a third-party Scribd copy exists, not crawlable with
+      confidence - see unverified appendix). Official page is thin today
+      but is the right anchor to recrawl as NEOM publishes more. Append to
+      saudi_arabia.yaml (new NEOM/Oxagon section). verified: yes for the
+      page itself (thin content); the specific standards document is NOT
+      verified as officially hosted.
+
+  - name: "SCZONE - General Authority for Suez Canal Economic Zone"
+    id: "sczone_eg"
+    enabled: false
+    base_url: "https://sczone.eg"
+    start_paths:
+      - "/en/"
+    region:
+      - "africa"
+      - "egypt"
+    category: "economic_dev"
+    tags:
+      - "renewable_energy"
+      - "data_center_specific"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (special-zones wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (special-zones.md #7). Egypt's national economic-zone
+      authority for the Suez Canal corridor lists "Data Centers" explicitly
+      as one of its targeted investment sectors alongside Green Hydrogen
+      and Solar PV; site has "Rules & Regulations" and "E-Services"
+      sections (contents not yet confirmed this pass); SCZONE has
+      separately signed renewable-power supply agreements for zone tenants
+      via its SCZONE Infrastructure Company / SCZone Utilities subsidiary.
+      The only MENA zone authority in this wave that names "Data Centers"
+      as an explicit targeted sector on its own site, paired with a real
+      renewable-power utility subsidiary serving zone tenants. Homepage
+      confirmed live but the deeper Rules & Regulations page content was
+      not directly fetched this pass - needs a follow-up fetch before
+      relying on it for policy text. Append to a new egypt.yaml. verified:
+      yes (homepage only) - confirmed live, on-topic sector list seen in
+      search snippet.
+
+  - name: "Khalifa Economic Zones Abu Dhabi (KEZAD)"
+    id: "kezad_ae"
+    enabled: false
+    base_url: "https://www.kezadgroup.com"
+    start_paths:
+      - "/"
+    region:
+      - "middle_east"
+      - "uae"
+      - "abu_dhabi"
+    category: "economic_dev"
+    tags:
+      - "renewable_energy"
+      - "planning"
+    policy_types:
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (special-zones wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (special-zones.md #8). Abu Dhabi zone authority (operated by
+      AD Ports Group), direct successor/rebrand of KIZAD. Site references
+      KEZAD's "SDG Model Zone Partner 2023-2024" recognition and general
+      "Sustainable Development" positioning; no tenant-facing energy/
+      environmental regulation text was found on the crawled homepage
+      content itself. LOWEST-CONFIDENCE of the UAE zone entries in this
+      wave - included because it is the successor to KIZAD (which UAE
+      district-cooling/green-industrial-zone coverage already references
+      in secondary sources), but the official site itself does not yet
+      expose the specific regulatory text a scan would need - recommend a
+      deeper crawl (depth 2-3) before expecting much yield. Append to
+      uae.yaml (new KEZAD/Abu Dhabi section, distinct from existing
+      doe_abudhabi entry). verified: yes (site is live, official, on-topic
+      sustainability framing) - no specific tenant mandate content
+      confirmed.
+
+  - name: "Tanger Med Special Agency - Energy Transition"
+    id: "tangermed_ma_energy"
+    enabled: false
+    base_url: "https://www.tangermed.ma"
+    start_paths:
+      - "/en/csr/energy-transition/"
+    region:
+      - "africa"
+      - "morocco"
+    category: "economic_dev"
+    tags:
+      - "renewable_energy"
+      - "efficiency"
+    policy_types:
+      - "strategy"
+      - "program"
+    language: "en"
+    verified_by: "source-expansion-research (special-zones wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (special-zones.md #9). Morocco's special free-zone/port
+      authority for the Tanger Med industrial and free-zone platform
+      (incl. Tanger Free Zone). Tanger Med Utilities (a Tanger Med Group
+      subsidiary) is financing/building ~11MW of photovoltaic capacity "on
+      behalf of its customers" (zone tenants); broader Group commitments to
+      decarbonized energy supply, energy efficiency, circular economy
+      described at the corporate/CSR level. A real (if not yet mandatory)
+      zone-utility-run renewable-energy program for tenants, and Morocco
+      has separately announced a national push for carbon-neutral data
+      centers by 2035 anchored partly in its free-zone platforms. Content
+      is organizational/Group-level rather than a binding tenant mandate.
+      Append to a new morocco.yaml. verified: yes - fetched directly,
+      confirmed live and on-topic.
+
+  - name: "PEZA - Implementing Rules and Regulations (Philippines)"
+    id: "peza_ph_irr"
+    enabled: false
+    base_url: "https://www.peza.gov.ph"
+    start_paths:
+      - "/implementing-rules-and-regulations"
+      - "/issuances"
+    region:
+      - "apac"
+      - "philippines"
+    category: "regulatory_authority"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (special-zones wave-4 agent)"
+    verified_date: "2026-07-18"
+    notes: |
+      Wave 4 (special-zones.md #10). Philippine Economic Zone Authority,
+      the national ecozone regulator, requires an Environmental Compliance
+      Certificate (ECC, issued by DENR-EMB) for ecozone development and
+      enforces geohazard/environmental-clearance compliance for
+      developers, factories, utilities, and facility-construction
+      applicants; PEZA has publicly promoted a "green, sustainable, and
+      disaster-free ecozones" transformation initiative; no PEZA-specific
+      PUE/DC-energy standard was found. PEZA is actively recruiting DC/
+      renewable-energy investment (Camarines Norte data-center-plus-
+      desalination project cited in a 2025 press release) and is the
+      binding environmental-compliance gate for any ecozone facility,
+      including data centers - general-purpose but on-topic. The two index
+      pages exist and are on the official domain - specific ECC/
+      environmental issuance text lives in linked docs, not yet
+      individually confirmed; treat named documents as lower confidence
+      than the base URL. Append to a new philippines.yaml. verified: yes
+      (index pages exist and are on the official domain).
