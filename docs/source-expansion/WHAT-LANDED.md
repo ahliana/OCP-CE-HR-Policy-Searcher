@@ -89,11 +89,21 @@ Scottish Parliament, Finland Eduskunta, LeyChile, Kenya Law, Open States.
 | Wave 1 | 154 | 138 | 16 | 45 |
 | Wave 2 | 158 | 141 | 17 | ~71 |
 | Wave 3 | 100 | 92 | 8 | ~34 |
-| **Combined (1+2+3)** | **412** | **371** | **41** | **~150** |
+| Wave 4 | 89 | 81 | 8 | ~45 |
+| **Combined (1-4)** | **~501** | **452** | **49** | **~195** |
 
 Deduped against 390 existing sources in `config/domains/**` (33 country files +
 50-state `us/` subdir + 9 structured API clients), plus cross-wave dedup (wave 2
-merged 3 Swiss-canton duplicates against wave 1).
+merged 3 Swiss-canton dups; wave 4 merged 5 more).
+
+**Wave 4 (map-maximizing)** also produced **63 jurisdiction-registry rows**
+([jurisdiction-additions-wave4.yaml](jurisdiction-additions-wave4.yaml)): 26 new
+countries (Mauritius, Panama, Fiji, Kosovo*...) with `iso3`+`iso_numeric`, and 36 new
+subnational rows (India/China/Japan/Spain/Italy/Belgium/Germany/Australia/Canada
+states+regions) with `code`+`parent`. These are the new places that light up the map
+when the sources promote. Every wave-4 region slug resolves against registry+proposed
+rows except **kosovo** (*no ISO 3166-1 code, contested - human decision). Belgium
+regions need the `belgium` row's aliases trimmed at promotion.
 
 **Wave 2 added** (angles wave 1 under-mined): 7 keyless legislation APIs (Poland Sejm,
 NL Tweede Kamer, Brazil Camara, AU Federal Register of Legislation, Spain Congreso,
