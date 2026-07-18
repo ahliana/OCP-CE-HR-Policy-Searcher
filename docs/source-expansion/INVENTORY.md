@@ -917,20 +917,461 @@ live code enums and the 390 existing sources:
 
 ---
 
-## Orchestrator validation - Wave 3 (2026-07-18)
+## Wave 3
 
-Machine check of the 92 wave-3 draft crawl entries against live enums, the 390
-existing sources, and all prior-wave drafts:
+Third research pass: 7 additional research files under
+`docs/source-expansion/regions-wave3/` (`water-cooling.md`, `carbon-ets.md`,
+`dc-incentives.md`, `permitting-eia.md`, `more-legislation-apis.md`,
+`digital-infra-strategies.md`, `municipal-heat-zoning.md`), targeting angles
+wave 1 and 2 didn't cover: data-center water/cooling regulation, carbon-
+pricing/ETS/climate-compliance bodies, DC-specific economic-development/tax
+incentives, environmental permitting/EIA/industrial-emissions authorities
+(the layer where DC energy/heat/noise conditions actually get *set*, at
+construction approval), additional legislature/gazette structured APIs,
+digital-infrastructure/telecom-ministry DC strategies (a class of source
+that hides in a digital-ministry strategy PDF rather than an energy-ministry
+site), and the municipal/city heat-network-zoning tier in heat-network-dense
+European countries. Same transcription-and-organization scope as waves 1-2 -
+no new sources invented, nothing enabled.
 
-- **92 entries, all `enabled: false`.** All parse. **0 id collisions** with existing
-  config; **0 cross-wave id or base_url duplicates** with waves 1-2.
-- **0 enum violations** - every region/category/tag/policy_type value maps to
-  `src/core/config.py` (cleanest wave; no new enum additions needed from wave 3).
-- **12 additive base_url overlaps with existing config** - unique ids sharing a domain
-  with an unrelated existing entry (gov.uk depts: uk_ets/secr/esos/dsit; eur-lex CSRD;
-  CARB; BAFU; METI; alberta.ca; imda.gov.sg; azleg.gov; london.gov.uk). This is the
-  codebase's established multi-entry-per-domain pattern; each notes its sibling id. Not
-  collisions - additive by design.
-- Wave-3 tier-c (8 new API clients): federal_register_api (keyless), congress_gov_api
-  (key), openstates_api (key), kenya_law_api, oparl (municipal), epa_ghgrp_envirofacts_api
-  (keyless), ga_epd_permit_search, eea_industrial_emissions_portal.
+### Wave 3 totals
+
+| Metric | Count |
+|---|---|
+| **Total verified candidates (unique, deduped)** | **99** |
+| Tier a (drops into existing client) | 0 |
+| Tier b (plain crawl domain) | 91 |
+| Tier c (needs a new structured client) | 8 |
+| Duplicates dropped/merged | 1 |
+| Unverified / needs-human-check items (appendix) | 39 |
+
+### By source file
+
+| Source file | Verified | Tier b | Tier c | Unverified |
+|---|---|---|---|---|
+| water-cooling.md | 9 | 9 | 0 | 5 |
+| carbon-ets.md | 22 | 21 | 1 | 4 |
+| dc-incentives.md | 19 | 19 | 0 | 3 |
+| permitting-eia.md | 12 (13 raw, 1 merged into wave-1) | 10 | 2 | 5 |
+| more-legislation-apis.md | 6 | 1 | 5 | 10 |
+| digital-infra-strategies.md | 10 | 10 | 0 | 4 |
+| municipal-heat-zoning.md | 21 | 21 | 0 | 8 |
+| **Total** | **99** (100 raw, 1 merged) | **91** | **8** | **39** |
+
+### Wave 3 dedup findings (cross-file and cross-wave)
+
+Every wave-3 candidate's `base_url` was diffed against: (1) all 391 `id`s/
+base_urls live in `config/domains/**`, (2) all 279 wave-1 + wave-2 draft
+crawl entries, (3) both prior waves' tier-c specs, and (4) every other
+wave-3 file. Verified programmatically (PyYAML parse of every draft file +
+a Python set-intersection over all `id`s) during wave-3 consolidation - zero
+`id` collisions found anywhere.
+
+**1 exact duplicate dropped**: `loudoun_county_dc_standards` (proposed by
+permitting-eia.md #9, `base_url: https://www.loudoun.gov`, both start_paths
+`/5990/Data-Center-Standards-Locations` and
+`/6222/Phase-2-Data-Center-Standards-Locations`) is byte-for-byte the same
+source as wave-1's `us_loudoun_county_va` already drafted in
+`draft/crawl/us-states.yaml` (same base_url, same both start_paths). The
+permitting-eia.md researcher's own dedup pass checked `draft/crawl/**/*.yaml`
+but missed this specific wave-1 file; caught during wave-3 consolidation via
+a full base_url grep across every prior draft. Not re-drafted - the existing
+wave-1 entry already covers this source (VA DEQ's air-permit angle on
+Loudoun is separately covered by the new, non-duplicate `va_deq_dc_air_permits`
+entry in the same file).
+
+**1 borderline case flagged, NOT dropped**: `gla_heat_networks_london`
+(municipal-heat-zoning.md #3) shares `base_url: https://www.london.gov.uk`
+with THREE existing `uk.yaml` entries (`uk_gla`, `uk_gla_heat_networks`,
+`gla_gff_london`), and `uk_gla` already carries the tag
+`data_center_heat_reuse`. None of the existing entries' `start_paths`
+include this candidate's specific paths (`/heat-networks-london`, the GLA's
+"Optimising Data Centres in London - Heat Reuse" PDF report), so it is not
+an exact duplicate by the "same body + same policy" test, but a reviewer may
+prefer folding these two `start_paths` into the existing
+`uk_gla_heat_networks` entry rather than shipping a fourth london.gov.uk
+domain. Drafted as its own entry in `draft/crawl/wave3/municipal-heat-
+zoning.yaml`; flagged inline for a human merge decision.
+
+**12 additive base_url overlaps with existing config** - unique ids sharing
+a domain with an unrelated existing entry, same precedent already
+established for `eur-lex.europa.eu` (4 entries) and `gov.uk` (30+ entries)
+in the live codebase:
+
+| base_url | Existing/sibling entry | New wave-3 entry | Distinction |
+|---|---|---|---|
+| `www.imda.gov.sg` | existing `imda_sg` (apac.yaml, Green Data Centre Programme) | `sg_dc_cfa2` (dc-incentives) | DC-CFA2 capacity-allocation scheme, different path |
+| `www.azleg.gov` | existing entry in `us/arizona.yaml` (bill tracker, `/bills/`) | `az_cdc_program_statute` (dc-incentives) | specific tax-incentive statute page, `/ars/41/01519.htm` |
+| `ww2.arb.ca.gov` | existing `carb_generators` (`us/california.yaml`) | `ca_carb_cap_trade` (carbon-ets) | backup-generator rules vs. cap-and-trade program |
+| `meti.go.jp` | existing `meti_jp` (apac.yaml, English GX strategy) | `jp_meti_gx_ets` (carbon-ets) | Japanese-language ETS-specific page |
+| `bafu.admin.ch` | existing `bafu_buildings` (switzerland.yaml) | `ch_bafu_ets` (carbon-ets) | building climate rules vs. Swiss ETS |
+| `alberta.ca` | existing `alberta_energy` (canada.yaml) | `ab_tier` (carbon-ets) | general landing pages vs. the specific TIER regulation |
+| `gov.uk` | 8+ existing `uk.yaml` entries | `uk_ets_participating`, `uk_secr`, `uk_esos` (carbon-ets); `dsit_datacentres_uk` (digital-infra-strategies) | distinct carbon-market/reporting/CNI topics, new departments (not DESNZ) |
+| `eur-lex.europa.eu` | 3 existing eu.yaml entries | `eurlex_csrd_2022_2464` (carbon-ets) | CSRD, distinct from the existing EED/data-centre-regulation entries |
+| `london.gov.uk` | 3 existing uk.yaml entries (`uk_gla`, `uk_gla_heat_networks`, `gla_gff_london`) | `gla_heat_networks_london` (municipal-heat-zoning) | see borderline-case note above |
+
+Additionally, 3 pairs of wave-3-internal entries (both new, not existing
+config) share a base_url across two different wave-3 files for the same
+reason - different program, same host: `epa.ie` (`ie_epa_water_abstraction`
+in water-cooling vs. `epa_ie_ied` in permitting-eia), `deq.virginia.gov`
+(`va_deq_water` vs. `va_deq_dc_air_permits`), and `tceq.texas.gov`
+(`tx_tceq_water_rights` vs. `tceq_air_generators`). None of these are
+`id`/base_url+start_path duplicates - each pair targets a different
+program, department, or specific document.
+
+### Master table — Tier c (new structured client needed), ranked best-first
+
+Full technical spec + draft `api_sources.yaml` entries for every row:
+`docs/source-expansion/draft/new-clients-wave3.md`.
+
+| # | Name | id | Level | Access | Source file | Why |
+|---|---|---|---|---|---|---|
+| 1 | US Federal Register API | `federal_register_api` | national | none | more-legislation-apis.md | Highest-value find of the wave - keyless, live on-topic query for "data center waste heat" returned 2,651 results incl. a DOE AI-infrastructure RFI |
+| 2 | Congress.gov API | `congress_gov_api` | national | api_key (free, `api.congress.gov/sign-up/`) | more-legislation-apis.md | Only structured source of the actual US federal bill-introduction-to-law pipeline with full-text-searchable CRS summaries |
+| 3 | Open States API v3 | `openstates_api` | subnational (all 50 US states in one integration) | api_key (free, `openstates.org/account/profile/`) | more-legislation-apis.md | Free-tier complement to the existing `legiscan` client - all 50 states + committees/events/geolocation lookup |
+| 4 | EPA Envirofacts Greenhouse Gas RESTful Data Service | `epa_ghgrp_envirofacts_api` | national | none | carbon-ets.md | Only true open-data API found in the entire carbon/ETS pass - live, keyless, facility-level US GHG data |
+| 5 | Kenya Law / National Council for Law Reporting search API | `kenya_law_api` | national | none | more-legislation-apis.md | Only verified national gazette/legislation API found in sub-Saharan Africa this pass; direct hit on Kenya's Energy Act |
+| 6 | European Industrial Emissions Portal (EEA) | `eea_industrial_emissions_portal` | supranational | none | permitting-eia.md | Closest thing to an EU-wide cross-country permitted-installation register; best as a discovery/cross-check layer (most DC gensets sit below IED/LCP thresholds) |
+| 7 | Georgia EPD Air Permit Search Engine | `ga_epd_permit_search` | subnational | none | permitting-eia.md | Facility-level searchable permit database, distinct from the existing static `ga_epd` crawl domain |
+| 8 | oParl standard (Cologne example) | `oparl_koeln` | local (municipal only, NOT Landtag-level) | none | more-legislation-apis.md | Real, live, keyless municipal legislative-motion API; lower priority since it doesn't reach the state-parliament level originally sought |
+
+### Master table — Tier b (plain crawl domain), grouped by source file, ranked best-first within each
+
+Full YAML for every row (exact `_template.yaml` schema, `enabled: false`):
+`docs/source-expansion/draft/crawl/wave3/<source-file-name>.yaml`.
+
+#### water-cooling.md — 9
+
+| # | Name | id | Level | Access | Why |
+|---|---|---|---|---|---|
+| 1 | Virginia DEQ - Water Withdrawal | `va_deq_water` | subnational | none | Largest US DC market; first state law forcing utility-level DC water-use disclosure (HB589) |
+| 2 | Dutch Water Authorities Association - Datacenters | `nl_unie_waterschappen_dc` | national | none | Clearest government-adjacent statement tying DC cooling water to the EU Water Framework Directive |
+| 3 | HHNK Regional Water Authority - Datacenters Noord-Holland | `nl_hhnk_datacenters` | subnational | none | Actual discharge-permit conditions for the Microsoft/Google Wieringermeer cluster |
+| 4 | Ireland EPA - Water Abstraction | `ie_epa_water_abstraction` | national | none | No water regulator existed anywhere in ireland.yaml despite the South Dublin hosepipe-ban DC water fight |
+| 5 | Singapore PUB - Mandatory Water Efficiency Management Practices | `sg_pub_water_efficiency` | national | none | Only body with a hard water-consumption threshold + mandatory reporting scheme naming data centers |
+| 6 | Arizona DWR - Assured and Adequate Water Supply | `az_water_resources` | subnational | none | The regulatory gap behind the Project Blue (Tucson) DC well-permit controversy |
+| 7 | Texas TCEQ - Water Rights | `tx_tceq_water_rights` | subnational | none | Top-3 US DC hub with an active drought/water-rights permitting fight, zero prior water-regulator coverage |
+| 8 | California DWR - Water Use Efficiency | `ca_dwr_water_use` | subnational | none | Forward placeholder for CA's 2028 mandated DC water-use definition/estimate (AB 2469/AB 2619) |
+| 9 | California SWRCB - Water Measurement and Reporting Regulations Rulemaking | `ca_swrcb_water_rulemaking` | subnational | none | Pairs with DWR; will publish the binding CII water-use classification for data centers by 2029 |
+
+#### carbon-ets.md — 21 (+1 tier-c)
+
+| # | Name | id | Level | Access | Why |
+|---|---|---|---|---|---|
+| 1 | EU Emissions Trading System (EU ETS) | `eu_ets_main` | supranational | none | Flagship EU carbon market; legal basis for ETS2 and the Union Registry |
+| 2 | EU ETS2 - Buildings, Road Transport and Additional Sectors | `eu_ets2_buildings_transport` | supranational | none | Scheme most likely to newly bind DC on-site fossil combustion from 2027 |
+| 3 | EU ETS Union Registry | `eu_ets_union_registry` | supranational | none | Facility-level EU ETS allocation/emissions data of record |
+| 4 | EUR-Lex Corporate Sustainability Reporting Directive (CSRD) 2022/2464 | `eurlex_csrd_2022_2464` | supranational | none | Broadest EU mandatory climate-disclosure regime touching DC corporate groups |
+| 5 | UK ETS (participation guidance) | `uk_ets_participating` | national | none | UK's post-Brexit domestic carbon market, national ETS authority page |
+| 6 | UK Streamlined Energy and Carbon Reporting (SECR) | `uk_secr` | national | none | UK's own standing mandatory energy/carbon reporting regime, predates Brexit |
+| 7 | UK Energy Savings Opportunity Scheme (ESOS) | `uk_esos` | national | none | Mandatory 4-yearly energy audits for large UK undertakings, incl. DC operators |
+| 8 | DEHSt - National Emissions Trading (nEHS/BEHG) | `de_dehst_nehs` | national | none | Germany's national carbon-price authority; KTF fund finances heat-network transformation |
+| 9 | California Cap-and-Trade Program (CARB) | `ca_carb_cap_trade` | subnational | none | The model program RGGI/Quebec/Washington reference |
+| 10 | Regional Greenhouse Gas Initiative (RGGI) | `us_rggi` | subnational (11-state) | none | First US cap-and-invest program, covers the US Northeast DC corridor |
+| 11 | Safeguard Mechanism (Clean Energy Regulator, Australia) | `au_cer_safeguard` | national | none | Australia's primary industrial carbon-pricing instrument |
+| 12 | National Greenhouse and Energy Reporting (NGER) Scheme | `au_cer_nger` | national | none | Feeds Safeguard; where facility-level Australian energy/emissions data goes public |
+| 13 | New Zealand Emissions Trading Scheme (NZ ETS) | `nz_epa_ets` | national | none | Only other Oceania ETS besides Australia's Safeguard Mechanism |
+| 14 | Swiss Emissions Trading System (BAFU/FOEN) | `ch_bafu_ets` | national | none | Fills switzerland.yaml's ETS gap (EU-linked since 2020) |
+| 15 | METI - Emissions Trading System (GX-ETS) | `jp_meti_gx_ets` | national | none | Japan's mandatory ETS entering binding phase FY2026, threshold in reach for large DC campuses |
+| 16 | GX League (Green Transformation League) | `jp_gx_league` | national | none | English-language primary source for the market-design docs behind GX-ETS |
+| 17 | SPEDE (Quebec cap-and-trade) | `qc_spede` | subnational | none | North America's largest linked carbon market (with California); genuinely new base_url for canada.yaml |
+| 18 | TIER Regulation (Alberta) | `ab_tier` | subnational | none | Turns an existing passing "TIER system" mention into an actual crawlable source |
+| 19 | US EPA Greenhouse Gas Reporting Program (GHGRP) | `us_epa_ghgrp` | national | none | Mandatory annual GHG reporting for ~8,000 large US facilities |
+| 20 | China MEE - Climate Change/Carbon Market Section | `cn_mee_ghg` | national | none | World's largest ETS by covered emissions; only reliably-resolving official entry point |
+| 21 | Emission Trade Registry System (ETRS), Korea | `kr_etrs_registry` | national | none | PARTIAL VERIFICATION - no existing PolicyPulse coverage of gir.go.kr at all |
+
+Tier-c (see master table above): `epa_ghgrp_envirofacts_api`.
+
+#### dc-incentives.md — 19
+
+| # | Name | id | Level | Access | Why |
+|---|---|---|---|---|---|
+| 1 | IMDA/EDB Data Centre Call for Application 2 (DC-CFA2) | `sg_dc_cfa2` | national | none | Highest-value find of the file - PUE <=1.25 and >=50% green power are literal conditions of a capacity-allocation scheme |
+| 2 | MIDA - Digital Infrastructure / DESAC Scheme | `my_mida_desac` | national | none | Tax allowance directly conditioned on green-tech adoption |
+| 3 | Illinois DCEO - Data Center Investment Program | `il_dceo_dc_investment` | subnational | none | Carbon-neutral-or-green-certification condition baked into a state sales-tax exemption statute |
+| 4 | Arizona - Computer Data Center Program Statute (ARS 41-1519) | `az_cdc_program_statute` | subnational | none | Doubles the exemption term specifically for green-certified data centers |
+| 5 | IDA Ireland - Funding Programmes & Incentives | `ie_ida_funding_incentives` | national | none | The actual grant-issuing FDI agency, not a regulator or ministry |
+| 6 | Wyoming Business Council - Managed Data Center Cost Reduction Funding | `wy_wbc_dc_cost_reduction` | subnational | none | Fills Wyoming's empty config file |
+| 7 | ImagiNE Nebraska - Incentives Program | `ne_imagine_act` | subnational | none | Fills Nebraska's empty config file |
+| 8 | Mississippi MDA - Data Center Sales & Use Tax Exemption | `ms_mda_dc_exemption` | subnational | none | Fills Mississippi's empty config file |
+| 9 | VEDP - Data Center Retail Sales & Use Tax Exemption (Virginia) | `va_vedp_dc_exemption` | subnational | none | The largest US DC market's own incentive-granting agency, not yet covered |
+| 10 | Texas Comptroller - Qualified Data Center Sales Tax Exemption | `tx_comptroller_dc_exemption` | subnational | none | Primary source of record for the exemption's live administration |
+| 11 | Georgia DOR - High-Technology Data Center Equipment Exemption | `ga_dor_dc_exemption` | subnational | none | The actual administering agency, distinct from the environmental EPD entry |
+| 12 | EDPNC - Data Centers Sales & Use Tax Exemptions (North Carolina) | `nc_edpnc_dc_exemption` | subnational | none | NC's two exemption tracks incl. distressed-county geographic targeting |
+| 13 | Washington DOR - Data Centers Sales and Use Tax Exemption Eligibility | `wa_dor_dc_exemption` | subnational | none | Where eligibility rules/forms actually live |
+| 14 | JobsOhio - Data Center Tax Exemption | `oh_jobsohio_dc_exemption` | subnational | none | Ohio's privatized econ-dev corp, the public-facing administrator |
+| 15 | Invest in Finland - Map of Data Center Opportunities | `fi_investinfinland_dc_map` | national | none | Ties investment promotion directly to energy/heat-recovery attributes |
+| 16 | Business Norway - Invest in Norway: Digital Infrastructure | `no_businessnorway_digital_infra` | national | none | Fills the investment-promotion-agency gap in Norway coverage |
+| 17 | Business Sweden - Invest in Sweden: Site Finder | `se_businesssweden_sitefinder` | national | none | Interactive site-selection tool with a regional-incentive-area layer |
+| 18 | Invest in Denmark | `dk_investindk` | national | none | Markets waste-heat-to-district-heating case studies (Meta Odense, Microsoft) to DC investors |
+| 19 | Business Iceland - Investment Opportunities | `is_investiniceland_opportunities` | national | none | Second, distinct Iceland agency beyond the National Energy Authority |
+
+#### permitting-eia.md — 10 (+2 tier-c; 1 dropped as an exact duplicate, see dedup findings above)
+
+| # | Name | id | Level | Access | Why |
+|---|---|---|---|---|---|
+| 1 | Ireland EPA - Industrial Emissions Licensing (IED) | `epa_ie_ied` | national | none | The actual enforcement mechanism behind Ireland's DC backup-generator rules (15 IE licences, 24 GHG permits already issued to DC operators) |
+| 2 | An Coimisiun Pleanala - Case Search | `pleanala_ie` | national | none | Ireland's national planning-appeal authority for the live Dublin DC planning-friction test case |
+| 3 | Planning Inspectorate - National Infrastructure Planning (NSIP register) | `pins_nsip_uk` | national | none | New Jan-2026 regulations formally brought data centres into the UK's NSIP consenting regime |
+| 4 | Regierungspraesidium Darmstadt - Immissionsschutz | `rp_darmstadt_immissionsschutz` | subnational | none | The actual BImSchG permitting authority for Frankfurt, Europe's largest DC market |
+| 5 | Lansstyrelsen Stockholm - environmental permit review | `lansstyrelsen_stockholm_miljo` | subnational | none | Sweden's Chapter 9 permit-review authority for DCs with backup generators (page-specificity pending human check) |
+| 6 | Miljostyrelsen - environmental approval of listed activities (Denmark) | `mst_dk_miljoegodkendelse` | national | none | Denmark's national environmental-approval authority, no equivalent existed in denmark.yaml |
+| 7 | IPLO - Milieubelastende activiteit datacentrum (Netherlands) | `iplo_nl_datacentrum` | national | none | A page dedicated specifically to data centres as a named permitting-hook activity |
+| 8 | Virginia DEQ - Issued Air Permits for Data Centers | `va_deq_dc_air_permits` | subnational | none | Single highest-value US find in this batch - the new statewide generator-BACT rule |
+| 9 | Texas TCEQ - Air Permitting (generators) | `tceq_air_generators` | subnational | none | Standard-permit conditions letting DC backup gensets avoid full individual air permits |
+| 10 | NSW Planning Portal - SSD Warehouses and Data Centres | `nsw_planning_ssd_dc` | subnational | none | Defines the >15MW threshold triggering full EIA in Australia's largest state |
+
+Tier-c (see master table above): `ga_epd_permit_search`, `eea_industrial_emissions_portal`.
+Dropped: `loudoun_county_dc_standards` (exact duplicate of wave-1's `us_loudoun_county_va`).
+
+#### more-legislation-apis.md — 1 (+5 tier-c)
+
+| # | Name | id | Level | Access | Why |
+|---|---|---|---|---|---|
+| 1 | Bundesrat Plenary-Document RSS Feeds (Germany) | `bundesrat_rss` | national | none | Lower priority than extending the existing `dip` client's `f.zuordnung=BR` filter - see notes |
+
+Tier-c (see master table above): `federal_register_api`, `congress_gov_api`, `openstates_api`, `kenya_law_api`, `oparl_koeln`.
+
+#### digital-infra-strategies.md — 10
+
+| # | Name | id | Level | Access | Why |
+|---|---|---|---|---|---|
+| 1 | Ireland DETE - Government Statement on Data Centres in Enterprise Strategy | `dete_datacentres_ie` | national | none | Highest-value find - the actual ministry document behind Ireland's binding 80%-new-renewables DC rule |
+| 2 | NITDA - National Cloud Policy 2025 (Nigeria) | `nitda_ng` | national | none | Clearest African digital-ministry DC strategy found, mandates sovereign hosting |
+| 3 | Kenya Ministry of ICT / ICT Authority - Policy Documents | `kenya_ict_dc` | national | none | Binding national Data Centre Standard applying to all government facilities |
+| 4 | Japan MIC - Regional Data Centre Distribution Programme | `mic_datacenter_jp` | national | none | Distinct telecom-ministry subsidy programme moving DC siting into depopulating regions |
+| 5 | Malaysia Ministry of Digital (KKD) | `kkd_my` | national | none | Ministry overseeing Malaysia's DC sector, distinct from the energy-ministry equivalents |
+| 6 | MyDIGITAL - Malaysia Digital 2030 | `mydigital_my` | national | none | Names cloud/DC investment as a named "catalytic project" |
+| 7 | Komdigi JDIH - PP 71/2019 (Indonesia) | `komdigi_id` | national | none | Indonesia's foundational data-centre/data-localization regulation, primary legal text |
+| 8 | EU Cloud and AI Development Act (CADA) | `eu_cada` | supranational | none | DG CONNECT setting DC sustainability/capacity policy ahead of enactment |
+| 9 | SDAIA - National Strategy for Data & AI (Saudi Arabia) | `sdaia_sa` | national | none | National data/AI/cloud authority, distinct from the energy ministry |
+| 10 | UK DSIT - Data Centres as Critical National Infrastructure | `dsit_datacentres_uk` | national | none | DSIT (not DESNZ) designated DCs as CNI, brings >=1MW DCs under NIS Regulations |
+
+Lower-confidence/partial (not counted in the 10 above): Australia DTA -
+Hosting Certification Framework (`dta_hcf_au`) - domain liveness confirmed,
+page content not independently rendered this session; recommend
+browser-based human verification before enabling.
+
+#### municipal-heat-zoning.md — 21
+
+| # | Name | id | Level | Access | Why |
+|---|---|---|---|---|---|
+| 1 | Helen Oy - Heat Recovery Service for Data Centers (Helsinki) | `helen_fi_dc_heat_recovery` | local | none | Clearest "policy meets practice" document found - names the actual tax incentive + contract models |
+| 2 | Provincie Noord-Holland - Datacenterstrategie 2025-2027 | `noord_holland_datacenters` | subnational | none | Appoints a "warmteregisseur" to broker DC waste heat into heat networks as a siting condition |
+| 3 | GLA - Heat Networks in London (+ Heat Reuse report) | `gla_heat_networks_london` | local | none | Quantifies up to 1.6 TWh/year recoverable heat from London's DC estate (dedup flag - see above) |
+| 4 | Eindhoven - Warmteprogramma (+ Meerhoven heat deal) | `eindhoven_warmteprogramma` | local | none | A live, signed agreement routing a named DC's waste heat into a district network |
+| 5 | Leeds - Local Development Order 3 | `leeds_gov_uk_ldo3_heat_network` | local | none | Adopted planning law explicitly naming data centres as a heat source |
+| 6 | Oslo Kommune Klimaetaten - DC waste heat | `klimaoslo_no_dc_heat` | local | none | Live, operating, subsidy-free DC-to-district-heating installation (5MW/5,000 apartments) |
+| 7 | VEKS - Future District Heating + Microsoft Surplus Heat | `veks_dk` | local | none | Direct Danish counterpart to Stockholm Data Parks; fills the gap left by wave-1's HOFOR rejection |
+| 8 | Stockholms Stad - Akalla Server Halls / Data Parks | `stockholm_stad_akalla_dataparks` | local | none | City's own planning-project page, distinct from the already-covered utility side |
+| 9 | Team Frankfurt Klimaschutz - Kommunale Waermeplanung | `frankfurt_kommunale_waermeplanung` | local | none | Europe's largest DC market's own municipal heat-planning site, names Rechenzentren explicitly |
+| 10 | City of Munich - Waermewende Muenchen | `muenchen_waermewende` | local | none | First Bavarian municipality to complete a heat plan (DC-specificity unverified on this page) |
+| 11 | Koebenhavns Kommune - Klimastrategi 2035 | `kk_dk_klimaplan` | local | none | Companion to VEKS with the city government's own framing |
+| 12 | Bristol - Heat Network Local Development Order | `bristol_gov_uk_heat_network_ldo` | local | none | Local implementation layer under Bristol's DESNZ pilot-zone designation |
+| 13 | GMCA - Heat Networks (GM Green City) | `gmca_heat_networks` | subnational | none | Confirms 5 strategic Heat Network Zoning Pilot zones; best substitute for a 403-blocked Manchester City Council |
+| 14 | Metropole de Lyon - Schema Directeur des Energies | `grandlyon_sde` | local | none | Closest French metropole equivalent to German kommunale Waermeplanung |
+| 15 | Eurometropole de Strasbourg - SDRC | `strasbourg_eu_sdrc` | local | none | Clearest French municipal example of a mandatory-connection instrument |
+| 16 | Bordeaux Metropole - Reseaux de Chaleur (+ opendata) | `bordeaux_metropole_reseaux_chaleur` | local | none | GIS-mapped mandatory-connection-perimeter dataset, richer than the national CKAN stub |
+| 17 | Nantes Metropole - Reseaux de chaleur | `nantes_metropole_reseaux_chaleur` | local | none | 74% renewable/recovery share already, rounds out French metropole coverage |
+| 18 | Stadt Koeln - Kommunale Waermeplanung | `stadt_koeln_kwp` | local | none | Cologne's completed (Nov-Dec 2025) municipal heat plan |
+| 19 | Gemeente Den Haag - Aardgasvrij / Transitievisie Warmte | `denhaag_aardgasvrij` | local | none | The Hague's heat-transition hub, 74% of neighborhoods heat-network-suited |
+| 20 | Gemeente Rotterdam - Klimaatdoelen Warmtesysteem | `rotterdam_klimaatdoelen_warmte` | local | none | Netherlands' largest industrial waste-heat base (AVR incinerator) |
+| 21 | Rijksoverheid - Wet Collectieve Warmte (Wcw) | `rijksoverheid_wcw` | national | none | The 2027 law compelling the entire Dutch municipal Warmteprogramma tier above |
+
+### Wave 3 tier-c client index
+
+| source_type (proposed) | API base | Auth | Format |
+|---|---|---|---|
+| `federal_register_api` | www.federalregister.gov | none | JSON |
+| `congress_gov_api` | api.congress.gov | api_key (free, `CONGRESS_GOV_API_KEY`) | JSON |
+| `openstates_api` | v3.openstates.org | api_key (free, `OPENSTATES_API_KEY`) | JSON |
+| `kenya_law_api` | new.kenyalaw.org | none | JSON (Akoma Ntoso/FRBR) |
+| `oparl` | per-body (verified example: ratsinformation.stadt-koeln.de) | none | JSON-LD |
+| `epa_ghgrp_envirofacts_api` | data.epa.gov | none | JSON (also XML/CSV/Parquet via URL suffix) |
+| `ga_epd_permit_search` | permitsearch.gaepd.org | none | HTML search form (no documented REST API) |
+| `eea_industrial_emissions_portal` | industry.eea.europa.eu | none | HTML portal + CSV/XML bulk download |
+
+### Wave 3 appendix: unverified / needs-human-check (39 items)
+
+Every item each wave-3 agent explicitly flagged as unverified, could not
+reach, or chose not to propose as a candidate - consolidated with the reason
+each failed verification. None of these are in the wave-3 draft crawl YAMLs
+or `new-clients-wave3.md`; they need a human (or a differently-configured
+fetch) before being turned into a candidate.
+
+#### water-cooling.md (5)
+
+| Item | Reason |
+|---|---|
+| Spain - Confederacion Hidrografica del Ebro (`chebro.es`) | Correct river-basin regulator for the Aragon DC cluster's water concessions, but no specific DC-water page/document located on the CHEbro site itself - only third-party political coverage |
+| Ireland - Uisce Eireann (Irish Water) Developer Services | Reported "Pre-Connection Enquiry" DC water-storage/reuse conditions, but the fetched page only covers general housing connections; the right document is likely a separate Water Services Policy Statement PDF, not content-checked |
+| England - GOV.UK abstraction-licence guidance page | DEDUP NOTE ONLY, not a new candidate - `uk_environment_agency` (uk.yaml) already exists on `gov.uk` with `water_abstraction` tagged; recommend adding the specific guidance path to that entry instead |
+| EU Water Framework Directive / DC water reporting | DEDUP NOTE ONLY, not a new candidate - already fully covered by the existing `ec_energy_datacentres` entry in eu.yaml, same exact start_path already present |
+| Netherlands - Rijkswaterstaat water permits | Confirmed live and the correct national-waters permitting authority, but the fetched page is a generic overview with no industrial-cooling/DC-specific text - weaker than the NL entries already drafted |
+
+#### carbon-ets.md (4)
+
+| Item | Reason |
+|---|---|
+| China CEA registry/exchange operator (`cets.org.cn`) | HTTP 412 on every attempt (server up, rejecting the request) - would be a stronger candidate than the MEE ministry page if a human can get past this |
+| UK ETS Registry (dedicated subdomain) | No `ets-registry.gov.uk`-style domain resolved; likely reached through a gov.uk sign-in/service-portal path not yet located |
+| NZ Emissions Unit Register (dedicated subdomain) | Guessed `eur.govt.nz` did not resolve (DNS failure); the EPA descriptive page (drafted as `nz_epa_ets`) is confirmed live instead |
+| Korea GIR English-language K-ETS page | `www.gir.go.kr/eng/main.do` loads but has zero K-ETS content; guessed English ETS-specific paths both 404'd - the Korean-language `kr_etrs_registry` is the best substitute |
+
+#### dc-incentives.md (3)
+
+| Item | Reason |
+|---|---|
+| France - TICFE electricity-tax reduction for data centers | Secondary sources describe a DC-targeted excise-tax cut, but the actual government source (legifrance.gouv.fr Loi de Finances article, or DGEC/DGFiP guidance) was not located; `businessfrance.fr`'s tax page does not mention data centers |
+| Wyoming - exact "Managed Data Center Cost Reduction Funding" sub-page URL | Named/linked from the confirmed-live parent BRC page but 404'd on two direct fetch attempts - likely a routing/trailing-slash quirk, not a dead program |
+| Arizona Commerce Authority's own program page (`azcommerce.com`) | Confirmed to exist via search snippets, but HTTP 403 to automated fetch (bot protection); the `azleg.gov` statute (drafted as `az_cdc_program_statute`) was used instead |
+
+#### permitting-eia.md (5)
+
+| Item | Reason |
+|---|---|
+| Ireland EPA licence search webapp (`epawebapp.epa.ie`) | HTTP 500 on a scripted fetch - likely needs a live browser session; the static epa.ie pages (drafted) are sufficient to start |
+| Sweden Lansstyrelsen page, data-centre specificity | The page describes the B-activity permit process generically (no DC mention); the DC link is established via a separate Naturvardsverket decision PDF - a human should confirm which to seed on |
+| Singapore URA (Urban Redevelopment Authority) | Searched for a dedicated DC planning/use-class guideline; found only generic Master Plan/Development Control Guidelines pages, no DC-specific content confirmed - not proposed |
+| Netherlands Omgevingsloket main portal | This is the live, login-gated permit-APPLICATION system itself, not a policy-document publisher; the IPLO page (drafted) is the correct guidance counterpart |
+| Ohio and other US states - state-level environmental/noise-permitting authority | Found only advocacy-site commentary confirming "Ohio has no statewide noise ordinance for industrial facilities" - no government policy page to crawl, not proposed |
+
+#### more-legislation-apis.md (10 bullets, ~15 jurisdictions)
+
+| Item | Reason |
+|---|---|
+| Austria - Parlament Open Data / data.gv.at | Landing page live and confirms JSON/API language, but every guessed direct data endpoint 404'd; CKAN `package_search` returns the HTML shell, not JSON, even with an Accept header - needs a real browser session |
+| Portugal - Assembleia da Republica | Landing page confirms "dados abertos... em formatos XML e JSON" in its own text, but download links on the bills subpage are obfuscated SharePoint tokens, not stable URLs |
+| Italy - Camera dei Deputati (`dati.camera.it`) | Every direct query (incl. `?output=json`) hits an Akamai bot-challenge page, not data |
+| Belgium - data.gov.be | New this pass: actively blocked by a TSPD/Akamai-style bot-challenge on the CKAN Action API |
+| Lithuania, Latvia, Slovenia, Croatia (Seimas/Saeima/DZ-RS/Sabor) | Main sites confirmed live, but no query-able open-data API endpoint located this pass (guessed paths 404'd) - needs a dedicated per-country search pass |
+| Mexico - Camara de Diputados / Senado | `datos.gob.mx` live, but no specific dataset exposing queryable bill text/metadata found; guessed CKAN path 404'd |
+| Argentina - datos.gob.ar | Real DCAT catalog confirmed, but "congreso"/"senado"/"diputados" keyword matches were false positives (aviation/conference datasets) - no legislative dataset found, dropped |
+| India - Sansad / IndiaCode | Both sites live, but no public API found (`/api`, `/opendata` 404; OAI-PMH endpoint 404s); PRS Legislative Research is a private NGO, out of scope - dropped |
+| Indonesia (peraturan.go.id), Malaysia (federalgazette.agc.gov.my) | Unreachable from this research session (connection refused / DNS failure) - looks network-level, not a real down-site signal; needs a recheck from a different network |
+| Not investigated this pass | EU TED + "Have Your Say" portal; Canadian provincial legislatures beyond Quebec (already covered via wave-1's `donneesquebec_ckan`) |
+
+#### digital-infra-strategies.md (4)
+
+| Item | Reason |
+|---|---|
+| UAE - TDRA sustainability page | Resolves, but content is general corporate-sustainability marketing copy, not a DC sector policy document; no dedicated UAE national DC strategy PDF located |
+| Malaysia - MCMC `/en/legal/acts` | Fetched, but the legislation index is generic (spectrum/technical-standards regs) with no DC-specific content visible without opening each act |
+| Thailand - MDES | Correct ministry confirmed live, but no dedicated national DC-strategy document located in Thai or English this pass |
+| South Korea - MSIT decentralization-from-Seoul DC policy | Ministry live and on-topic for digital/cloud strategy generally, but the specific "decentralize DCs from Seoul post-2022-Pangyo-fire" policy is corroborated only by academic/press sources, no primary MSIT document located |
+
+(Australia DTA Hosting Certification Framework is tracked separately as a
+lower-confidence/partial tier-b candidate above, not in this unverified
+list.)
+
+#### municipal-heat-zoning.md (8)
+
+| Item | Reason |
+|---|---|
+| Amsterdam - Transitievisie Warmte / Warmteprogramma | `amsterdam.nl` returned HTTP 403 on every URL tried; a companion `openresearch.amsterdam` page fetched successfully but without district-heating/DC detail (full PDF not fetched) - recommend a human confirm amsterdam.nl directly or accept openresearch.amsterdam as a secondary domain |
+| Stuttgart - Kommunaler Waermeplan | `stuttgart.de` returned HTTP 403 on every URL; WebSearch snippets directly quote the official page content (Gemeinderat adopted Dec 2023, names the HLRS III supercomputer's waste-heat reuse since 2012) - high confidence but not independently fetched |
+| Stadt Koeln - second press-release URL | Not itself unverified (the base entry `stadt_koeln_kwp` is drafted and verified) - a related press-release URL was found via search but not independently fetched; worth adding as an additional start_path if enabled |
+| Manchester City Council (`manchester.gov.uk`) | HTTP 403 on both URLs tried; the GMCA-run `gmgreencity.com` entry (drafted) covers the same Greater Manchester program and is verified |
+| Grenoble - Compagnie de Chauffage (CCIAG) | Confirmed to exist (France's 2nd-largest heat network), but no page found this session with explicit chaleur-fatale-from-datacenters or connection-mandate language strong enough to draft |
+| Stockholms Stad - Klimathandlingsplan 2030 (PDF) | `start.stockholm` (the city's formal policy-document domain, distinct from the `vaxer.stockholm` planning-projects subdomain already drafted) confirmed to exist via WebSearch but not independently fetched |
+| HOFOR (Copenhagen) | Not re-tested; already checked and rejected in wave 1 (`regions/nordic.md`) as marketing-only with no policy content - VEKS is the Copenhagen-area source that clears the bar |
+| Rotterdamse Warmte (Enertrans BV) | The Schiebroek/110-Morgen DC-to-heat-network project is real, but the delivery vehicle is a private company, not a government site - same category problem as HOFOR; the City of Rotterdam's own page (drafted) is the appropriate government-source stand-in |
+
+### Wave 3 enum-additions recap
+
+Wave 3 needed the following values that are NOT yet in
+`src/core/config.py`'s enums (all mapped to the closest allowed value in the
+drafted YAML, with the intended specific value preserved in each entry's
+`id`/notes):
+
+**`VALID_REGIONS`** (all mapped, per-entry rationale in each file's header
+comment):
+- `malaysia` (mapped to `apac` - used by `my_mida_desac`, `kkd_my`,
+  `mydigital_my`)
+- `kenya` (mapped to `africa` - used by `kenya_ict_dc`, `kenya_law_api`)
+- `nigeria` (mapped to `africa` - used by `nitda_ng`)
+- `indonesia` (mapped to `apac` - used by `komdigi_id`)
+- `new_zealand` (mapped to `apac` - used by `nz_epa_ets`, same precedent as
+  wave-1/2 NZ entries)
+- `china` (mapped to `apac` - used by `cn_mee_ghg`; carried forward from
+  wave-2's already-flagged gap - China has no `VALID_REGIONS` entry at all)
+- `mena` (mapped to `middle_east`, the actual valid broad-group value - used
+  by `sdaia_sa`)
+- City/province-level values with no bucket today (same recurring pattern as
+  wave-1/2's Aragon/Catalonia/Madrid/etc. gap): `helsinki`, `noord_holland`,
+  `london`, `eindhoven`, `leeds`, `oslo`, `copenhagen`, `stockholm`,
+  `frankfurt`, `muenchen`, `bristol`, `manchester`/`greater_manchester`,
+  `lyon`, `strasbourg`, `bordeaux`, `nantes`, `koeln`, `denhaag`, `rotterdam`
+  (all in `municipal-heat-zoning.yaml`)
+
+**`VALID_CATEGORIES`**:
+- `digital_ministry` (mapped to `policy` - used by all 10 entries in
+  `digital-infra-strategies.yaml`). Recommend adding this as a real category
+  given it's a recurring, distinct class of source (national ICT/digital
+  ministries publishing DC strategy), not a one-off.
+
+**`VALID_TAGS`**:
+- `water_quality` (mapped to `planning` - used by `nl_unie_waterschappen_dc`)
+- `wue` (mapped to `efficiency` - used by `sg_pub_water_efficiency`)
+- Recommend a small addition here too (e.g. `water_use` or
+  `water_stewardship`) - wave 3 opened an entirely new regulatory dimension
+  (data-center water/cooling law) that `VALID_TAGS` has no vocabulary for at
+  all today.
+
+**`VALID_POLICY_TYPES`**:
+- No invalid value shipped in the final drafted YAML - two categories of
+  in-progress mapping mistakes were caught and fixed during validation
+  before finalizing (see orchestrator note below), and one source file
+  (`more-legislation-apis.md`) proposed `notice` for the Federal Register
+  API's policy_types in its prose (not in `VALID_POLICY_TYPES`) - the
+  drafted `api_sources.yaml` entry for `federal_register_api` uses
+  `[regulation, report]` instead.
+
+No invalid `region` values were needed for the crawl-domain (tier-b) US
+state entries - all state names used (`virginia`, `arizona`, `texas`,
+`california`, `illinois`, `wyoming`, `nebraska`, `mississippi`,
+`north_carolina`, `washington`, `ohio`, `georgia`) are already present via
+the auto-generated 50-state block in `VALID_REGIONS`.
+
+### Orchestrator validation - Wave 3 (2026-07-18)
+
+Machine check of the 92 wave-3 draft crawl entries (100 total incl. the 8
+tier-c specs) against the live code enums (imported directly from
+`src.core.config` in this session) and the 391 existing sources:
+
+- **92 crawl entries + 8 tier-c specs, all `enabled: false`.** All parse
+  (PyYAML). **0 id collisions** with the 391 existing source ids, the 138
+  wave-1 draft entries, or the 141 wave-2 draft entries.
+- **1 exact-duplicate base_url+start_path pair** found and dropped (see
+  dedup findings above): `loudoun_county_dc_standards` vs. wave-1's
+  `us_loudoun_county_va`.
+- **1 borderline base_url overlap flagged, not dropped**:
+  `gla_heat_networks_london` vs. three existing `london.gov.uk` entries in
+  `uk.yaml` (net-new start_paths, same body/topic-adjacent - human merge
+  decision recommended).
+- **12 additive base_url overlaps with existing config** - unique ids
+  sharing a domain with an unrelated existing entry (gov.uk depts: uk_ets/
+  secr/esos/dsit; eur-lex CSRD; CARB; BAFU; METI; alberta.ca; imda.gov.sg;
+  azleg.gov; london.gov.uk). This is the codebase's established multi-
+  entry-per-domain pattern; each notes its sibling id - not collisions,
+  additive by design (full table above).
+- **Two enum-mapping mistakes caught and fixed during validation** (not
+  shipped in the final files): an initial draft of
+  `digital-infra-strategies.yaml` used `policy_types: ["policy", ...]` for 3
+  entries (`nitda_ng`, `kenya_ict_dc`, `sdaia_sa`) and `tags: ["standards",
+  ...]` for 1 entry (`kenya_ict_dc`) - neither `policy` (as a policy_type)
+  nor `standards` (as a tag) exists in the live enums (both are valid
+  `VALID_CATEGORIES` values, which is likely why they were miscategorized).
+  Both corrected to valid values (`guidance`/`strategy` and dropping
+  `standards`, respectively) before finalizing; re-validated clean by direct
+  import of `VALID_REGIONS`/`VALID_CATEGORIES`/`VALID_TAGS`/
+  `VALID_POLICY_TYPES` from `src.core.config` - **0 enum violations in the
+  final shipped files**.
+- **8 enum values outside the current `src/core/config.py` sets** remain
+  after mapping to the closest allowed value (config loader warns, does not
+  reject) - see "Wave 3 enum-additions recap" above for the full list and
+  rationale.
+
+Nothing here blocks review; the two flagged dedup cases (1 dropped, 1
+borderline) and the enum-addition recommendations are the items a human
+needs to settle before any wave-3 entry is enabled.
