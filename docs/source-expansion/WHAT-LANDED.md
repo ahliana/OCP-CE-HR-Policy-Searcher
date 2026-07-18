@@ -30,20 +30,43 @@ value is now resolved against that registry (`jurisdictions.get()`), not the old
   My earlier "add to VALID_REGIONS" note is obsolete - the registry's own rule is
   "add a source's new region = add one row in jurisdictions.yaml."
 
-### Coordination with the map interface
+### Coordination with the map interface + wave1 build track
 
-The jurisdiction registry is the shared contract between this source research and
-the **map interface** being built in parallel (not yet in a pushed branch). The
-registry reserves `iso_numeric` as "the world-atlas map key" and renders
-group/supranational rows (eu, apac, ...) via their `members`. So: every source's
-`region:` must be a registry slug for the map to place it. This branch is now
-95%+ map-ready; the two proposed rows close the rest. **This branch stays
-docs-only (touches nothing in `config/` or `src/`), so it cannot conflict with the
-registry or map work** - the two proposed rows are handed off for the registry
-owner to merge, keeping both efforts mergeable.
+Per the multi-track plan (`C:\Files\Code\OCP\20260718_0200_PolicyPulse_Track_Coordination.md`):
 
-`config/jurisdictions.yaml` is a hot shared file (main + the map/registry work
-edit it); do not edit it from this branch.
+- **The jurisdiction registry is the shared contract.** Map track reads it
+  (`/api/coverage` iterates it; new countries "simply light up", no map code change).
+  Source track owns `src/sources/`, `config/domains/`, `docs/source-expansion/*` and
+  **appends rows to `config/jurisdictions.yaml`** (append-only, conflict-safe).
+- **CI guardrail**: `test_every_domain_slug_resolves` globs `config/domains/**`. My
+  drafts live in `docs/`, so they don't trip it yet; the registry rows get added **in
+  the same PR that promotes a source into `config/domains/`** (the plan's rule, line 29).
+  So [jurisdiction-additions.yaml](jurisdiction-additions.yaml) (manitoba + global)
+  is correctly timed - merge those rows when promoting the sources they serve. For any
+  new *country* not yet in the registry, fill `iso3` + `iso_numeric` (the map's join key).
+- This branch stays docs-only for now, so it cannot conflict with the map or registry
+  work. Map is FINALIZED and ready to build (Phase 1 = `GET /api/coverage`).
+
+### ALREADY BUILT on `feature/source-expansion-wave1` - do NOT rebuild
+
+7 of my tier-c API proposals are already implemented on that branch (23 clients total).
+Cross off before building any client from my inventory:
+
+| My proposal | Built client id |
+|---|---|
+| Oireachtas (Ireland) | `oireachtas` |
+| Norway Storting | `stortinget` |
+| Japan e-Gov Law | `egov_japan` |
+| NZ Legislation (PCO) | `nz_pco` |
+| Poland Sejm | `sejm` |
+| Netherlands Tweede Kamer | `tweede_kamer` |
+| Brazil Camara | `camara` |
+
+Also built there (not all in my formal tier-c list): `diavgeia` (Greece), `kokkai`
+(Japan Diet), `riigikogu` (Estonia), `pmg` (South Africa PMG), `eu_have_your_say`,
+`govuk`. So the genuinely net-new tier-c set to build shrinks from 41 to ~34 - the
+strongest remaining keyless ones: US Federal Register, EPA GHGRP, EU Parliament,
+Scottish Parliament, Finland Eduskunta, LeyChile, Kenya Law, Open States.
 
 ---
 
