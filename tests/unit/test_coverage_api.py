@@ -229,6 +229,34 @@ class TestNullIsoCountries:
         assert cov["countries"] == []
 
 
+class TestUnresolvedEdges:
+    def test_policy_without_jurisdiction_key_does_not_crash(self):
+        cov = compute_coverage(
+            [{"policy_name": "x", "url": "u", "relevance_score": 1}], []
+        )
+        assert cov["countries"] == [] and cov["supranational"] == []
+        assert cov["diagnostics"]["unresolved_policies"] == ["(no jurisdiction)"]
+        assert cov["totals"]["policies"] == 1
+
+    def test_resolved_without_a_country_is_reported_not_placed(self):
+        from src.core.jurisdictions import Jurisdiction
+        jurisdictions._load()
+        # A state whose parent chain never reaches a country -> country_of None,
+        # kind not supra/group -> falls through to the unresolved diagnostic.
+        jurisdictions._by_slug["orphan_state"] = Jurisdiction(
+            slug="orphan_state", name="Orphan State", kind="us_state",
+            iso_numeric=None, parent=None,
+        )
+        for key in ("orphan_state", jurisdictions._normalize("Orphan State")):
+            jurisdictions._alias_index[key] = "orphan_state"
+        jurisdictions._alias_by_len = sorted(
+            jurisdictions._alias_index.items(), key=lambda kv: -len(kv[0])
+        )
+        cov = compute_coverage([_pol("Orphan State", "x")], [])
+        assert cov["countries"] == [] and cov["supranational"] == []
+        assert "Orphan State" in cov["diagnostics"]["unresolved_policies"]
+
+
 # --- Route wiring (registration + response shape) ---
 
 class _FakeStore:
@@ -247,6 +275,24 @@ class _FakeConfig:
         return list(self._domains)
 
 
+class _FakePolicy:
+    """Stands in for a core.models.Policy - only model_dump is exercised."""
+
+    def __init__(self, data):
+        self._data = data
+
+    def model_dump(self, mode="json"):
+        return dict(self._data)
+
+
+class _FakeManager:
+    def __init__(self, policies=None):
+        self._policies = policies or []
+
+    def get_all_policies(self):
+        return list(self._policies)
+
+
 @pytest.fixture
 def client(monkeypatch):
     monkeypatch.delenv("ADMIN_TOKEN", raising=False)
@@ -256,10 +302,21 @@ def client(monkeypatch):
     store = _FakeStore([_pol("Sweden (EU)", "s"), _pol("European Union", "e")])
     config = _FakeConfig([{"id": "d1", "region": ["sweden"]}])
     app.dependency_overrides[deps.get_policy_store] = lambda: store
+    app.dependency_overrides[deps.get_scan_manager] = lambda: _FakeManager([])
     app.dependency_overrides[deps.get_config] = lambda: config
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
+
+
+def _coverage_client(store, manager, config):
+    from src.api.app import app
+    from src.api import deps
+
+    app.dependency_overrides[deps.get_policy_store] = lambda: store
+    app.dependency_overrides[deps.get_scan_manager] = lambda: manager
+    app.dependency_overrides[deps.get_config] = lambda: config
+    return app
 
 
 class TestRouteWiring:
@@ -283,3 +340,33 @@ class TestRouteWiring:
         body = resp.json()
         assert body["unresolved_policies"] == []
         assert body["unresolved_region_slugs"] == []
+
+
+class TestFreshness:
+    """Coverage must reflect in-memory scan results, not just the persisted
+    snapshot - the same freshness /api/policies gives (merge, dedupe by URL)."""
+
+    def test_in_memory_scan_policies_are_merged(self):
+        store = _FakeStore([_pol("Sweden", "persisted")])
+        manager = _FakeManager([_FakePolicy(_pol("Denmark", "just-scanned"))])
+        app = _coverage_client(store, manager, _FakeConfig([]))
+        try:
+            with TestClient(app) as c:
+                body = c.get("/api/coverage").json()
+        finally:
+            app.dependency_overrides.clear()
+        assert body["totals"]["policies"] == 2
+        assert _by_iso(body["countries"], _iso("Denmark"))["policies"] == 1
+
+    def test_duplicate_url_across_store_and_manager_counted_once(self):
+        shared = _pol("Sweden", "same-policy")
+        store = _FakeStore([shared])
+        manager = _FakeManager([_FakePolicy(dict(shared))])
+        app = _coverage_client(store, manager, _FakeConfig([]))
+        try:
+            with TestClient(app) as c:
+                body = c.get("/api/coverage").json()
+        finally:
+            app.dependency_overrides.clear()
+        assert body["totals"]["policies"] == 1
+        assert _by_iso(body["countries"], _iso("Sweden"))["policies"] == 1

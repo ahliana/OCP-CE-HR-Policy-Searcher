@@ -25,9 +25,10 @@ Attribution rules (uniform for policies and sources):
 
 from fastapi import APIRouter, Depends
 
-from ..deps import get_config, get_policy_store
+from ..deps import get_config, get_policy_store, get_scan_manager
 from ...core import jurisdictions
 from ...core.config import ConfigLoader
+from ...orchestration.scan_manager import ScanManager
 from ...storage.store import PolicyStore
 
 router = APIRouter(prefix="/api", tags=["coverage"])
@@ -70,7 +71,7 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
         raw = policy.get("jurisdiction")
         jur = jurisdictions.resolve_text(raw)
         if jur is None:
-            unresolved_policies.append(raw)
+            unresolved_policies.append(raw or "(no jurisdiction)")
             continue
         country = jurisdictions.country_of(jur)
         if country is not None and country.iso_numeric:
@@ -143,19 +144,41 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
     }
 
 
+def _all_policies(store: PolicyStore, manager: ScanManager) -> list[dict]:
+    """Persisted policies plus in-memory scan results, deduped by URL.
+
+    The ``get_policy_store`` singleton is a snapshot loaded once, so policies
+    found by scans in this process live in the scan manager until they land in
+    that snapshot. Merging both (the same thing ``/api/policies`` does) keeps
+    coverage as fresh as the policy list, so the map reflects a scan's finds.
+    """
+    policies = store.get_all()
+    seen = {p.get("url") for p in policies}
+    for policy in manager.get_all_policies():
+        p = policy.model_dump(mode="json")
+        if p.get("url") not in seen:
+            policies.append(p)
+            seen.add(p.get("url"))
+    return policies
+
+
 @router.get("/coverage")
 def get_coverage(
     store: PolicyStore = Depends(get_policy_store),
+    manager: ScanManager = Depends(get_scan_manager),
     config: ConfigLoader = Depends(get_config),
 ):
     """Coverage aggregate for the world map: countries, supranational, totals."""
-    result = compute_coverage(store.get_all(), config.get_enabled_domains("all"))
+    result = compute_coverage(
+        _all_policies(store, manager), config.get_enabled_domains("all")
+    )
     return {k: result[k] for k in ("countries", "supranational", "totals")}
 
 
 @router.get("/coverage/unresolved")
 def get_coverage_unresolved(
     store: PolicyStore = Depends(get_policy_store),
+    manager: ScanManager = Depends(get_scan_manager),
     config: ConfigLoader = Depends(get_config),
 ):
     """Jurisdiction strings and region slugs the registry could not resolve.
@@ -165,5 +188,7 @@ def get_coverage_unresolved(
     "untracked". Both lists should be empty; the domain-slug guardrail test
     keeps the slug list empty in CI.
     """
-    result = compute_coverage(store.get_all(), config.get_enabled_domains("all"))
+    result = compute_coverage(
+        _all_policies(store, manager), config.get_enabled_domains("all")
+    )
     return result["diagnostics"]
