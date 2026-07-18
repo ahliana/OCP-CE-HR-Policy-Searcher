@@ -39,7 +39,7 @@ Nothing here has shipped. The next move is a human choosing what to promote/buil
 
 | # | Decision | Recommendation |
 |---|---|---|
-| 1 | **Push destination.** `origin` dual-pushes to your mirror AND the public OCP org. Branch is unpushed. | Mirror-only until the source branches consolidate, or leave parked. |
+| 1 | **Push.** Branch is unpushed (local-only, so not backed up). | Per the 3-session push policy in the coordination doc: research does NOT push now - it pushes at source-promotion time as its own PR. Staying parked is correct. Optional: a mirror-only push (explicit `github.com/ahliana/...` URL) for backup, without publishing to the OCP org. |
 | 2 | ~~**Kosovo** jurisdiction~~ - DECIDED 2026-07-18 (Ahliana): list-only, `code: XK`, `iso_numeric: null`. Row set in `jurisdiction-additions-wave4.yaml`. No action left. | Done. |
 | 3 | **Belgium** regions - `belgium` registry row's aliases (wallonia/flanders/brussels) must be trimmed when their own subnational rows merge. | No map impact (coverage rolls up via `country_of`). Research track owns this modify; do it in the promotion PR. |
 | 4 | **`gov.ie` overlap** + 4 national-portal dup pairs (argentina.gob.ar, gob.pe, gub.uy, aragon.es). | Keep as separate department entries or merge start_paths. Flagged inline. |
