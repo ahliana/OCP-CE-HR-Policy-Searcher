@@ -1,0 +1,421 @@
+# =============================================================================
+# DRAFT — Middle East + Africa source expansion (tier-b crawl domains only —
+# this region produced NO tier-c candidates)
+# Source: docs/source-expansion/regions/mena-africa.md
+# Every entry below is `enabled: false`. NONE of these fit the three existing
+# MENA/Africa files (uae.yaml, saudi_arabia.yaml, south_africa.yaml — each a
+# single-country file by convention) — every country here needs its OWN new
+# file: israel.yaml, turkey.yaml, nigeria.yaml, egypt.yaml, ghana.yaml,
+# kuwait.yaml, morocco.yaml. rcreee_regional and afrec_au are cross-country
+# supranational bodies — recommend a NEW file
+# config/domains/mena_africa_regional.yaml for these two, mirroring how
+# eu.yaml holds EU-level (vs. member-state) sources.
+#
+# Region-value note: individual countries (israel/turkey/kuwait/nigeria/
+# ghana/morocco/egypt) are not in VALID_REGIONS (src/core/config.py) — mapped
+# to the broad valid "middle_east"/"africa" buckets (both, for Egypt, which
+# is transcontinental per the original researcher's own note). Country
+# identity preserved in id/name/notes.
+# =============================================================================
+
+domains:
+  - name: "Israel Ministry of Energy and Infrastructure - Policy Planning and Strategy Division"
+    id: "moe_il"
+    enabled: false
+    base_url: "https://www.gov.il"
+    start_paths:
+      - "/en/departments/units/planning_department"
+      - "/en/departments/ministry-of-energy-and-infrastructure"
+    region:
+      - "middle_east"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "planning"
+      - "mandates"
+    policy_types:
+      - "strategy"
+      - "regulation"
+      - "report"
+    language: "en"
+    requires_playwright: true
+    verified_by: "source-expansion-research (mena-africa agent)"
+    notes: |
+      New file: config/domains/israel.yaml. Region mapped to "middle_east"
+      (see file header note). Israel's Ministry of Energy published an
+      inter-ministerial interim policy specifically on data-center/
+      server-farm energy demand (Feb 2026, covered by Israeli legal/
+      policy press), including planning standards meant to "reduce energy
+      consumption, minimize waste and maximize renewable energy use" for
+      data centers — one of the most directly on-topic finds in the whole
+      region. Plain HTTP fetch (no browser) returned 403 twice; a real
+      browser session loaded it cleanly — very likely bot-detection on
+      gov.il's CDN, requires_playwright recommended. verified: yes (via
+      browser, page title + RIA-report links confirmed).
+
+  - name: "RCREEE - Regional Center for Renewable Energy and Energy Efficiency"
+    id: "rcreee_regional"
+    enabled: false
+    base_url: "https://rcreee.org"
+    start_paths:
+      - "/publications"
+      - "/policies"
+    region:
+      - "middle_east"
+      - "africa"
+    category: "coordination_body"
+    tags:
+      - "efficiency"
+      - "research"
+      - "planning"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (mena-africa agent)"
+    notes: |
+      New file: config/domains/mena_africa_regional.yaml (cross-country
+      supranational body, not a single-country file). Category mapped
+      from original "policy" to "coordination_body" (closest exact fit
+      for a 17-member-state intergovernmental body: Algeria, Bahrain,
+      Djibouti, Egypt, Iraq, Jordan, Kuwait, Lebanon, Libya, Mauritania,
+      Morocco, Palestine, Somalia, Sudan, Syria, Tunisia, Yemen). Best
+      leverage-per-source find in the region — one source, 17 countries.
+      Publications include "Governance of Renewable Energy and Energy
+      Efficiency Policies in Arab States," a National Cooling Action Plans
+      (NCAP) workshop report, country-specific efficiency studies for
+      Egypt. WordPress site, robots.txt blocks only /wp-admin/, sitemap at
+      /wp-sitemap.xml. verified: yes (publications page lists 40+ PDF
+      titles including those named above).
+
+  - name: "Turkey Energy Market Regulatory Authority (EPDK/EMRA)"
+    id: "epdk_tr"
+    enabled: false
+    base_url: "https://www.epdk.gov.tr"
+    start_paths:
+      - "/Home/En"
+    allowed_path_patterns:
+      - "/Home/En/Electricity*"
+      - "/Home/En/EnergyTransition*"
+    region:
+      - "middle_east"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (mena-africa agent)"
+    notes: |
+      New file: config/domains/turkey.yaml. National electricity regulator
+      with a dedicated "Energy Transition" legislation section; Turkey has
+      an EU-aligned building energy efficiency framework the regulator
+      co-administers. Site groups content by sector (Electricity, Natural
+      Gas, Petroleum, LPG, Energy Transition) — allowed_path_patterns
+      tuned to Electricity + Energy Transition to avoid petroleum/LPG
+      noise (exact path slugs to confirm at crawl-build time).
+      verified: yes (WebFetch confirmed English homepage with
+      LAWS/REGULATIONS subsections).
+
+  - name: "Nigerian Electricity Regulatory Commission (NERC)"
+    id: "nerc_ng"
+    enabled: false
+    base_url: "https://nerc.gov.ng"
+    start_paths:
+      - "/regulations"
+      - "/codes"
+      - "/orders"
+    region:
+      - "africa"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "standard"
+    language: "en"
+    verified_by: "source-expansion-research (mena-africa agent)"
+    notes: |
+      New file: config/domains/nigeria.yaml. Regulates under the
+      Electricity Act 2023, dedicated "Regulatory Instruments" hub with
+      Regulations/Codes/Orders/Standards & Guidelines subsections. Nigeria
+      is Africa's largest power market and a growing data-center hub
+      (Lagos). robots.txt is stock WordPress (/wp-admin/ only), sitemap at
+      /sitemap.xml. verified: yes (WebFetch confirmed the four-subsection
+      nav).
+
+  - name: "EgyptERA - Egyptian Electric Utility and Consumer Protection Regulatory Agency"
+    id: "egyptera_eg"
+    enabled: false
+    base_url: "https://www.egyptera.org"
+    start_paths:
+      - "/en/"
+    region:
+      - "middle_east"
+      - "africa"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "efficiency"
+      - "reporting"
+    policy_types:
+      - "law"
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (mena-africa agent)"
+    notes: |
+      New file: config/domains/egypt.yaml. Egypt tagged both
+      "middle_east" and "africa" per the original researcher's explicit
+      note (transcontinental — RCREEE member and Africa Energy Portal
+      member) to avoid a duplicate entry. Established under Electricity
+      Law 87/2015, which tasks EgyptERA with overseeing electricity-use
+      efficiency via annual demand-management/efficiency plans — the
+      regulator with the actual statutory efficiency mandate (Egypt's
+      National Energy Efficiency Action Plan II sits under this
+      framework), stronger pick than NREA (see below). verified: yes
+      (homepage confirmed LAWS AND DECISIONS/CIRCULARS/AWARENESS
+      PUBLICATIONS/ANNUAL REPORT sections).
+
+  - name: "Ghana Energy Commission - Energy Efficiency Regulations"
+    id: "energycom_gh"
+    enabled: false
+    base_url: "https://www.energycom.gov.gh"
+    start_paths:
+      - "/newsite/index.php/regulation/energy-efficiency-ie"
+    region:
+      - "africa"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "standard"
+    language: "en"
+    verified_by: "source-expansion-research (mena-africa agent)"
+    notes: |
+      New file: config/domains/ghana.yaml. Tag "standards" from the
+      original mapped/folded into "efficiency" (VALID_TAGS has no literal
+      "standards" tag — that's a category value). Explicit
+      minimum-energy-performance-standard regulations for "computers" and
+      industrial cooling/electrical equipment under the Energy Commission
+      Act 1997 (Act 541) — 2022 batch (LI 2442-2461) covers computers,
+      set-top boxes, air conditioners, industrial fans, distribution
+      transformers. Closer to IT-equipment efficiency mandates than most
+      national efficiency regimes captured so far. robots.txt stock
+      (blocks /wp-admin/ only). verified: yes (WebFetch confirmed full
+      LI list 2442-2461 + Energy Efficiency Guidelines download).
+
+  - name: "Kuwait Ministry of Electricity, Water and Renewable Energy (MEW)"
+    id: "mew_kw"
+    enabled: false
+    base_url: "https://www.mew.gov.kw"
+    start_paths:
+      - "/en/"
+    region:
+      - "middle_east"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "planning"
+    policy_types:
+      - "guidance"
+      - "strategy"
+    language: "en"
+    verified_by: "source-expansion-research (mena-africa agent)"
+    notes: |
+      New file: config/domains/kuwait.yaml. Only national energy ministry
+      for Kuwait; weaker on data-center-specific content today, but the
+      correct authority to watch as Kuwait's renewable/efficiency strategy
+      documents get published (targets 30% renewable electricity by
+      2030). robots.txt returned 404 (no restrictions file present at
+      all — unusual but not blocking). Publishes a "Guide to Rationalizing
+      Electricity and Water Consumption" PDF. verified: yes (WebFetch
+      confirmed official site + consumption-rationalization guide).
+
+  - name: "AMEE - Moroccan Agency for Energy Efficiency"
+    id: "amee_ma"
+    enabled: false
+    base_url: "https://www.amee.ma"
+    start_paths:
+      - "/"
+    region:
+      - "africa"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "regulation"
+      - "guidance"
+    language: "fr"
+    rate_limit_seconds: 3.0
+    verified_by: "source-expansion-research (mena-africa agent)"
+    notes: |
+      New file: config/domains/morocco.yaml. Created 2016 from the former
+      ADEREE, under the Ministry of Energy Transition. Covers buildings,
+      industry, transport, public lighting — the Thermal Building
+      Regulation (RTCM) is the closest Moroccan analogue to an efficiency
+      mandate that would eventually touch data centers. Use the domain
+      ROOT as start_paths — the specific
+      /en/moroccan-agency-for-energy-efficiency URL found in search 404'd
+      at verification time; bare amee.ma / www.amee.ma resolves fine and
+      is clearly the real site. verified: yes, with that 404 caveat (root
+      domain confirmed live: "Agence Marocaine pour l'Efficacite
+      Energetique (AMEE)", sector pages for Industrie/Transport/
+      Agriculture/Batiment).
+
+  - name: "Turkey Ministry of Energy and Natural Resources"
+    id: "enerji_tr"
+    enabled: false
+    base_url: "https://www.enerji.gov.tr"
+    start_paths:
+      - "/en-US/Pages/Energy-Efficiency"
+    region:
+      - "middle_east"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "strategy"
+    policy_types:
+      - "strategy"
+      - "regulation"
+    language: "en"
+    requires_playwright: true
+    rate_limit_seconds: 4.0
+    verified_by: "source-expansion-research (mena-africa agent)"
+    notes: |
+      New file: config/domains/turkey.yaml (alongside epdk_tr above).
+      Complements EPDK (the regulator) with the ministry-level strategy
+      side — together they cover Turkey's EU-aligned building energy
+      efficiency framework. Site was intermittently unreachable during
+      verification (timeouts on 3 of 4 attempts) — possibly geo-fencing/
+      rate-limiting against automated clients; requires_playwright + a
+      generous rate limit (4-5s) recommended. verified: partial — the
+      bare domain (no www.) loaded once via browser confirming the real
+      ministry title, but the specific Energy-Efficiency subpath could not
+      be independently reloaded this session (repeated timeouts) — matches
+      a live search-result title, page almost certainly exists but flag
+      for a human re-check before enabling.
+
+  - name: "AFREC - African Energy Commission (African Union)"
+    id: "afrec_au"
+    enabled: false
+    base_url: "https://au-afrec.org"
+    start_paths:
+      - "/energy-efficiency-programme"
+      - "/policy-briefs"
+    region:
+      - "africa"
+    category: "coordination_body"
+    tags:
+      - "efficiency"
+      - "research"
+      - "planning"
+    policy_types:
+      - "report"
+      - "guidance"
+      - "strategy"
+    language: "en"
+    verified_by: "source-expansion-research (mena-africa agent)"
+    notes: |
+      New file: config/domains/mena_africa_regional.yaml (alongside
+      rcreee_regional above). Category mapped from original "policy" to
+      "coordination_body" (continental specialized energy agency of the
+      African Union — same reasoning as RCREEE). Also reachable at
+      afrec.au.int (older domain, redirects/mirrors) — use au-afrec.org
+      as canonical, it loaded cleanly. Publishes the African Energy
+      Efficiency Strategy (AfEES); hosted the first continental
+      energy-efficiency conference Dec 2025. Covers Kenya/Nigeria/Ghana/
+      Morocco (and everyone else) at a strategy level even where a
+      national regulator's own site is thin. verified: yes (WebFetch
+      confirmed M&E Handbook, MEPS training material, Policy Briefs
+      section).
+
+  - name: "Egypt New and Renewable Energy Authority (NREA)"
+    id: "nrea_eg"
+    enabled: false
+    base_url: "https://nrea.gov.eg"
+    start_paths:
+      - "/test/en/Home"
+    region:
+      - "middle_east"
+      - "africa"
+    category: "energy_ministry"
+    tags:
+      - "strategy"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "standard"
+    language: "en"
+    verified_by: "source-expansion-research (mena-africa agent)"
+    notes: |
+      New file: config/domains/egypt.yaml (alongside egyptera_eg above).
+      WEAKEST candidate in this batch — almost entirely renewable-
+      generation-focused (wind/solar project execution, 30%-by-2030
+      target), little visible waste-heat/data-center/efficiency-mandate
+      content. Included for completeness (Egypt's other national energy
+      authority) — consider skipping if source-count budget is tight.
+      Site runs under a "/test/" path prefix even in production (unusual
+      but consistently live). verified: yes (official NREA homepage
+      confirmed via browser).
+
+  - name: "Oman Authority for Public Services Regulation (APSR)"
+    id: "apsr_om"
+    enabled: false
+    base_url: "https://apsr.om"
+    start_paths:
+      - "/en/renewableenergy"
+    region:
+      - "middle_east"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "standard"
+    language: "en"
+    requires_playwright: true
+    verified_by: "source-expansion-research (mena-africa agent)"
+    notes: |
+      New file: config/domains/oman.yaml. Sole national regulator for
+      electricity (and five other public services) in Oman; per search
+      results, working on mandatory energy-efficiency specifications for
+      major appliances. Domain returns HTTP 200 and a valid page title
+      ("APSR"), but the page body renders EMPTY in a non-JS-executing
+      fetch and stayed empty even after a short wait in a real browser
+      session — very likely a heavy client-side app (React/Angular)
+      needing longer render time/specific routing. requires_playwright
+      with an increased load-wait strongly recommended; may still need
+      additional wait/scroll logic (possibly tier-c if content is served
+      via an internal API the crawler can't trigger). Candidate
+      start_path (/en/renewableenergy) per search results, NOT
+      independently re-verified this session. verified: partial — domain
+      resolves and title confirms identity, but no policy content could
+      be independently read. RECOMMEND HUMAN CHECK with a JS-capable
+      browser and longer wait before enabling.
+
+# -----------------------------------------------------------------------------
+# Not included above — three candidates could not be reached at all from the
+# research environment (DNS failure or connection refused, both fetch tools)
+# despite strong secondary evidence (live PDFs/pages cited by third-party
+# regulator directories). See INVENTORY.md appendix for full detail:
+#   - Qatar Kahramaa (km.qa) — District Cooling Dept, Council of Ministers
+#     Law No. 19 (2024) gives it DC licensing/regulation authority.
+#     ECONNREFUSED on every attempt.
+#   - Bahrain Sustainable Energy Authority (sea.gov.bh) — hit its 6% NEEAP
+#     target 6 years early, Ministerial Order 70/2015 sets MEPS/labeling.
+#     ENOTFOUND (DNS failure) on every attempt.
+#   - Kenya EPRA (epra.go.ke) — Energy (Energy Management) Regulations 2025
+#     require audits above a 180,000 kWh threshold. ECONNREFUSED on every
+#     attempt.
+# A human on a different network should confirm these load before any config
+# is written.
+# -----------------------------------------------------------------------------

@@ -1,0 +1,455 @@
+# =============================================================================
+# DRAFT — Latin America source expansion (tier-b crawl domains only)
+# Source: docs/source-expansion/regions/latam.md
+# Every entry below is `enabled: false`. Brazil/Mexico already ship
+# (brazil.yaml/mexico.yaml) and are not touched. NEW files needed: chile.yaml,
+# colombia.yaml, argentina.yaml, peru.yaml, uruguay.yaml, costa_rica.yaml.
+# Tier-c candidate for this region (LeyChile/BCN Legislative Web Service) is
+# NOT in this file — see docs/source-expansion/draft/new-clients.md.
+#
+# Region-value note: Chile/Colombia/Argentina/Peru/Uruguay are not
+# individually in VALID_REGIONS (src/core/config.py) — the broad valid
+# "south_america" bucket already covers them, used as-is. Costa Rica is
+# Central American; VALID_REGIONS has no "central_america" bucket — mapped
+# to the broader (imperfect) "north_america" per its own comment ("North
+# America: US, Canada, Mexico"), noted explicitly below since Costa Rica
+# doesn't really fit that description either.
+# =============================================================================
+
+domains:
+  - name: "Ministerio de Energia - Chile"
+    id: "energia_cl"
+    enabled: false
+    base_url: "https://energia.gob.cl"
+    start_paths:
+      - "/mini-sitio/reglamentos"
+      - "/eficienciaenergetica"
+      - "/panel/plan-de-descarbonizacion"
+    region:
+      - "south_america"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "renewable_energy"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "strategy"
+      - "law"
+    language: "es"
+    requires_playwright: false
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/chile.yaml. Primary national energy policy
+      body for Chile, currently the largest LatAm data-center market by MW
+      under construction. National energy policy to 2050, decarbonization
+      plan, Energy Efficiency Law (Ley 21.305) implementation, green
+      hydrogen strategy. Open energy data portal (energiaabierta.cl) is a
+      SEPARATE domain, not included here. /panel/* decarbonization pages
+      use moderate JS — requires_playwright: true recommended for those
+      specifically, false should suffice for /eficienciaenergetica.
+      verified: yes (root fetched, all three sections confirmed).
+
+  - name: "CNE - Comision Nacional de Energia (Chile)"
+    id: "cne_cl"
+    enabled: false
+    base_url: "https://www.cne.cl"
+    start_paths:
+      - "/normativas"
+      - "/estadisticas"
+    region:
+      - "south_america"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "es"
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/chile.yaml. Electricity/hydrocarbon sector
+      technical-regulation portal ("Portal Normativo"), tariff-setting
+      resolutions, public consultations. Site explicitly discusses
+      data-center-driven grid demand growth. verified: yes (root fetched,
+      Normativas/statistics sections + a DC grid-impact news item
+      confirmed).
+
+  - name: "SEC - Superintendencia de Electricidad y Combustibles (Chile)"
+    id: "sec_cl"
+    enabled: false
+    base_url: "https://www.sec.cl"
+    start_paths:
+      - "/transparencia/marconormativo.html"
+    max_depth: 2
+    region:
+      - "south_america"
+    category: "standards"
+    tags:
+      - "mandates"
+    policy_types:
+      - "standard"
+      - "regulation"
+    language: "es"
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/chile.yaml. Electrical installation safety
+      regulations (Decreto 08), technical pliegos (RPTD series), NCh Elec.
+      4/2003 low-voltage standard — the binding technical-standards layer
+      under CNE/Energy Ministry policy. Homepage itself is mostly
+      citizen-services framed (complaints, installer lookup); regulatory
+      content lives under /transparencia/ and a wp-content uploads path —
+      confirmed via targeted search, not homepage crawl, so max_depth >= 2
+      is set and the crawler should NOT rely on homepage links alone.
+      verified: yes, indirectly (targeted search confirmed the path +
+      several live regulation/standard PDFs).
+
+  - name: "Ministerio de Minas y Energia (Colombia)"
+    id: "minenergia_co"
+    enabled: false
+    base_url: "https://www.minenergia.gov.co"
+    start_paths:
+      - "/es/normatividad/consulta-normativa"
+      - "/es/eficiencia-energetica"
+    region:
+      - "south_america"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "incentives"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "strategy"
+      - "incentive"
+    language: "es"
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/colombia.yaml. National energy ministry for
+      Colombia, a fast-growing LatAm DC market (Bogota metro). FENOGE
+      (efficient-use/renewables fund), FNCER non-conventional renewables
+      policy, energy efficiency programs, "Repositorio Normativo" and
+      regulatory-agenda tracker. verified: yes (root fetched, normativa/
+      efficiency/FENOGE-FNCER sections confirmed).
+
+  - name: "UPME - Unidad de Planeacion Minero Energetica (Colombia)"
+    id: "upme_co"
+    enabled: false
+    base_url: "https://www1.upme.gov.co"
+    start_paths:
+      - "/DemandaEnergetica"
+      - "/Paginas/PROURE.aspx"
+    region:
+      - "south_america"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "planning"
+      - "research"
+    policy_types:
+      - "strategy"
+      - "report"
+      - "program"
+    language: "es"
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/colombia.yaml. Colombia's energy-planning
+      body — National Energy Plan (PEN 2025-2055), PROURE
+      rational/efficient energy-use action plans, generation/demand
+      statistics via SIMEC. PROURE is the direct efficiency-mandate
+      analogue to Brazil's PROCEL already in brazil.yaml. Live host
+      redirected www.upme.gov.co to www1.upme.gov.co during testing — use
+      the www1 host as base_url. verified: yes (root fetched, PEN/PROURE/
+      SIMEC content confirmed).
+
+  - name: "CREG - Comision de Regulacion de Energia y Gas (Colombia)"
+    id: "creg_co"
+    enabled: false
+    base_url: "https://www.creg.gov.co"
+    start_paths:
+      - "/gestor-normativo"
+    region:
+      - "south_america"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "es"
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/colombia.yaml. Colombia's electricity/gas
+      regulator — resolutions/draft resolutions/administrative circulars
+      via "Gestor Normativo," the binding-rule layer under MinEnergia/UPME
+      policy. verified: yes (root fetched, Gestor normativo confirmed).
+
+  - name: "Secretaria de Energia - Argentina"
+    id: "energia_ar"
+    enabled: false
+    base_url: "https://www.argentina.gob.ar"
+    start_paths:
+      - "/economia/energia"
+    allowed_path_patterns:
+      - "/economia/energia/*"
+    region:
+      - "south_america"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "incentives"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "strategy"
+      - "incentive"
+    language: "es"
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/argentina.yaml. National energy policy
+      design, energy-efficiency subsecretariat, targeted energy subsidy
+      scheme (SEF), Federal Energy Council, energy statistics portal.
+      base_url is the shared argentina.gob.ar portal (same pattern as
+      enre_ar below) — allowed_path_patterns keeps the crawl scoped.
+      verified: yes (path fetched, policy/program content confirmed).
+
+  - name: "ENRE - Ente Nacional Regulador de la Electricidad (Argentina)"
+    id: "enre_ar"
+    enabled: false
+    base_url: "https://www.argentina.gob.ar"
+    start_paths:
+      - "/enre"
+    allowed_path_patterns:
+      - "/enre/*"
+    region:
+      - "south_america"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "es"
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/argentina.yaml. Argentina's national
+      electricity-sector regulator — tariffs, service-quality, technical
+      regulation, the binding-rule counterpart to the Secretaria de
+      Energia's policy above. Scoped with allowed_path_patterns to this
+      sub-site of the shared argentina.gob.ar portal. verified: yes (path
+      fetched, electricity/regulation content confirmed).
+
+  - name: "MINEM - Ministerio de Energia y Minas (Peru)"
+    id: "minem_pe"
+    enabled: false
+    base_url: "https://www.gob.pe"
+    start_paths:
+      - "/minem"
+    allowed_path_patterns:
+      - "/minem/*"
+    region:
+      - "south_america"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "strategy"
+    language: "es"
+    requires_playwright: true
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/peru.yaml. gob.pe is Peru's unified
+      government portal — allowed_path_patterns scopes the crawl. Peru's
+      national energy/mining ministry (energy policy, efficiency,
+      regulation), another growing Lima-area DC market. Site returns a
+      bot-detection "418" response to some fetch-tool user agents; a
+      standard browser UA resolves fine — requires_playwright or a
+      browser-like User-Agent header recommended. verified: yes (curl
+      with a browser User-Agent returned HTTP 200, page text contained
+      "energia"/"eficiencia" terms; the AI-fetch tool itself was
+      bot-blocked).
+
+  - name: "OSINERGMIN (Peru)"
+    id: "osinergmin_pe"
+    enabled: false
+    base_url: "https://www.gob.pe"
+    start_paths:
+      - "/osinergmin"
+    allowed_path_patterns:
+      - "/osinergmin/*"
+    region:
+      - "south_america"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "es"
+    requires_playwright: true
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/peru.yaml. Peru's electricity/energy/mining
+      regulator — resolutions, tariffs, technical supervision. Same
+      gob.pe bot-detection caveat as minem_pe above.
+      verified: yes (curl with a browser User-Agent returned HTTP 200,
+      page text contained "electricidad"/"energia"/"regulacion" terms).
+
+  - name: "MIEM - Ministerio de Industria, Energia y Mineria (Uruguay)"
+    id: "miem_uy"
+    enabled: false
+    base_url: "https://www.gub.uy"
+    start_paths:
+      - "/ministerio-industria-energia-mineria"
+    allowed_path_patterns:
+      - "/ministerio-industria-energia-mineria/*"
+    region:
+      - "south_america"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "incentives"
+      - "research"
+    policy_types:
+      - "regulation"
+      - "strategy"
+      - "incentive"
+    language: "es"
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/uruguay.yaml. gub.uy is Uruguay's unified
+      government portal — allowed_path_patterns scopes the crawl.
+      National energy policy, energy-efficiency certificate program,
+      Energy Sector Fund (research/innovation grants), open-data
+      observatory. Uruguay is a smaller but notably 100%-renewable-grid DC
+      pitch market. verified: yes (curl confirmed HTTP 200, 262
+      occurrences of "energia" plus "Eficiencia"/"Normativa" terms).
+
+  - name: "URSEA - Unidad Reguladora de Servicios de Energia y Agua (Uruguay)"
+    id: "ursea_uy"
+    enabled: false
+    base_url: "https://www.gub.uy"
+    start_paths:
+      - "/unidad-reguladora-servicios-energia-agua"
+    allowed_path_patterns:
+      - "/unidad-reguladora-servicios-energia-agua/*"
+    region:
+      - "south_america"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "efficiency"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "es"
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/uruguay.yaml. Uruguay's energy-services
+      regulator — electricity/gas/water/fuel technical regulation,
+      licensing, efficiency oversight. verified: yes (curl confirmed HTTP
+      200, 263 occurrences of "energia" plus "Eficiencia"/"Normativa"
+      terms).
+
+  - name: "ARESEP - Autoridad Reguladora de los Servicios Publicos (Costa Rica)"
+    id: "aresep_cr"
+    enabled: false
+    base_url: "https://aresep.go.cr"
+    start_paths:
+      - "/"
+    region:
+      - "north_america"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "es"
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/costa_rica.yaml. Region mapped: Costa Rica
+      is Central American; VALID_REGIONS has no "central_america" bucket
+      (only "north_america": US/Canada/Mexico, which doesn't really fit
+      Costa Rica either) — mapped to "north_america" as the closest
+      available value, flagged here as an imperfect fit worth revisiting
+      if a "central_america" region value is ever added. Electricity
+      tariff-setting and service-quality regulation, relevant given Costa
+      Rica's near-100%-renewable grid is an active DC marketing angle.
+      Site's regulation content is linked from the homepage; no deeper
+      stable path confirmed — recommend a human pick specific sub-paths
+      from the homepage nav before enabling. verified: yes (curl confirmed
+      HTTP 200, 17 occurrences of "electricidad" plus
+      "normativa"/"energia" terms).
+
+  - name: "SUIN-Juriscol - Sistema Unico de Informacion Normativa (Colombia)"
+    id: "suin_juriscol_co"
+    enabled: false
+    base_url: "https://www.suin-juriscol.gov.co"
+    start_paths:
+      - "/"
+    region:
+      - "south_america"
+    category: "legislative"
+    tags:
+      - "mandates"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "es"
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/colombia.yaml. Colombia's unified
+      consolidated-legislation search system (laws, decrees, all sectors)
+      — not energy-specific, but the authoritative full-text source for
+      Colombian legislation, useful for pulling energy/efficiency laws
+      found via keyword search; needed since Colombia has no
+      LeyChile-equivalent open API. A self-signed/incomplete TLS chain was
+      encountered by one fetch tool (curl -k succeeded) — worth a
+      connectivity check before enabling. No public JSON/XML API found —
+      crawl only. verified: yes (curl confirmed HTTP 200, "Normativa"/
+      "legislacion" terms present).
+
+  - name: "InfoLEG - Informacion Legislativa y Documental (Argentina)"
+    id: "infoleg_ar"
+    enabled: false
+    base_url: "https://www.infoleg.gob.ar"
+    start_paths:
+      - "/"
+    region:
+      - "south_america"
+    category: "legislative"
+    tags:
+      - "mandates"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "es"
+    verified_by: "source-expansion-research (latam agent)"
+    notes: |
+      New file: config/domains/argentina.yaml. Argentina's national
+      legislative/documentary database (Ministry of Justice) — laws,
+      decrees, resolutions, Official Bulletin entries across all sectors,
+      Creative Commons licensed. Broad legislative complement to the
+      Secretaria de Energia/ENRE sites above, same role as
+      SUIN-Juriscol for Colombia. A servicios.infoleg.gob.ar subdomain
+      service was referenced in search results but no published API
+      documentation/stable query contract was found — treat as crawl-only,
+      not a structured-API candidate, unless a human finds developer docs.
+      verified: yes (fetched root over HTTPS with a browser User-Agent,
+      HTTP 200, legislative-database content confirmed).
+
+# -----------------------------------------------------------------------------
+# Not included above (see INVENTORY.md appendix for full detail):
+#   - Direccion de Energia / MINAE (Costa Rica) — both www.minae.go.cr
+#     (HTTP 403 on every attempt) and energia.minae.go.cr (DNS failure)
+#     could not be reached; WebSearch independently confirms the site
+#     exists (a "Marco legal sobre energia" page and Directriz
+#     011-MINAE/017 public-sector efficiency mandates were referenced) but
+#     none of this was confirmed live from the research environment. A
+#     human should try loading both URLs directly (possible Cloudflare/
+#     geo restriction) before adding.
+# -----------------------------------------------------------------------------

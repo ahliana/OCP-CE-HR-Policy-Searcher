@@ -1,0 +1,663 @@
+# =============================================================================
+# DRAFT — DACH (Germany/Austria/Switzerland) subnational source expansion
+# (tier-b crawl domains only — this region produced NO tier-a or tier-c
+# candidates, every source below is a plain government/legal-text portal).
+# Source: docs/source-expansion/regions/dach.md
+# Every entry below is `enabled: false`.
+#   - German entries append to config/domains/germany.yaml (all 16 Laender
+#     will have ministry+Landesrecht coverage once these 8 new Laender ship).
+#   - Austrian entries append to config/domains/austria.yaml.
+#   - Swiss cantonal entries go to a NEW file config/domains/switzerland.yaml
+#     is NOT new (it already exists with federal + Zurich) — these 4 new
+#     canton sections (Geneva, Basel-Stadt, Vaud, Bern) append to it.
+#
+# Region-value note: individual Swiss cantons other than Zurich, and German
+# Laender other than the 8 already in VALID_REGIONS (hessen, bayern,
+# nordrhein_westfalen, baden_wuerttemberg, berlin, hamburg, niedersachsen,
+# sachsen), are not in the live VALID_REGIONS enum in src/core/config.py.
+# Mapped to the broader valid "switzerland" / "germany" region value below;
+# the specific canton/Land name is preserved in the `id` and `notes` for
+# discoverability. Unrecognized region values only trigger a config-loader
+# warning, not a hard failure, so this is a documentation choice, not a
+# functional requirement.
+# =============================================================================
+
+domains:
+  - name: "Geneve - Loi sur l'energie (LEn) rsGE L 2 30"
+    id: "ge_len_energie"
+    enabled: false
+    base_url: "https://silgeneve.ch"
+    start_paths:
+      - "/legis/data/rsg_l2_30.htm"
+    region:
+      - "eu_central"
+      - "switzerland"
+    category: "legislation"
+    tags:
+      - "mandates"
+      - "waste_heat"
+      - "data_center_specific"
+      - "district_heating"
+    policy_types:
+      - "law"
+    language: "fr"
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: canton is Geneva (not in VALID_REGIONS' explicit
+      canton list, which only lists "zurich" — mapped to "switzerland").
+      Article 17A explicitly names "les chaleurs emises par les serveurs
+      informatiques" (heat emitted by computer servers) as subject to
+      Geneva's mandatory heat-recovery framework — most explicit
+      non-German DACH statutory text naming data centers by name.
+      Complements the German EnEfG and Zurich cantonal law already
+      configured. Single consolidated-law page, low update frequency.
+      verified: yes (WebFetch, Art. 17A text captured directly, page last
+      modified 2026-07-04).
+
+  - name: "Kanton Basel-Stadt - Energiegesetz (EnG) SG 772.100"
+    id: "bs_energiegesetz"
+    enabled: false
+    base_url: "https://gesetzessammlung.bs.ch"
+    start_paths:
+      - "/app/de/texts_of_law/772.100"
+    region:
+      - "eu_central"
+      - "switzerland"
+    category: "legislation"
+    tags:
+      - "mandates"
+      - "waste_heat"
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "law"
+    language: "de"
+    requires_playwright: true
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: canton is Basel-Stadt -> "switzerland" (see file
+      header note). Sec.17 obligates large consumers (>5GWh/yr heat or
+      >0.5GWh/yr electricity — explicitly named source "Serverraeume und
+      Rechenzentren") to analyze consumption and use waste heat; Sec.19
+      mandates cantonal heat planning with waste-heat allocation; Sec.2(4)
+      requires DH to reach 80% CO2-free by 2020. Directly analogous to the
+      Zurich EnerG already configured. JS-rendered "LexWork" app — full
+      text confirmed to render without interaction, but
+      requires_playwright recommended. verified: yes (full text pulled via
+      browser, Sec. 1-41 confirmed).
+
+  - name: "Canton de Vaud - Legislation sur l'energie (LVLEne)"
+    id: "vd_energie_legislation"
+    enabled: false
+    base_url: "https://www.vd.ch"
+    start_paths:
+      - "/environnement/energie/legislation/principaux-elements-de-la-loi-sur-lenergie"
+    region:
+      - "eu_central"
+      - "switzerland"
+    category: "energy_ministry"
+    tags:
+      - "mandates"
+      - "waste_heat"
+      - "planning"
+    policy_types:
+      - "law"
+      - "guidance"
+    language: "fr"
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: canton is Vaud -> "switzerland" (see file header
+      note). Art. 28c-28e LVLEne: large consumers (>5GWh/yr heat or
+      >0.5GWh/yr electricity) must analyze/reduce consumption — same
+      MuKEn-derived threshold as Zurich/Basel/Bern. Art. 16e-16g mandates
+      territorial energy planning integrating renewable/recovered heat
+      into zoning. New LVLEne (adopted Feb 2026) enters force Jan 2027 —
+      current page covers the law in force through 2026-12-31 plus a link
+      to the replacement; re-check after Jan 2027. verified: yes (full
+      page text pulled via browser, all article citations confirmed).
+
+  - name: "Kanton Bern - Wirtschafts-, Energie- und Umweltdirektion (Energie)"
+    id: "be_weu_energie"
+    enabled: false
+    base_url: "https://www.weu.be.ch"
+    start_paths:
+      - "/de/start/themen/energie.html"
+    region:
+      - "eu_central"
+      - "switzerland"
+    category: "energy_ministry"
+    tags:
+      - "waste_heat"
+      - "planning"
+      - "district_heating"
+    policy_types:
+      - "guidance"
+      - "regulation"
+    language: "de"
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: canton is Bern -> "switzerland" (see file header
+      note). Revised cantonal Energiegesetz (in force since Jan 2023) and
+      implementing Kantonale Energieverordnung (KEnV, BSG 741.111); Bern
+      cited alongside Vaud/Thurgau as proposing municipal energy plans
+      account for data-center waste-heat potential. Companion legal text
+      at belex.sites.be.ch/app/de/texts_of_law/741.111 (KEnV) is a good
+      follow-up crawl target. verified: yes (WebFetch confirmed "Energie"
+      page under WEU).
+
+  - name: "Rheinland-Pfalz - Ministerium fuer Wirtschaft, Tourismus, Energie und Klima (MWTEK)"
+    id: "rlp_energy"
+    enabled: false
+    base_url: "https://mwtek.rlp.de"
+    start_paths:
+      - "/themen/energie"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "strategy"
+    language: "de"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Land is Rheinland-Pfalz, not in VALID_REGIONS'
+      explicit Laender list -> mapped to "germany" (see file header note).
+      Completes German Laender coverage. RLP passed a state law
+      implementing the federal Waermeplanungsgesetz (municipal heat-
+      planning duty devolved to all Kreise/large cities). Ministry was
+      reorganized: old "Ministerium fuer Klimaschutz, Umwelt, Energie und
+      Mobilitaet" (mkuem.rlp.de) split — energy/climate moved here;
+      environment/agriculture stayed at mlwuf.rlp.de (do NOT use that
+      domain for this topic). verified: yes (WebFetch confirmed
+      "Waermenetze" subsection + "Waermewende im Quartier" program).
+
+  - name: "Landesrecht Rheinland-Pfalz"
+    id: "rlp_recht"
+    enabled: false
+    base_url: "https://landesrecht.rlp.de"
+    start_paths:
+      - "/bsrp/"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "legislation"
+    tags:
+      - "mandates"
+    policy_types:
+      - "legislation"
+    language: "de"
+    requires_playwright: true
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Rheinland-Pfalz -> "germany" (see file header note).
+      Consolidated RLP state law/ordinances, juris-hosted (same platform
+      pattern as the existing hessen_recht sibling entry).
+      verified: yes (WebFetch confirmed page title).
+
+  - name: "Brandenburg - Ministerium fuer Wirtschaft, Energie, Klimaschutz und Europa (MWEKE)"
+    id: "brandenburg_energy"
+    enabled: false
+    base_url: "https://mweke.brandenburg.de"
+    start_paths:
+      - "/de/startseite/bb1.c.477963.de"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "strategy"
+    language: "de"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Brandenburg -> "germany" (see file header note).
+      Brandenburgische Waermeplanungsverordnung in force Jul 2024; Potsdam
+      must file its heat plan by mid-2026. Heat-planning oversight is
+      split with the Ministry for Infrastructure/Regional Planning (MIL,
+      mil.brandenburg.de, see unverified appendix) — MWEKE is the general
+      energy/climate portfolio owner and the better long-term crawl root.
+      verified: yes (WebFetch, live nav/news confirmed).
+
+  - name: "BRAVORS - Brandenburgisches Vorschriftensystem"
+    id: "brandenburg_recht"
+    enabled: false
+    base_url: "https://bravors.brandenburg.de"
+    start_paths:
+      - "/"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "legislation"
+    tags:
+      - "mandates"
+    policy_types:
+      - "legislation"
+    language: "de"
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Brandenburg -> "germany" (see file header note).
+      Official Brandenburg state law/regulation search (also indexes
+      federal/EU documents for context). verified: yes (WebFetch confirmed
+      quick/advanced search + archive sections).
+
+  - name: "Sachsen-Anhalt - Ministerium fuer Wissenschaft, Energie, Klimaschutz und Umwelt (MWU)"
+    id: "sachsen_anhalt_energy"
+    enabled: false
+    base_url: "https://mwu.sachsen-anhalt.de"
+    start_paths:
+      - "/energie/kommunale-waermeplanung"
+      - "/energie"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "energy_ministry"
+    tags:
+      - "district_heating"
+      - "planning"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "strategy"
+    language: "de"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Sachsen-Anhalt -> "germany" (see file header note).
+      Dedicated ministry page for the state's municipal heat-planning law
+      (cabinet-approved implementation of the federal WPG), concrete
+      deadlines (Magdeburg/Halle 2026, rest of state 2028), ~12M EUR
+      funding. verified: yes (WebFetch, page title "Kommunale
+      Waermeplanung - Fahrplan fuer das klimaneutrale Heizen").
+
+  - name: "Landesrecht Sachsen-Anhalt"
+    id: "sachsen_anhalt_recht"
+    enabled: false
+    base_url: "https://www.landesrecht.sachsen-anhalt.de"
+    start_paths:
+      - "/"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "legislation"
+    tags:
+      - "mandates"
+    policy_types:
+      - "legislation"
+    language: "de"
+    requires_playwright: true
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Sachsen-Anhalt -> "germany" (see file header note).
+      Consolidated Sachsen-Anhalt state law, juris portal (same pattern as
+      sibling Laender entries). verified: yes (WebFetch confirmed title).
+
+  - name: "Schleswig-Holstein - Energiewende im Waermesektor (MEKUN)"
+    id: "schleswig_holstein_energy"
+    enabled: false
+    base_url: "https://www.schleswig-holstein.de"
+    start_paths:
+      - "/DE/landesregierung/themen/energie/energiewende/Waerme"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "energy_ministry"
+    tags:
+      - "district_heating"
+      - "planning"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "strategy"
+    language: "de"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Schleswig-Holstein -> "germany" (see file header
+      note). State's Energiewende- und Klimaschutzgesetz (EWKG, amended
+      Mar 2025) mandates heat planning for all 1,104 municipalities;
+      state co-runs the Waermekompetenzzentrum Schleswig-Holstein (WKZ.SH,
+      since Mar 2025). verified: yes (WebFetch, EWKG amendment date + WKZ.SH
+      details confirmed).
+
+  - name: "Gesetze-Rechtsprechung Schleswig-Holstein"
+    id: "schleswig_holstein_recht"
+    enabled: false
+    base_url: "https://www.gesetze-rechtsprechung.sh.juris.de"
+    start_paths:
+      - "/bssh/"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "legislation"
+    tags:
+      - "mandates"
+    policy_types:
+      - "legislation"
+    language: "de"
+    requires_playwright: true
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Schleswig-Holstein -> "germany" (see file header
+      note). Over 1,400 consolidated state laws/ordinances including the
+      EWKG referenced above. verified: yes (WebFetch confirmed title).
+
+  - name: "Saarland - Waermewende (MWIDE)"
+    id: "saarland_energy"
+    enabled: false
+    base_url: "https://www.saarland.de"
+    start_paths:
+      - "/mwide/DE/portale/waermewende/home"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "energy_ministry"
+    tags:
+      - "district_heating"
+      - "planning"
+      - "waste_heat"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "de"
+    requires_playwright: true
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Saarland -> "germany" (see file header note).
+      Dedicated Waermewende advisory office (Beratungsstelle Waermewende)
+      plus a "Landesstudie Waermewende im Saarland" report; public
+      Waermekataster tool (geoportal.saarland.de/article/Waermekataster/,
+      see unverified appendix) is a follow-up crawl target. WebFetch
+      (automated tool fetch) returned HTTP 403 on this exact URL; page
+      loads normally in a real browser — set a realistic User-Agent and/or
+      requires_playwright. verified: yes, via browser tool (title
+      "Waermewende Saarland", Landesstudie/Beratungsstelle/FAQ/funding
+      sections all confirmed present).
+
+  - name: "Buergerservice Saarland (Landesrecht)"
+    id: "saarland_recht"
+    enabled: false
+    base_url: "https://recht.saarland.de"
+    start_paths:
+      - "/bssl/search"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "legislation"
+    tags:
+      - "mandates"
+    policy_types:
+      - "legislation"
+    language: "de"
+    requires_playwright: true
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Saarland -> "germany" (see file header note). Only
+      Saarland state-law source in the corpus; over 1,100 consolidated
+      laws per juris product description. verified: yes (WebFetch
+      confirmed title "Buergerservice Saarland").
+
+  - name: "Mecklenburg-Vorpommern - Ministerium fuer Energie, Infrastruktur und Digitalisierung"
+    id: "mv_energy"
+    enabled: false
+    base_url: "https://www.regierung-mv.de"
+    start_paths:
+      - "/Landesregierung/em/"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "strategy"
+    language: "de"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Mecklenburg-Vorpommern -> "germany" (see file header
+      note). MV is implementing a state heat-planning ordinance (expected
+      early 2025) adapted for rural/low-density heat-network economics —
+      different policy posture than the dense Laender already configured.
+      LEKA MV (state energy/climate agency, leka-mv.de, see unverified
+      appendix) is a good follow-up crawl target. verified: yes (WebFetch,
+      Energieportal MV sub-link confirmed).
+
+  - name: "Landesrecht Mecklenburg-Vorpommern"
+    id: "mv_recht"
+    enabled: false
+    base_url: "https://www.landesrecht-mv.de"
+    start_paths:
+      - "/bsmv/search"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "legislation"
+    tags:
+      - "mandates"
+    policy_types:
+      - "legislation"
+    language: "de"
+    requires_playwright: true
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Mecklenburg-Vorpommern -> "germany" (see file header
+      note). LARIS (Landesrechtsinformationssystem M-V) portal.
+      verified: yes (WebFetch confirmed title).
+
+  - name: "Bremen - Waermewende im Land Bremen"
+    id: "bremen_energy"
+    enabled: false
+    base_url: "https://umwelt.bremen.de"
+    start_paths:
+      - "/klima/klima-energie/waermewende-2383782"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "energy_ministry"
+    tags:
+      - "district_heating"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "guidance"
+    language: "de"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Bremen -> "germany" (see file header note). Bremen's
+      Klimaschutzstrategie 2038 and municipal heat-planning draft (public
+      comment; large heat pumps at the Weser river/treatment plant
+      projected to cover 36% of heat demand); city-state law requires a
+      heat plan by Jun 2026. verified: yes (WebFetch confirmed title).
+
+  - name: "Bremische Vorschriften - Gesetzesportal"
+    id: "bremen_recht"
+    enabled: false
+    base_url: "https://www.transparenz.bremen.de"
+    start_paths:
+      - "/vorschriften-72741"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "legislation"
+    tags:
+      - "mandates"
+    policy_types:
+      - "legislation"
+    language: "de"
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Bremen -> "germany" (see file header note). Hosted on
+      Bremen's Transparenzportal (open-data/transparency portal, NOT a
+      juris instance — different platform shape than sibling Laender,
+      relevant for parser assumptions). Over 600 consolidated
+      laws/ordinances. verified: yes (WebFetch confirmed title).
+
+  - name: "Thueringer Energie- und GreenTech-Agentur (ThEGA) - Kommunale Waermeplanung"
+    id: "thueringen_thega"
+    enabled: false
+    base_url: "https://www.thega.de"
+    start_paths:
+      - "/themen/klimafreundliche-waerme/kommunale-waermeplanung/"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "program"
+    tags:
+      - "district_heating"
+      - "waste_heat"
+      - "planning"
+      - "data_center_specific"
+    policy_types:
+      - "guidance"
+      - "program"
+    language: "de"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Thueringen -> "germany" (see file header note).
+      Operates on behalf of the Thueringer Energieministerium; runs the
+      state's Abwaermekataster (waste-heat cadastre in the Energieatlas
+      Thueringen) — lets companies register waste-heat sources for reuse
+      by third parties. Also documents the Thueringer
+      Waermeplanungskostenerstattungsverordnung (ThuerWPKEVO). Chosen over
+      the ministry's own site (umwelt.thueringen.de) which is gated by a
+      Link11 CAPTCHA (see unverified appendix). verified: yes (full page
+      text via browser, Abwaermekataster + ThuerWPKEVO confirmed).
+
+  - name: "Landesrecht Thueringen (Buergerservice)"
+    id: "thueringen_recht"
+    enabled: false
+    base_url: "https://landesrecht.thueringen.de"
+    start_paths:
+      - "/bsth/search"
+    region:
+      - "eu"
+      - "eu_central"
+      - "germany"
+    category: "legislation"
+    tags:
+      - "mandates"
+    policy_types:
+      - "legislation"
+    language: "de"
+    requires_playwright: true
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Thueringen -> "germany" (see file header note).
+      Completes German Laender law-database coverage — all 16 Laender have
+      a law-search source once this and the other 7 Laender-recht entries
+      in this file ship. verified: yes (browser-confirmed title
+      "Buergerservice Thueringen").
+
+  - name: "Klima- und Energiefonds Oesterreich - Foerderungen"
+    id: "at_klimafonds"
+    enabled: false
+    base_url: "https://www.klimafonds.gv.at"
+    start_paths:
+      - "/foerderungen/"
+    region:
+      - "eu"
+      - "eu_central"
+      - "austria"
+    category: "economic_dev"
+    tags:
+      - "incentives"
+      - "efficiency"
+      - "waste_heat"
+    policy_types:
+      - "incentive"
+    language: "de"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Austria's national climate/energy fund runs recurring on-topic grant
+      programs (e.g. "Betriebliche Niedertemperaturwaerme und -kaelte" —
+      15M EUR; large heat/cold storage systems — 75M EUR). National
+      incentive counterpart to the existing bmk.gv.at (regulation) and
+      ris.bka.gv.at (law) entries. Funding calls rotate/expire — moderate
+      re-crawl cadence appropriate. verified: yes (WebFetch, 10 active
+      funding programs confirmed live).
+
+  - name: "Wien - Energieplanung (MA 20)"
+    id: "at_wien_ma20"
+    enabled: false
+    base_url: "https://www.wien.gv.at"
+    start_paths:
+      - "/kontakt/ma20-publikationen"
+    region:
+      - "eu"
+      - "eu_central"
+      - "austria"
+    category: "district_heating"
+    tags:
+      - "district_heating"
+      - "waste_heat"
+      - "data_center_specific"
+      - "planning"
+    policy_types:
+      - "guidance"
+      - "report"
+    language: "de"
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (dach agent)"
+    notes: |
+      Region mapped: Vienna/Wien is its own Bundesland but not in
+      VALID_REGIONS' explicit list -> mapped to "austria". First
+      subnational Austrian entry in the corpus. Vienna is Austria's
+      primary data-center market (Digital Realty's Floridsdorf facility
+      feeds waste heat via a 3MW heat-pump into DH for a hospital;
+      Vienna's EU AI Gigafactory bid proposed feeding server waste heat
+      into DH for ~200,000 households) and MA20 produces the Wiener
+      Waermeplan 2040. wien.gv.at intermittently returns a "Server Fehler"
+      page for some deep-link paths (observed on
+      /kontakte/ma20/energieraumplanung.html) — the publications index
+      path above was confirmed stable. The companion Wiener Waermeplan
+      2040 PDF (wien.gv.at/pdf/ma20/wwp-a3-web-l11.pdf, 9.8MB) also
+      resolved live but wasn't machine-readable this pass — worth adding
+      as a second start_path. verified: yes (browser-loaded page text
+      confirmed title + live publication links).
+
+# -----------------------------------------------------------------------------
+# Not included above (see INVENTORY.md appendix for full detail + reasons):
+#   - Thueringen Ministry direct site (umwelt.thueringen.de) — blocked by a
+#     Link11 CAPTCHA on every attempt; ThEGA entry above covers the same
+#     content as a working substitute.
+#   - Austria E-Control (e-control.at) — electricity/gas regulator only, no
+#     district-heating/waste-heat content found on-site despite a 2023 EAG
+#     amendment routing Fernwaerme price-transparency data there.
+#   - Brandenburg MIL (mil.brandenburg.de) — co-owns the heat-planning
+#     ordinance with MWEKE (above); not independently verified this pass.
+#   - LEKA MV (leka-mv.de) — MV's energy/climate agency, analogous to ThEGA;
+#     referenced by search only, not independently fetched.
+#   - Saarland Waermekataster tool (geoportal.saarland.de/article/
+#     Waermekataster/) — referenced from the Saarland ministry page above,
+#     not independently fetched/verified.
+# -----------------------------------------------------------------------------

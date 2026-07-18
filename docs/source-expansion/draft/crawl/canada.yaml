@@ -1,0 +1,285 @@
+# =============================================================================
+# DRAFT — Canada source expansion (tier-b crawl domains only)
+# Source: docs/source-expansion/regions/canada.md
+# Every entry below is `enabled: false`. Appends to config/domains/canada.yaml
+# (existing 13-entry file) — no new country file needed.
+# The tier-c candidate for this region (Donnees Quebec "Projets de loi" CKAN
+# API, id donneesquebec_bills) is NOT in this file — see
+# docs/source-expansion/draft/new-clients.md.
+# =============================================================================
+
+domains:
+  - name: "AESO — Large Load Projects (Data Centres)"
+    id: "aeso_large_load"
+    enabled: false
+    base_url: "https://www.aeso.ca"
+    start_paths:
+      - "/grid/connecting-to-the-grid/large-load-projects/"
+      - "/grid/connecting-to-the-grid/process-updates/"
+    region:
+      - "north_america"
+      - "canada"
+      - "alberta"
+    category: "grid_operator"
+    tags:
+      - "mandates"
+      - "planning"
+      - "efficiency"
+    policy_types:
+      - "guidance"
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (canada agent)"
+    notes: |
+      Highest-value Canada find. AESO's live framework for connecting data
+      centres to Alberta's grid (1,200MW interim cap, Phase 2 large-load
+      integration, "Guide to AESO Connection Requirements for
+      Transmission-Connected Data Centres" posted Jun 2026) — explicitly
+      discusses waste-heat/self-generation considerations for large loads.
+      robots.txt not fetchable by tooling but page loads fine in-browser;
+      no evidence of a real crawl restriction. verified: yes (live browser
+      fetch, June 2026-dated content).
+
+  - name: "BC Utilities Commission — Thermal Energy Systems"
+    id: "bcuc_thermal"
+    enabled: false
+    base_url: "https://www.bcuc.com"
+    start_paths:
+      - "/WhatWeDo/ThermalEnergySystems"
+    region:
+      - "north_america"
+      - "canada"
+      - "british_columbia"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (canada agent)"
+    notes: |
+      BCUC directly regulates "Thermal Energy System" (TES) providers — BC's
+      legal term for district heating/cooling. Publishes TES Guidelines
+      (five TES classes, filing/exemption requirements), links to live
+      proceedings (2026 Creative Energy Sen_akw rate order). robots.txt
+      returned 403 to automated fetch but page renders fully in-browser, no
+      login wall — likely bot-detection on root requests, not a real
+      restriction on this path. verified: yes (live browser fetch).
+
+  - name: "City of Vancouver — False Creek Neighbourhood Energy Utility (NEU)"
+    id: "vancouver_neu"
+    enabled: false
+    base_url: "https://vancouver.ca"
+    start_paths:
+      - "/home-property-development/southeast-false-creek-neighbourhood-energy-utility.aspx"
+      - "/home-property-development/how-the-utility-works.aspx"
+    region:
+      - "north_america"
+      - "canada"
+      - "british_columbia"
+    category: "district_heating"
+    tags:
+      - "efficiency"
+      - "planning"
+    policy_types:
+      - "program"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (canada agent)"
+    notes: |
+      City-owned district energy utility whose primary energy source (70%)
+      is literal waste-heat recovery (sewage heat via heat pumps) — a
+      textbook match for "thermal energy reuse" taxonomy, with a policy
+      history (Southeast False Creek development plan mandating low-carbon
+      heat). verified: yes (live browser fetch).
+
+  - name: "Markham District Energy Inc."
+    id: "markham_district_energy"
+    enabled: false
+    base_url: "https://www.markhamdistrictenergy.com"
+    start_paths:
+      - "/news-events/mde-news/"
+      - "/who-benefits/community/"
+    region:
+      - "north_america"
+      - "canada"
+      - "ontario"
+    category: "district_heating"
+    tags:
+      - "efficiency"
+      - "planning"
+    policy_types:
+      - "program"
+      - "report"
+    language: "en"
+    max_pages: 50
+    rate_limit_seconds: 2.0
+    verified_by: "source-expansion-research (canada agent)"
+    notes: |
+      Municipally-owned (City of Markham). Retrofitted an Equinix data
+      centre to supply heat recovery into its municipal thermal network;
+      currently building "the world's largest wastewater energy transfer"
+      facility (ground broken 2024, operational 2026). Directly documents a
+      live DC-to-district-heating pathway. robots.txt fetched cleanly:
+      disallows only /wp-admin/, crawl-delay 10s, sitemap at
+      /wp-sitemap.xml (WordPress, no Playwright needed).
+      verified: yes (root URL fetched).
+
+  - name: "City of Toronto — District Energy"
+    id: "toronto_district_energy"
+    enabled: false
+    base_url: "https://www.toronto.ca"
+    start_paths:
+      - "/services-payments/water-environment/environmentally-friendly-city-initiatives/district-energy/"
+    region:
+      - "north_america"
+      - "canada"
+      - "ontario"
+    category: "district_heating"
+    tags:
+      - "efficiency"
+      - "planning"
+    policy_types:
+      - "strategy"
+      - "program"
+    language: "en"
+    verified_by: "source-expansion-research (canada agent)"
+    notes: |
+      Ties district energy to TransformTO (Toronto's climate plan), 2050
+      target of 30% of floor space on low-carbon thermal networks, mentions
+      Enwave's Deep Lake Water Cooling system serving data centres as
+      anchor loads. robots.txt fetched cleanly — blocks legacy /legdocs/
+      and /wp-admin/ only. verified: yes (WebFetch).
+
+  - name: "NRC — National Energy Code of Canada for Buildings (Codes Canada)"
+    id: "nrc_codes_canada"
+    enabled: false
+    base_url: "https://nrc.canada.ca"
+    start_paths:
+      - "/en/certifications-evaluations-standards/codes-canada/codes-canada-publications"
+    region:
+      - "north_america"
+      - "canada"
+    category: "standards"
+    tags:
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "standard"
+    language: "en"
+    verified_by: "source-expansion-research (canada agent)"
+    notes: |
+      Federal standard adopted/enforced provincially (bridges national
+      standards work into subnational building/energy regulation, same
+      pattern as existing oee.nrcan.gc.ca entry). Baseline efficiency
+      standard referenced or adopted by every province. Editions every 5
+      years (2011/2015/2017/2020/2025). Distinct base_url from the existing
+      natural-resources.canada.ca and oee.nrcan.gc.ca entries, not a
+      duplicate. verified: yes (WebFetch confirmed 2025 edition page).
+
+  - name: "Regie de l'energie — Gouvernement du Quebec"
+    id: "regie_energie_qc"
+    enabled: false
+    base_url: "https://www.regie-energie.qc.ca"
+    start_paths:
+      - "/fr"
+      - "/fr/nouvelles/communiques"
+    region:
+      - "north_america"
+      - "canada"
+      - "quebec"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+      - "incentives"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "fr"
+    verified_by: "source-expansion-research (canada agent)"
+    notes: |
+      Quebec's counterpart to Ontario Energy Board/BCUC — regulates
+      Hydro-Quebec and Energir rates; active dossiers on building-heating
+      decarbonization support (e.g. D-2022-061 GHG-reduction rate mechanism
+      for dual-energy heating, 2025 renewable-gas connection rulings).
+      Existing quebec_energy/hydroquebec_ee entries cover ministry/utility
+      side only, not the regulator. verified: yes (root URL fetched,
+      D-2022-061 corroborated via quebec.ca news release).
+
+  - name: "Legislative Assembly of Ontario — Bills"
+    id: "ola_bills"
+    enabled: false
+    base_url: "https://www.ola.org"
+    start_paths:
+      - "/en/legislative-business/bills/all"
+      - "/en/legislative-business/bills/current"
+    region:
+      - "north_america"
+      - "canada"
+      - "ontario"
+    category: "legislative"
+    tags:
+      - "mandates"
+    policy_types:
+      - "legislation"
+    language: "en"
+    verified_by: "source-expansion-research (canada agent)"
+    notes: |
+      NOT an open-data/API source despite general preference — the "Data
+      resources" page has moved/broken and no RSS/API was found on the
+      bills pages during this pass; plain HTML crawl only. Fills Ontario's
+      provincial-legislation gap (existing ontario_energy/oeb_ca/ieso_ca
+      entries are all executive-branch, not legislative) in Canada's
+      largest data-centre-market province. robots.txt (Drupal site) blocks
+      admin/auth paths only, not /legislative-business/bills/*.
+      verified: yes (WebFetch, confirmed sessions from 36th Parliament to
+      current 44th).
+
+  - name: "Government of Manitoba — Energy Efficiency (Environment, Climate and Parks)"
+    id: "manitoba_energy"
+    enabled: false
+    base_url: "https://www.gov.mb.ca"
+    start_paths:
+      - "/sd/environment_and_biodiversity/energy/green_bldg.html"
+      - "/sd/environment_and_biodiversity/energy/incentives.html"
+    region:
+      - "north_america"
+      - "canada"
+      - "manitoba"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "incentives"
+    policy_types:
+      - "regulation"
+      - "program"
+    language: "en"
+    verified_by: "source-expansion-research (canada agent)"
+    notes: |
+      First Manitoba entry in canada.yaml. Documents the Energy Savings Act
+      (retrofit financing), a Green Building Policy requiring LEED Silver on
+      government-funded projects, North America's highest gas-furnace
+      efficiency standard (92%), and Manitoba Hydro industrial
+      waste-heat/bioenergy incentive programs referenced from this page.
+      robots.txt fetched cleanly — blocks unrelated department sub-pages
+      only. verified: yes (WebFetch).
+
+# -----------------------------------------------------------------------------
+# Recommended EDIT (not a new domain, not included above): append the
+# CanmetENERGY district-energy/waste-heat-mapping research page
+# (natural-resources.canada.ca/science-data/science-research/research-centres/
+# cost-effective-large-scale-district-energy-thermal-storage-systems-flexible-
+# resilient-energy-efficient-communities-0) to the EXISTING nrcan_ca entry's
+# start_paths in config/domains/canada.yaml — its base_url is already present,
+# so it is not a new-domain candidate. Explicitly names data centers as a heat
+# source. verified live and on-topic.
+#
+# Not included above (see INVENTORY.md appendix for full detail):
+#   - Nova Scotia Department of Energy — efficiency subpage returned "Access
+#     denied" (bot-detection) to both fetch tools; needs human/Playwright
+#     recheck before a start_path can be picked.
+# -----------------------------------------------------------------------------

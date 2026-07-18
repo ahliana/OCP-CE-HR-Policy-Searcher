@@ -1,0 +1,389 @@
+# =============================================================================
+# DRAFT — East Asia (Japan/South Korea/China/Taiwan/Hong Kong) source
+# expansion (tier-b crawl domains only)
+# Source: docs/source-expansion/regions/east-asia.md
+# Every entry below is `enabled: false`. Japan/South Korea entries append to
+# config/domains/apac.yaml (existing). China has ZERO prior coverage — new
+# file config/domains/china.yaml needed. Taiwan and Hong Kong likewise have
+# zero prior coverage — new files config/domains/taiwan.yaml and
+# config/domains/hong_kong.yaml needed.
+# Tier-c candidates for this region (e-Gov Law API v2, Open Assembly
+# Information API, Open Law API, data.gov.sg contingent) are NOT in this
+# file — see docs/source-expansion/draft/new-clients.md.
+#
+# Region-value note: China/Taiwan/Hong Kong are not individually in
+# VALID_REGIONS (src/core/config.py) — mapped to the broad valid "apac"
+# bucket; country identity preserved in id/name/notes. Japan and
+# South Korea ARE individually valid ("japan", "south_korea").
+# =============================================================================
+
+domains:
+  - name: "Beijing Municipal People's Government - Data Center Policy"
+    id: "beijing_gov_dc"
+    enabled: false
+    base_url: "https://www.beijing.gov.cn"
+    start_paths:
+      - "/zhengce/zhengcefagui/202411/t20241115_3942264.html"
+      - "/zhengce/zcjd/202411/t20241118_3942744.html"
+    region:
+      - "apac"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "pue_limits"
+      - "carbon"
+    policy_types:
+      - "regulation"
+      - "incentive"
+    language: "zh"
+    verified_by: "source-expansion-research (east-asia agent)"
+    notes: |
+      New file: config/domains/china.yaml. Region mapped to "apac" — China
+      not individually in VALID_REGIONS (see file header note). Beijing
+      Existing Data Center Optimization Work Plan (2024-2027, doc # jing
+      jing xin fa [2024] 62): average annual PUE <=1.35 by 2027 for
+      existing DCs; differential (higher) electricity pricing for DCs
+      exceeding the PUE standard (+CNY0.2/kWh, +CNY0.5/kWh phased);
+      subsidies up to CNY30M per green retrofit. Most detailed, current
+      municipal PUE-linked pricing/incentive regime found in East Asia.
+      Tag "differential_pricing" from the original mapped to "mandates" is
+      NOT included since it's a pricing surcharge, not purely
+      regulatory-mandate language — kept as "mandatory"/"pue_limits"/
+      "carbon" per the closest VALID_TAGS fit. A third start_path (2023
+      DC energy-review rules) was found via search but not independently
+      fetched — see INVENTORY appendix, not included here.
+      verified: yes (fetched directly, PUE<=1.35 target text confirmed).
+
+  - name: "Shanghai Municipal People's Government - Data Center Policy"
+    id: "shanghai_gov_dc"
+    enabled: false
+    base_url: "https://www.shanghai.gov.cn"
+    start_paths:
+      - "/gwk/search/content/9dd958b26fa249d4a32367dce97211bf"
+      - "/nw12344/20240914/a33482feb8a24666ad745e95ef295f03.html"
+    region:
+      - "apac"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "pue_limits"
+      - "carbon"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+    language: "zh"
+    verified_by: "source-expansion-research (east-asia agent)"
+    notes: |
+      New file: config/domains/china.yaml. Region mapped to "apac" (see
+      file header note). Shanghai's Implementation Opinion (hu jing xin ji
+      [2022] 306) + 2024-2027 green low-carbon transition action plan.
+      New large clustered DCs: PUE <=1.25; existing centers with PUE >1.7
+      (small/old/<800 racks/10+ years) targeted for phase-out. References
+      national standard GB 40879-2021 and local standard DB31/652-2020. A
+      second candidate path (/hqcyfz2/20230626/...) 404'd during
+      verification and was dropped. verified: yes (fetched directly,
+      document number + PUE targets confirmed).
+
+  - name: "Ministry of Industry and Information Technology (MIIT) - Data Center Policy (China)"
+    id: "miit_cn"
+    enabled: false
+    base_url: "https://www.miit.gov.cn"
+    start_paths:
+      - "/zwgk/zcjd/art/2021/art_792413b03def477d93e2bb445c1692a2.html"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "mandatory"
+      - "pue_limits"
+      - "efficiency"
+      - "carbon"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "zh"
+    verified_by: "source-expansion-research (east-asia agent)"
+    notes: |
+      New file: config/domains/china.yaml. Region mapped to "apac" (see
+      file header note). New Data Center Development Three-Year Action
+      Plan (2021-2023): PUE <=1.3 for new large facilities nationally,
+      <=1.25 in cold-climate regions; hub-node/provincial/edge DC layout
+      guidance; liquid cooling and clean-energy siting encouraged. This is
+      the named ministry (MIIT) in the brief for China. Same document is
+      mirrored on gov.cn (govcn_dc below), which may be more resilient if
+      miit.gov.cn becomes unreachable. verified: yes (fetched directly,
+      MIIT-issued infographic page confirmed; PUE figures cross-confirmed
+      via the gov.cn mirror).
+
+  - name: "China State Council Gazette / gov.cn - Data Center & Energy Notices"
+    id: "govcn_dc"
+    enabled: false
+    base_url: "https://www.gov.cn"
+    start_paths:
+      - "/zhengce/zhengceku/2021-07/14/content_5624964.htm"
+    region:
+      - "apac"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "pue_limits"
+    policy_types:
+      - "regulation"
+    language: "zh"
+    verified_by: "source-expansion-research (east-asia agent)"
+    notes: |
+      New file: config/domains/china.yaml. Region mapped to "apac" (see
+      file header note). China's central "zhengceku" (policy repository)
+      mirrors MIIT Notice gong xin bu tong xin [2021] 76 (full text of
+      the New Data Center 3-Year Action Plan) — more resilient access
+      point than individual ministry domains (ministry sites often only
+      host interpretive summaries/infographics); worth using as a fallback
+      aggregator across MIIT/NDRC/NEA notices generally, not just this
+      document. verified: yes (fetched directly, full notice text with
+      document number/date/PUE targets confirmed).
+
+  - name: "Hong Kong SAR - Data Centre Facilitation Measures Portal"
+    id: "datacentre_hk"
+    enabled: false
+    base_url: "https://www.datacentre.gov.hk"
+    start_paths:
+      - "/en/facilitation_measures/energy_efficiency.html"
+      - "/en/"
+    region:
+      - "apac"
+    category: "regulatory"
+    tags:
+      - "efficiency"
+      - "incentives"
+    policy_types:
+      - "guidance"
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (east-asia agent)"
+    notes: |
+      New file: config/domains/hong_kong.yaml. Region mapped to "apac"
+      (see file header note). One-stop government portal (Digital Policy
+      Office, formerly OGCIO) aggregating Hong Kong's DC-specific
+      facilitation measures: Building Energy Efficiency Ordinance (BEEO)
+      application to DCs, the Fresh Water Cooling Towers Scheme, Green
+      Data Centres Practice Guide, BEAM Plus Data Centres assessment tool.
+      Best aggregator found for HK DC energy policy — better than crawling
+      EMSD alone since it cross-links Buildings Dept and Digital Policy
+      Office material too. First Hong Kong source for this project.
+      verified: yes (both paths fetched directly).
+
+  - name: "Electrical and Mechanical Services Department (EMSD) - Energy Management (Hong Kong)"
+    id: "emsd_hk"
+    enabled: false
+    base_url: "https://www.emsd.gov.hk"
+    start_paths:
+      - "/en/energy_efficiency/energy_management/index.html"
+      - "/en/energy_efficiency/new_renewable_energy/index.html"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "mandatory"
+      - "efficiency"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (east-asia agent)"
+    notes: |
+      New file: config/domains/hong_kong.yaml. Region mapped to "apac"
+      (see file header note). EMSD is the exact agency the brief names for
+      Hong Kong (equivalent regulator to METI/MOTIE) — BEEO (mandatory
+      energy audits every 10 years for commercial buildings, includes
+      DCs), online building energy benchmarking tool, HK EE Net technical
+      library. Note: a more DC-specific path found via search
+      (/en/energy_efficiency/quality_professional_services/data_centre/
+      index.html) 404'd on direct fetch — do NOT use that path.
+      verified: yes (both paths above fetched directly).
+
+  - name: "Tokyo Bureau of Urban Development - Data Center Urban Development Guideline"
+    id: "tokyo_toshiseibi_dc"
+    enabled: false
+    base_url: "https://www.toshiseibi.metro.tokyo.lg.jp"
+    start_paths:
+      - "/machizukuri/smarttokyo/datacenter"
+    region:
+      - "apac"
+      - "japan"
+    category: "standards"
+    tags:
+      - "planning"
+      - "efficiency"
+      - "district_heating"
+    policy_types:
+      - "guidance"
+    language: "ja"
+    verified_by: "source-expansion-research (east-asia agent)"
+    notes: |
+      New file: config/domains/japan.yaml, OR append to config/domains/
+      apac.yaml alongside the existing meti_jp/enecho_jp/elaws_jp entries
+      (a human should decide file placement — Japan may warrant its own
+      file given how much Japan-specific content this pass surfaced).
+      Single highest-value find for the whole East Asia region: TMG's
+      "Guideline for Data Centers Harmonized with Urban Development"
+      (published Mar 31, 2026) explicitly covers power-demand
+      coordination, decarbonization, and NEW support for utilizing
+      data-center waste heat in surrounding communities, plus a
+      forthcoming (FY2026) environment-conscious DC certification scheme.
+      Tokyo holds roughly half of Japan's DC floor space per TMG's own
+      published figure. VERIFICATION CAVEAT: the guideline's existence was
+      confirmed via the Mar 2026 TMG press release
+      (metro.tokyo.lg.jp/information/press/2026/03/2026033122), but this
+      specific bureau-subdomain landing page was located via search and
+      NOT independently re-fetched with WebFetch — one confidence level
+      below a direct fetch (see INVENTORY appendix).
+
+  - name: "Tokyo Metropolitan Government Bureau of Environment - Cap-and-Trade Program"
+    id: "tokyo_kankyo_capandtrade"
+    enabled: false
+    base_url: "https://www.kankyo.metro.tokyo.lg.jp"
+    start_paths:
+      - "/climate/large_scale/index.html"
+    region:
+      - "apac"
+      - "japan"
+    category: "regulatory"
+    tags:
+      - "mandatory"
+      - "carbon"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "ja"
+    verified_by: "source-expansion-research (east-asia agent)"
+    notes: |
+      New file: config/domains/japan.yaml (see placement note on
+      tokyo_toshiseibi_dc above). World's first urban cap-and-trade
+      scheme; mandatory CO2 reduction for large facilities using
+      >=1,500kL crude-oil-equivalent/year (same threshold used in the
+      national DC energy-efficiency benchmark) — covers large Tokyo data
+      centers as regulated entities. 4th compliance period FY2025-FY2029.
+      Distinct scheme from the national METI/ANRE benchmark already
+      tracked (enecho_jp). An English program-summary PDF exists
+      (english.metro.tokyo.lg.jp/documents/d/english/
+      outlineoftheprogram_4th, 758KB) but is image-embedded/not
+      machine-readable — supplementary artifact only, not the primary
+      crawl target. The old "Eco-Conscious Data Center Certification"
+      scheme page (/climate/large_scale/dc.html) was confirmed
+      DISCONTINUED since March 2017 — do not propose that path.
+      verified: yes (fetched directly, program description + 1,500kL
+      threshold confirmed).
+
+  - name: "Korea Energy Agency (KEA)"
+    id: "kea_kr"
+    enabled: false
+    base_url: "https://www.energy.or.kr"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+      - "south_korea"
+    category: "regulatory"
+    tags:
+      - "efficiency"
+      - "reporting"
+    policy_types:
+      - "standard"
+      - "guidance"
+    language: "ko"
+    verified_by: "source-expansion-research (east-asia agent)"
+    notes: |
+      Append to config/domains/apac.yaml. Implements zero-energy building
+      certification, industrial energy audits/voluntary efficiency
+      targets, public-facility power monitoring — the implementing agency
+      underneath MOTIE's policy (existing motie_kr entry is the ministry
+      itself, not the implementing agency). No confirmed dedicated
+      data-center program page — DC relevance is adjacent/implementing-
+      agency value rather than DC-specific; a deeper crawl/discovery pass
+      may find a more targeted start_path. verified: yes (site identity
+      only — official Korean e-government site confirmed).
+
+  - name: "Energy Administration, Ministry of Economic Affairs (MOEAEA, Taiwan)"
+    id: "moeaea_tw"
+    enabled: false
+    base_url: "https://www.moeaea.gov.tw"
+    start_paths:
+      - "/ECW/populace/home/Home.aspx"
+      - "/ECW/english/content/ContentLink.aspx?menu_id=977"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "incentives"
+      - "carbon"
+    policy_types:
+      - "regulation"
+      - "incentive"
+      - "guidance"
+    language: "zh"
+    verified_by: "source-expansion-research (east-asia agent)"
+    notes: |
+      New file: config/domains/taiwan.yaml. Region mapped to "apac" (see
+      file header note). This is the exact agency named in the brief for
+      Taiwan (MOEA), and Taiwan currently has ZERO entries anywhere in
+      config/domains/ — foundational national source for the country.
+      Energy conservation programs, subsidy schemes, energy statistics,
+      responsible for the Energy Administration Act (governs large
+      energy-consuming facilities, a category that includes data centers)
+      en route to Taiwan's 2050 net-zero target. Bilingual site (zh-TW
+      primary, English available). verified: yes (fetched directly,
+      official site + content sections confirmed).
+
+  - name: "Laws & Regulations Database of the R.O.C. (Ministry of Justice, Taiwan)"
+    id: "law_moj_tw"
+    enabled: false
+    base_url: "https://law.moj.gov.tw"
+    start_paths:
+      - "/Eng/index.aspx"
+      - "/ENG/LawClass/LawAll.aspx?pcode=J0130002"
+      - "/ENG/LawClass/LawAll.aspx?pcode=J0130032"
+    region:
+      - "apac"
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "energy_efficiency"
+    policy_types:
+      - "law"
+      - "legislation"
+    language: "en"
+    verified_by: "source-expansion-research (east-asia agent)"
+    notes: |
+      New file: config/domains/taiwan.yaml. Region mapped to "apac" (see
+      file header note). Full bilingual statutory text for Taiwan's energy
+      law, including the Energy Administration Act and Renewable Energy
+      Development Act — statutory-text companion to moeaea_tw above. No
+      API found despite a targeted search — crawl-only. Chinese text is
+      authoritative over English per the site's own disclaimer. The
+      English index page was fetched directly; the two specific
+      LawAll.aspx law pages were confirmed live via WebSearch result
+      snippets showing real article text, not independently re-fetched
+      with WebFetch this pass. verified: yes for /Eng/index.aspx (direct
+      fetch); the two pcode-specific pages one confidence level below
+      (search-confirmed only).
+
+# -----------------------------------------------------------------------------
+# Not included above (see INVENTORY.md appendix for full detail + reasons):
+#   - Guizhou Provincial Big Data Development and Management Bureau
+#     (dsj.guizhou.gov.cn) — every direct fetch attempt returned
+#     connect ECONNREFUSED from this environment; content described via
+#     WebSearch snippets only, not directly fetched.
+#   - Beijing DRC 2023 data-center energy-review rules (a third
+#     beijing_gov_dc start_path) — found via WebSearch, not independently
+#     fetched this session; likely resolves given the rest of the portal
+#     verified cleanly, but not confirmed.
+#   - Korea District Heating Corporation (KDHC, kdhc.co.kr) — state-run DH
+#     utility matching the brief's "district heating authorities" ask;
+#     WebFetch returned connect ECONNREFUSED, not confirmed reachable.
+#   - e-Gov Law API v2 machine-readable schema — API/docs URLs confirmed
+#     live, but Swagger UI is client-rendered; exact endpoint schema not
+#     independently confirmed from a text fetch (tier-c candidate, see
+#     new-clients.md for egov_law_api).
+# -----------------------------------------------------------------------------

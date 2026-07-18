@@ -1,0 +1,638 @@
+# =============================================================================
+# DRAFT — Oceania + South Asia + Southeast Asia source expansion (tier-b
+# crawl domains only)
+# Source: docs/source-expansion/regions/oceania-south-asia.md
+# Every entry below is `enabled: false`. AU entries append to
+# config/domains/australia.yaml. India entries append to
+# config/domains/india.yaml. NZ entries need a NEW file
+# config/domains/new_zealand.yaml. Philippines/Malaysia/Indonesia/Vietnam
+# each need a NEW file (philippines.yaml, malaysia.yaml, indonesia.yaml,
+# vietnam.yaml) — zero prior coverage for any of the four.
+# Tier-c candidate for this region (New Zealand Legislation API) is NOT in
+# this file — see docs/source-expansion/draft/new-clients.md.
+#
+# Region-value note: Western Australia/Queensland/Victoria are not
+# individually in VALID_REGIONS (only new_south_wales/south_australia are) —
+# mapped to the broader valid "australia". Rajasthan/Haryana/West Bengal/
+# Gujarat are likewise not individual (only karnataka/tamil_nadu/telangana/
+# maharashtra are) — mapped to "india". New Zealand, Philippines, Malaysia,
+# Indonesia, Vietnam are not in VALID_REGIONS at all — mapped to the broad
+# "apac" bucket. State/country identity is preserved in id/name/notes.
+# =============================================================================
+
+domains:
+  - name: "Australian Energy Regulator (AER)"
+    id: "aer_au"
+    enabled: false
+    base_url: "https://www.aer.gov.au"
+    start_paths:
+      - "/industry/networks"
+      - "/about/strategic-initiatives/network-tariff-reform"
+      - "/industry/registers/resources/guidelines/connection-charge-guidelines"
+    region:
+      - "apac"
+      - "australia"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      Append to config/domains/australia.yaml. Highest-value find in the
+      whole region: AER publishes a dedicated "Data Centre Connections"
+      guidance document (PAL RRP BUS 3.6.01, Dec 2025) and multiple
+      distribution-determination attachments discussing DC connection cost
+      allocation (e.g. Powercor 2026-31 "Connection policy" attachment). A
+      national economic regulator writing rules specifically about DC grid
+      connections — most DC-specific regulatory document found region-
+      wide. Direct WebFetch to the root domain timed out (likely
+      bot-detection on "/"); sub-pages and PDFs resolved per
+      search-engine cache/snippets. verified: yes (WebSearch confirmed
+      live PDF URLs; root-domain direct fetch not independently
+      re-confirmed — one confidence level below a full direct fetch).
+
+  - name: "Australian Energy Market Commission (AEMC)"
+    id: "aemc_au"
+    enabled: false
+    base_url: "https://www.aemc.gov.au"
+    start_paths:
+      - "/"
+      - "/rule-changes"
+    region:
+      - "apac"
+      - "australia"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "data_center_specific"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      Append to config/domains/australia.yaml. Active draft rule proposing
+      technical standards for data-center grid connections (National
+      Electricity Rules amendment). verified: yes (WebFetch to root
+      succeeded, homepage confirms National Electricity/Gas/Retail Rules
+      mandate + the data-center rule-change news item).
+
+  - name: "Energy Policy WA (Western Australia)"
+    id: "energy_policy_wa"
+    enabled: false
+    base_url: "https://www.wa.gov.au"
+    start_paths:
+      - "/organisation/energy-policy-wa"
+    region:
+      - "apac"
+      - "australia"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "planning"
+      - "renewable_energy"
+    policy_types:
+      - "strategy"
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      Append to config/domains/australia.yaml. Region mapped: Western
+      Australia -> "australia" (see file header note). WA's state
+      energy-policy body — Energy Transformation Strategy, Future Energy
+      System Outlook, Pilbara Energy Transition Plan, PoweringWA reporting
+      platform — none captured by the existing three AU files.
+      verified: yes (WebFetch confirmed live content).
+
+  - name: "Queensland Treasury - Energy"
+    id: "qld_treasury_energy"
+    enabled: false
+    base_url: "https://www.treasury.qld.gov.au"
+    start_paths:
+      - "/policies-and-programs/energy/"
+      - "/policies-and-programs/energy/energy-roadmap/"
+    region:
+      - "apac"
+      - "australia"
+    category: "energy_ministry"
+    tags:
+      - "planning"
+      - "renewable_energy"
+    policy_types:
+      - "strategy"
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      Append to config/domains/australia.yaml. Region mapped: Queensland
+      -> "australia" (see file header note). energy.qld.gov.au and
+      energyandclimate.qld.gov.au both 301-redirect here — Queensland
+      folded its standalone energy department into Treasury; use
+      treasury.qld.gov.au as canonical base_url. Largest AU state not yet
+      covered. verified: yes (HTTP 307 redirect confirms path is live;
+      corroborated via the Energy Roadmap page and QLD Audit Office
+      "Energy 2025" report referencing this department).
+
+  - name: "Victoria - DEECA Energy"
+    id: "vic_energy"
+    enabled: false
+    base_url: "https://www.energy.vic.gov.au"
+    start_paths:
+      - "/businesses/tips-for-managing-business-energy-costs"
+      - "/grants/energy-innovation-fund"
+      - "/renewable-energy/victorias-electricity-future"
+    region:
+      - "apac"
+      - "australia"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "incentives"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "standard"
+      - "incentive"
+    language: "en"
+    requires_playwright: true
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      Append to config/domains/australia.yaml. Region mapped: Victoria ->
+      "australia" (see file header note). Victorian Energy Upgrades
+      program (mandatory efficiency scheme with Measurement & Verification
+      manual), 7-star new-home efficiency standard, Gas Substitution
+      Roadmap. Melbourne is a major AU DC market. Direct WebFetch/curl
+      returned 403 (bot-detection front door, likely Akamai/Cloudflare) —
+      requires_playwright recommended. verified: partial — direct fetch
+      blocked (403); content confirmed live/on-topic via WebSearch
+      snippets pointing directly at energy.vic.gov.au PDFs (Victorian
+      Energy Upgrades Specifications v19/v21, Benchmark Rating
+      Specifications, Gas Substitution Roadmap). Recommend a human/browser
+      check before enabling.
+
+  - name: "EECA - Energy Efficiency and Conservation Authority (New Zealand)"
+    id: "eeca_nz"
+    enabled: false
+    base_url: "https://www.eeca.govt.nz"
+    start_paths:
+      - "/"
+      - "/co-funding-and-support"
+      - "/insights"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "standard"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      New file: config/domains/new_zealand.yaml. Region mapped to "apac"
+      — New Zealand not in VALID_REGIONS (see file header note). NZ's
+      dedicated efficiency-mandate body (E3 equipment-efficiency
+      programme, business energy audits, Regional Heat Demand Database
+      tool — directly relevant to district-heating taxonomy). No NZ
+      efficiency-ministry coverage exists in current config at all.
+      verified: yes (WebFetch confirmed E3 programme, business energy
+      management guidance, Regional Heat Demand Database tool).
+
+  - name: "MBIE - Energy and Natural Resources (New Zealand)"
+    id: "mbie_energy_nz"
+    enabled: false
+    base_url: "https://www.mbie.govt.nz"
+    start_paths:
+      - "/building-and-energy/energy-and-natural-resources/"
+      - "/building-and-energy/energy-and-natural-resources/energy-strategies-for-new-zealand"
+      - "/building-and-energy/energy-and-natural-resources/low-emissions-economy"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "planning"
+      - "carbon"
+      - "mandates"
+    policy_types:
+      - "strategy"
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      New file: config/domains/new_zealand.yaml. Region mapped to "apac"
+      (see file header note). NZ's primary energy-ministry function
+      (energy strategy, low-emissions economy, generation and markets)
+      sits here, not at EECA. verified: yes (WebFetch confirmed full page
+      tree under this path).
+
+  - name: "Rajasthan Electricity Regulatory Commission (RERC)"
+    id: "rerc_in"
+    enabled: false
+    base_url: "https://rerc.rajasthan.gov.in"
+    start_paths:
+      - "/"
+    max_depth: 2
+    region:
+      - "apac"
+      - "india"
+    category: "regulatory_authority"
+    tags:
+      - "reporting"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      Append to config/domains/india.yaml (new Rajasthan section). Region
+      mapped: Rajasthan -> "india" (see file header note). Genuinely new
+      source TYPE for the India file — existing entries are ministries and
+      state DC/renewable-incentive bodies, no State Electricity Regulatory
+      Commission (SERC) covered yet. Publishes tariff orders/regulations
+      under the Electricity Act 2003. Exact "Orders"/tariff-order listing
+      slug not confirmed — start at root with max_depth 2.
+      verified: yes (Orders/Regulations/Acts & Policies/Case Status/
+      E-Filing sections confirmed; HTTP 200).
+
+  - name: "Rajasthan Renewable Energy Corporation (RRECL)"
+    id: "rrecl_in"
+    enabled: false
+    base_url: "https://energy.rajasthan.gov.in"
+    start_paths:
+      - "/rrecl/"
+    region:
+      - "apac"
+      - "india"
+    category: "energy_ministry"
+    tags:
+      - "renewable_energy"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "program"
+    language: "en"
+    requires_playwright: true
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      Append to config/domains/india.yaml (new Rajasthan section). Region
+      mapped: Rajasthan -> "india" (see file header note). Rajasthan hosts
+      the 2,245MW Bhadla Solar Park and is a major renewable-energy state;
+      RRECL is its nodal agency, not yet covered. Page content is a
+      thin/near-empty JS shell on plain fetch — requires_playwright
+      recommended. verified: yes (reachable, HTTP 200) but on-topic
+      content confirmed via WebSearch/third-party description rather than
+      direct page text — recommend a human follow-up check before
+      enabling.
+
+  - name: "Haryana Renewable Energy Development Agency (HAREDA)"
+    id: "hareda_in"
+    enabled: false
+    base_url: "https://hareda.gov.in"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+      - "india"
+    category: "energy_ministry"
+    tags:
+      - "renewable_energy"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "program"
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      Append to config/domains/india.yaml (new Haryana section). Region
+      mapped: Haryana -> "india" (see file header note). Haryana renewable-
+      energy nodal agency and Energy Conservation Act implementer, not yet
+      covered. Has an online-services/SARAL portal for applications — not
+      a policy source itself, skip that branch. verified: yes (Programmes,
+      Policy & Regulations, PM KUSUM Haryana, Energy Conservation Act
+      sections confirmed; HTTP 200).
+
+  - name: "West Bengal Renewable Energy Development Agency (WBREDA)"
+    id: "wbreda_in"
+    enabled: false
+    base_url: "https://wbreda.org"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+      - "india"
+    category: "energy_ministry"
+    tags:
+      - "renewable_energy"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "program"
+      - "strategy"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      Append to config/domains/india.yaml (new West Bengal section).
+      Region mapped: West Bengal -> "india" (see file header note). State
+      nodal agency since 1993; publishes the Renewable Energy Policy of
+      West Bengal plus solar/bio/tidal/mini-hydel programs. Fills an
+      East-India gap. verified: yes (live content + dated Feb 2026 tender
+      notices confirmed, Renewable Energy Policy document linked).
+
+  - name: "Gujarat Energy Development Agency (GEDA)"
+    id: "geda_in"
+    enabled: false
+    base_url: "https://geda.gujarat.gov.in"
+    start_paths:
+      - "/Gallery/Media_Gallery"
+    region:
+      - "apac"
+      - "india"
+    category: "energy_ministry"
+    tags:
+      - "renewable_energy"
+      - "incentives"
+    policy_types:
+      - "incentive"
+      - "strategy"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      Append to config/domains/india.yaml (new Gujarat section). Region
+      mapped: Gujarat -> "india" (see file header note). Gujarat is
+      India's #1 state by renewable-energy capacity (29GW); GEDA is
+      SNA/SDA for both MNRE and BEE, just published the Gujarat Integrated
+      Renewable Energy Policy 2025. Direct fetch (WebFetch and curl,
+      twice each) failed to connect from the research environment
+      (ECONNRESET/timeout) — plausibly a network/geo restriction on Indian
+      government hosting rather than the site being down.
+      verified: NO direct fetch success — WebSearch returned live,
+      cache-visible URLs (including the Renewable Energy Policy 2023 PDF
+      at this domain), confirming the site/documents exist. RECOMMEND
+      HUMAN VERIFICATION before enabling given the direct-connection
+      failures.
+
+  - name: "Central Electricity Regulatory Commission (CERC, India)"
+    id: "cerc_in"
+    enabled: false
+    base_url: "https://cercind.gov.in"
+    start_paths:
+      - "/Current_reg.html"
+      - "/regulations.html"
+    region:
+      - "apac"
+      - "india"
+    category: "regulatory_authority"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      Append to config/domains/india.yaml (national section). National
+      apex electricity regulator (tariff determination, inter-state
+      transmission, RE-tariff regulations) — the existing cea_in entry
+      (Central Electricity Authority) is a PLANNING body, CERC is the
+      TARIFF/REGULATORY body; distinct and complementary. Same
+      connection-reset behavior as geda_in from the research environment.
+      verified: NO direct fetch success (ECONNRESET twice) — WebSearch
+      confirmed multiple live, on-topic URLs. RECOMMEND HUMAN
+      VERIFICATION before enabling.
+
+  - name: "India Code (national legislation repository)"
+    id: "india_code"
+    enabled: false
+    base_url: "https://www.indiacode.nic.in"
+    start_paths:
+      - "/handle/123456789/1362/browse?type=shorttitle"
+      - "/handle/123456789/2489/simple-search"
+    region:
+      - "apac"
+      - "india"
+    category: "legislative"
+    tags:
+      - "mandates"
+    policy_types:
+      - "law"
+      - "legislation"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      Append to config/domains/india.yaml (national section). Authoritative
+      full-text repository of all central and state Acts — a genuine
+      legislative primary-source gap (existing India entries are only
+      ministry/agency policy pages, not the Acts themselves). DSpace-based
+      repository; no confirmed REST/JSON API (an OAI-PMH feed may exist
+      but was not confirmed) — crawl target, not a structured-API
+      candidate. Direct WebFetch returned HTTP 403 (bot-detection).
+      verified: partial — direct fetch blocked (403); WebSearch confirmed
+      the site is live and structured (browse-by-shorttitle, act-detail
+      pages, full-text search). RECOMMEND HUMAN VERIFICATION (e.g. via
+      browser) before enabling.
+
+  - name: "PRS Legislative Research (India)"
+    id: "prs_india"
+    enabled: false
+    base_url: "https://prsindia.org"
+    start_paths:
+      - "/billtrack"
+      - "/theprsblog"
+    region:
+      - "apac"
+      - "india"
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "legislation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      Append to config/domains/india.yaml (national section). JUDGMENT
+      CALL FLAG: PRS is an independent NONPROFIT tracking Parliament +
+      state legislatures, NOT a government body itself — the standard
+      citation for India bill-status tracking (used by policymakers and
+      press), covers state legislatures too (otherwise very hard to track
+      centrally). Weigh against the brief's "not news blogs" bar; this
+      reads as an official-adjacent legislative-tracking utility rather
+      than commentary, but a human should confirm it clears the bar before
+      enabling. Content under CC-BY 4.0; no API found. Exact current
+      start_paths should be re-confirmed at crawl-build time.
+      verified: yes (WebFetch confirmed bill/act/state-legislation/
+      budget/committee tracking + licensing).
+
+  - name: "Philippines Department of Energy (DOE)"
+    id: "doe_ph"
+    enabled: false
+    base_url: "https://www.doe.gov.ph"
+    start_paths:
+      - "/energy-efficiency-ec"
+      - "/"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+      - "data_center_specific"
+    policy_types:
+      - "law"
+      - "regulation"
+      - "guidance"
+    language: "en"
+    requires_playwright: true
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      New file: config/domains/philippines.yaml. Region mapped to "apac"
+      — Philippines not in VALID_REGIONS (see file header note). One of
+      the most directly on-topic finds in the whole region: DOE is
+      actively drafting a data-center energization policy (reported by
+      Philippine News Agency, DOE Secretary quoted) and already
+      administers Republic Act 11285 (Energy Efficiency and Conservation
+      Act, 2024) with implementing circulars on building energy
+      conservation and equipment labeling. Direct WebFetch returned 403
+      (bot-detection front door) — requires_playwright recommended.
+      Legacy path "/energy-efficiency-ec" should be re-verified at
+      crawl-build time (current nav may have moved). verified: yes via
+      WebSearch corroboration across PNA, DOE's own legacy subdomain, and
+      third-party (PE2 alliance) sources; direct fetch blocked by 403.
+
+  - name: "SEDA - Sustainable Energy Development Authority (Malaysia)"
+    id: "seda_my"
+    enabled: false
+    base_url: "https://www.seda.gov.my"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "renewable_energy"
+      - "incentives"
+      - "efficiency"
+    policy_types:
+      - "incentive"
+      - "law"
+      - "program"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      New file: config/domains/malaysia.yaml. Region mapped to "apac" —
+      Malaysia not in VALID_REGIONS (see file header note). Statutory
+      renewable/efficiency authority under Renewable Energy Act 2011 and
+      SEDA Act 2011 — Feed-in-Tariff, Net Energy Metering, Energy Audit
+      Conditional Grants. Exact feed-in-tariff/NEM/Solar ATAP/energy-audit
+      program page slugs should be confirmed at crawl-build time.
+      verified: yes (WebFetch confirmed full content).
+
+  - name: "Energy Commission (Suruhanjaya Tenaga, Malaysia)"
+    id: "st_my"
+    enabled: false
+    base_url: "https://www.st.gov.my"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+    category: "regulatory_authority"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "regulation"
+      - "standard"
+    language: "en"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      New file: config/domains/malaysia.yaml. Region mapped to "apac"
+      (see file header note). National electricity/gas regulator —
+      licensing, tariff frameworks, Registered Energy Auditor scheme;
+      complements SEDA's incentive-side coverage with the regulatory
+      side. Exact energy-efficiency/stakeholders/pricing-framework page
+      slugs should be confirmed at crawl-build time. verified: yes
+      (WebFetch confirmed Energy Efficiency section, pricing frameworks,
+      consultation papers).
+
+  - name: "Ministry of Energy and Mineral Resources (ESDM, Indonesia)"
+    id: "esdm_id"
+    enabled: false
+    base_url: "https://www.esdm.go.id"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "renewable_energy"
+      - "efficiency"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "strategy"
+      - "report"
+    language: "id"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      New file: config/domains/indonesia.yaml. Region mapped to "apac" —
+      Indonesia not in VALID_REGIONS (see file header note). National
+      ministry with a dedicated renewable-energy-and-conservation
+      directorate (EBTKE) — publishes Indonesia Energy Outlook and
+      biofuel-mandate (B40/B50) regulation. No Indonesia coverage exists
+      in current config. Exact EBTKE directorate sub-path should be
+      confirmed at crawl-build time. verified: yes (WebFetch confirmed
+      EBTKE directorate, Energy Outlook reports, biofuel mandate news).
+
+  - name: "Ministry of Industry and Trade (MOIT, Vietnam)"
+    id: "moit_vn"
+    enabled: false
+    base_url: "https://moit.gov.vn"
+    start_paths:
+      - "/"
+    region:
+      - "apac"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "mandates"
+      - "renewable_energy"
+    policy_types:
+      - "regulation"
+      - "law"
+    language: "vi"
+    verified_by: "source-expansion-research (oceania agent)"
+    notes: |
+      New file: config/domains/vietnam.yaml. Region mapped to "apac" —
+      Vietnam not in VALID_REGIONS (see file header note). Vietnam's
+      energy ministry — energy-labeling program, energy-savings
+      initiatives, electricity-pricing decrees. No Vietnam coverage exists
+      in current config. Exact energy-efficiency ("Su dung nang luong tiet
+      kiem va hieu qua") and legal-documents ("Van ban phap luat") section
+      slugs should be confirmed at crawl-build time. verified: yes
+      (WebFetch confirmed dedicated energy-efficiency section,
+      energy-labeling program, legal-documents/decrees section).
+
+# -----------------------------------------------------------------------------
+# Not included above (see INVENTORY.md appendix for full detail + reasons):
+#   - Thailand DEDE (dede.go.th) — curl 200 OK but WebFetch hit a TLS cert
+#     error; English subdomain weben.dede.go.th failed to resolve entirely.
+#     Content looks strong (Energy Efficiency Plan 2015, Alternative Energy
+#     Development Plan 2015-2036) but no clean fetch obtained this pass —
+#     needs a human check with a real browser / relaxed TLS verification.
+#   - New Zealand Parliament Open Data (data.parliament.nz) — described in
+#     search results as "working on launching our official API... soon";
+#     curl returned 404 at root. Likely not yet stable — the confirmed,
+#     working NZ structured source is nz_legislation_api instead (tier-c,
+#     see new-clients.md).
+# -----------------------------------------------------------------------------

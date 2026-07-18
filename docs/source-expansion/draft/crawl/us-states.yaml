@@ -1,0 +1,330 @@
+# =============================================================================
+# DRAFT — US States/Local source expansion (tier-b crawl domains only)
+# Source: docs/source-expansion/regions/us-states.md
+# Every entry below is `enabled: false`. These append to PER-STATE files under
+# config/domains/us/ (one file per state already exists) — target file named
+# in each entry's notes. mo_psc / mo_energy_division / ne_dwee REPLACE the
+# current comment-only stub files for missouri.yaml / nebraska.yaml.
+# No tier-a or tier-c candidates found for this region (see INVENTORY.md).
+# Category/tags/policy_types validated against the live enum in
+# src/core/config.py (VALID_CATEGORIES/VALID_TAGS/VALID_POLICY_TYPES), which
+# is broader than the illustrative comment block in _template.yaml — see
+# INVENTORY.md "Schema note" for why.
+# =============================================================================
+
+domains:
+  - name: "Virginia State Corporation Commission (SCC) — Case Information / Docket Search"
+    id: "va_scc"
+    enabled: false
+    base_url: "https://www.scc.virginia.gov"
+    start_paths:
+      - "/case-information/"
+      - "/pages/Data-Centers"
+    region:
+      - "us"
+      - "us_states"
+      - "virginia"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (us-states agent)"
+    notes: |
+      Append to config/domains/us/virginia.yaml.
+      VA's PUC-equivalent. Nov 2025 approved a GS-5 rate class for data-center
+      customers >=25MW (14-year contracts, 85%/60% minimum demand floors);
+      as of Jul 2026 considering shifting transmission cost allocation onto
+      data centers. Complements the HB323/HB906/HB824 bill-tracking entries
+      already in virginia.yaml — SCC is the implementing body those bills name.
+      Canonical URL redirects from http to a non-HTTPS-looking host; verify
+      TLS behavior before enabling. verified: yes (live browser fetch,
+      2026-07 pass).
+
+  - name: "Georgia Public Service Commission — Data Center / Large-Load Rulemaking"
+    id: "ga_psc"
+    enabled: false
+    base_url: "https://psc.ga.gov"
+    start_paths:
+      - "/"
+      - "/site/downloads/datacenterfactsheet.pdf"
+    region:
+      - "us"
+      - "us_states"
+      - "georgia"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (us-states agent)"
+    notes: |
+      Append to config/domains/us/georgia.yaml.
+      Docket #44280 set a 100MW peak-demand large-load threshold (Feb 2025);
+      Jul 2025 order froze Georgia Power base rates through 2028 + mandates
+      quarterly large-load reports. georgia.yaml already tracks SB 34
+      (cost-allocation law) but not the PSC that implements it.
+      verified: yes (live fetch confirmed dedicated data-center homepage
+      section referencing Docket #44280).
+
+  - name: "Texas PUC Interchange — Large Load Interconnection Rulemaking (Project 58481)"
+    id: "tx_puc_interchange"
+    enabled: false
+    base_url: "https://interchange.puc.texas.gov"
+    start_paths:
+      - "/Search/Filings?ControlNumber=58481"
+    region:
+      - "us"
+      - "us_states"
+      - "texas"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (us-states agent)"
+    notes: |
+      Append to config/domains/us/texas.yaml.
+      Implements TX SB6 (2025): PUCT large-load (>=75MW) interconnection
+      standards for ERCOT, proposed rule 16 TAC Sec 25.194 (Mar 2026),
+      $100k-300k study fees, $50k/MW financial security. Live docket, 203+
+      filings as of verification. Query-string driven (?ControlNumber=) —
+      crawler needs to target specific control numbers, periodic
+      re-discovery required for new dockets. Old marketing site
+      puc.texas.gov 404s post-redesign — do NOT use as base_url, use the
+      Interchange subdomain above. verified: yes, via browser (WebFetch
+      returned an anomalous 402 on this URL per the region researcher —
+      treated as a WebFetch-tool artifact, not a site problem).
+
+  - name: "New York Department of Public Service / PSC — Large Load Interconnection Reform"
+    id: "ny_dps"
+    enabled: false
+    base_url: "https://dps.ny.gov"
+    start_paths:
+      - "/"
+    region:
+      - "us"
+      - "us_states"
+      - "new_york"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (us-states agent)"
+    notes: |
+      Append to config/domains/us/new_york.yaml.
+      Feb 2026 NY PSC opened "Proceeding on ... Interconnection Reforms for
+      Large Loads" (Gov. Hochul's Energize NY initiative) — 11.9GW in the
+      NYISO queue as of Feb 2026; technical conference due Dec 2026, white
+      paper due Feb 2027. new_york.yaml currently only has NYSERDA + state
+      senate; the PSC/DPS itself is missing. Document viewer
+      (documents.dps.ny.gov) serves PDFs behind a DocRefId GUID param — not
+      directly browsable, needs the File Search step first; not
+      independently text-extracted this pass (see INVENTORY appendix).
+      verified: yes (site + case-search nav confirmed live; specific order
+      text corroborated via secondary sources only, see appendix).
+
+  - name: "Oregon Public Utility Commission — Large Customer / Data Center Tariffs"
+    id: "or_puc_large_load"
+    enabled: false
+    base_url: "https://www.oregon.gov/puc"
+    start_paths:
+      - "/puc/utilities/pages/large-load.aspx"
+    region:
+      - "us"
+      - "us_states"
+      - "oregon"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "incentives"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (us-states agent)"
+    notes: |
+      Append to config/domains/us/oregon.yaml.
+      Implements OR's 2025 POWER Act (HB 3546). Docket UM 2377 (approved
+      May 2026) created Schedule 96 for PGE data centers >20MW: 100% cost
+      recovery, 90% min demand charges, 10-30yr terms, 1c/kWh surcharge on
+      >100MW funding low-income energy-burden programs. Related dockets:
+      UE 433, UE 463, UE 424, UM 2024. base_url shares the oregon.gov root
+      with the existing or_building_codes entry (bare https://www.oregon.gov)
+      — same multi-entry-per-root pattern already used for energy.ca.gov (6x
+      in california.yaml). Order PDFs live on a separate
+      apps.puc.state.or.us subdomain — may need its own
+      allowed_path_patterns. verified: yes (live fetch).
+
+  - name: "Missouri Public Service Commission — Large Load / Data Center Rate Cases"
+    id: "mo_psc"
+    enabled: false
+    base_url: "https://psc.mo.gov"
+    start_paths:
+      - "/Electric"
+      - "/"
+    region:
+      - "us"
+      - "us_states"
+      - "missouri"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "reporting"
+    policy_types:
+      - "regulation"
+    language: "en"
+    verified_by: "source-expansion-research (us-states agent)"
+    notes: |
+      REPLACES the comment-only stub config/domains/us/missouri.yaml.
+      Under MO SB4, PSC approved (Nov 2025, effective Dec 2025) a large-load
+      rate plan for Ameren Missouri (>=75MW peak at 115kV+, 12-yr min
+      contracts, 2-yr collateral, early-termination exit fee). Filers
+      included Amazon, Google, Sierra Club, MO Office of Public Counsel.
+      Use the Orders/Notices and Press Releases index pages as start paths
+      rather than guessing dated press-release slugs (one guessed slug
+      404'd during verification). verified: yes (live homepage + nav
+      confirmed; specific Ameren order corroborated via press coverage).
+
+  - name: "Missouri Department of Natural Resources — Division of Energy"
+    id: "mo_energy_division"
+    enabled: false
+    base_url: "https://dnr.mo.gov"
+    start_paths:
+      - "/about-us/division-energy"
+    region:
+      - "us"
+      - "us_states"
+      - "missouri"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "incentives"
+    policy_types:
+      - "program"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (us-states agent)"
+    notes: |
+      Append alongside mo_psc in config/domains/us/missouri.yaml (this
+      file's mo_psc entry above replaces the missouri.yaml stub; this one
+      is the ministry-side companion, same energy_ministry+regulatory
+      pairing pattern used for other states).
+      Missouri's state energy office: efficiency/weatherization, renewable
+      demonstration grants, green building registry, forthcoming (Sept
+      2026) comprehensive energy plan. General office, not data-center
+      specific. verified: yes (live fetch).
+
+  - name: "Loudoun County, Virginia — Data Center Standards & Locations"
+    id: "us_loudoun_county_va"
+    enabled: false
+    base_url: "https://www.loudoun.gov"
+    start_paths:
+      - "/5990/Data-Center-Standards-Locations"
+      - "/6222/Phase-2-Data-Center-Standards-Locations"
+    region:
+      - "us"
+      - "us_states"
+      - "virginia"
+    category: "regulatory"
+    tags:
+      - "planning"
+      - "mandates"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (us-states agent)"
+    notes: |
+      Append to config/domains/us/virginia.yaml (locality section).
+      Loudoun is the self-described "Data Center Capital of the World."
+      Mar 2025 zoning amendment eliminated by-right DC development
+      (special-exception review now required). Phase 2 page scopes review
+      of "energy opportunities"/on-site generation; a linked county brief
+      recommends waste-heat recapture (district energy) for nearby
+      buildings. Category mapped to "regulatory" (permit/zoning authority,
+      closest fit — no "local_government" category exists in
+      VALID_CATEGORIES). Most concrete "local government considering
+      DC waste-heat reuse" source found in the whole region.
+      verified: yes (both URLs fetched live).
+
+  - name: "Prince William County, Virginia — Data Center Ordinance Advisory Group (archived)"
+    id: "us_prince_william_county_va"
+    enabled: false
+    base_url: "https://www.pwcva.gov"
+    start_paths:
+      - "/department/planning-office/data-center-ordinance-advisory-group"
+    region:
+      - "us"
+      - "us_states"
+      - "virginia"
+    category: "regulatory"
+    tags:
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (us-states agent)"
+    notes: |
+      Append to config/domains/us/virginia.yaml (locality section).
+      Documents the 2023-2025 Data Center Ordinance Advisory Group:
+      Ordinance 23-07 (noise), Resolution 23-111 (Design & Construction
+      Standards Manual / zoning amendment for DC impacts). Group disbanded,
+      content being folded into a new consolidated "Data Centers" page —
+      explicitly archival but citable. County relaunched its site in 2026;
+      the URL from prior research (/department/zoning-administration/
+      impacts-of-data-center-uses) now 404s — use the URL above instead.
+      Lower priority than Loudoun (#1 in this file). verified: yes, with
+      the 404 caveat above.
+
+  - name: "Nebraska Department of Water, Energy and Environment (DWEE)"
+    id: "ne_dwee"
+    enabled: false
+    base_url: "https://dwee.nebraska.gov"
+    start_paths:
+      - "/"
+      - "/taxonomy/term/74"
+    region:
+      - "us"
+      - "us_states"
+      - "nebraska"
+    category: "energy_ministry"
+    tags:
+      - "efficiency"
+      - "incentives"
+    policy_types:
+      - "program"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (us-states agent)"
+    notes: |
+      REPLACES the comment-only stub config/domains/us/nebraska.yaml.
+      General state energy office (merged with the former environmental
+      agency in 2019): efficiency loan programs, weatherization, ONE RED
+      decarbonization program, annual State Energy Report. No
+      data-center-specific content found despite NE's growing hyperscale
+      presence (Meta/Google/Facebook near Omaha) — lowest-priority entry in
+      this file, included only to replace an empty stub; revisit if NE
+      produces DC-specific policy. verified: yes (live fetch).
+
+# -----------------------------------------------------------------------------
+# Not included above (see INVENTORY.md appendix for full detail + reasons):
+#   - wa_utc (Washington UTC) — no docket exists yet, recommended as a
+#     lower-confidence "watch" source only; listed as unverified.
+#   - Illinois POWER Act — bill failed to pass 2026 session, no source to add.
+#   - Minnesota HF4888 — real law, but minnesota.yaml already covers the
+#     implementing bodies (mn_puc/mn_commerce/mn_legislature); a bill-specific
+#     entry (Virginia HB323-style) is a future opportunity, not a new domain.
+# -----------------------------------------------------------------------------

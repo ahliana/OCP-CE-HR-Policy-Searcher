@@ -1,0 +1,318 @@
+# =============================================================================
+# DRAFT — Supranational / Intergovernmental source expansion (tier-b crawl
+# domains only)
+# Source: docs/source-expansion/regions/supranational.md
+# Every entry below is `enabled: false`. iea_4e_edna_datacentres,
+# energy_community_acquis, c40_knowledge_hub, iso_iec_30134_datacentre_kpi
+# need a NEW file config/domains/supranational.yaml (none of them are
+# EU- or APAC-specific the way existing regional files are organized).
+# cencenelec_green_datacentres and euroheat_power_knowledge_hub append to the
+# EXISTING config/domains/eu.yaml. asean_centre_for_energy appends to the
+# EXISTING config/domains/apac.yaml.
+# Tier-c candidates for this region (data.europa.eu Search API — cross-listed
+# in eu-uncovered.md, merged there; OECD SDMX API) are NOT in this file —
+# see docs/source-expansion/draft/new-clients.md.
+#
+# Region-value note: "supranational" and "global" are used below exactly as
+# the original researcher tagged them, but NEITHER is in the live
+# VALID_REGIONS enum in src/core/config.py. Unlike the other draft files in
+# this directory, no reasonable "closest allowed value" substitute exists —
+# forcing e.g. IEA 4E EDNA or ISO/IEC 30134 (both genuinely global, not
+# EU/APAC-specific) into "eu" or "apac" would misrepresent their scope. This
+# is flagged here and in INVENTORY.md as a recommended small addition to
+# VALID_REGIONS (adding "supranational" and "global", the same way "canada",
+# "south_africa", etc. were added over time) rather than force-mapped.
+# Unrecognized region values only trigger a config-loader warning, not a
+# hard failure, so this does not block using these drafts as-is.
+# =============================================================================
+
+domains:
+  - name: "IEA 4E EDNA - Data Centre Energy Efficiency"
+    id: "iea_4e_edna_datacentres"
+    enabled: false
+    base_url: "https://www.iea-4e.org"
+    start_paths:
+      - "/edna/"
+      - "/edna/tasks/energy-efficiency-of-data-centres/"
+      - "/edna/news/"
+    region:
+      - "supranational"
+      - "global"
+    category: "standards"
+    tags:
+      - "efficiency"
+      - "research"
+      - "reporting"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (supranational agent)"
+    notes: |
+      New file: config/domains/supranational.yaml. Region values
+      "supranational"/"global" not in VALID_REGIONS (see file header
+      note). IEA's own dedicated data-center energy-efficiency policy
+      workstream (IEA Technology Collaboration Programme, multi-country)
+      — the closest supranational match to this project's exact subject.
+      Names data-center energy labeling schemes, policy reviews, and a
+      "Total Energy Model" for connected devices/data centers. No
+      robots.txt blocker observed; static HTML, low rate-limit risk;
+      reports published a few times a year. verified: yes (fetched
+      /edna/tasks/energy-efficiency-of-data-centres/, confirmed on-topic
+      2025/2026 IEA DC policy reports).
+
+  - name: "Energy Community Secretariat - Acquis (Energy Efficiency)"
+    id: "energy_community_acquis"
+    enabled: false
+    base_url: "https://www.energy-community.org"
+    start_paths:
+      - "/enc-lex/law/acquis.html"
+    region:
+      - "eu"
+      - "eu_east"
+      - "supranational"
+    category: "legislative"
+    tags:
+      - "mandates"
+      - "efficiency"
+    policy_types:
+      - "directive"
+      - "law"
+      - "report"
+    language: "en"
+    requires_playwright: true
+    rate_limit_seconds: 3.0
+    verified_by: "source-expansion-research (supranational agent)"
+    notes: |
+      New file: config/domains/supranational.yaml. Region value
+      "supranational" not in VALID_REGIONS (see file header note);
+      "balkans" from the original mapped to "eu_east" (closest valid
+      bucket for Western Balkans). Treaty body extending the EU energy
+      acquis (incl. the Energy Efficiency Directive) to the Western
+      Balkans, Ukraine, Moldova, Georgia — the mechanism by which EED
+      Article 12 DC reporting and Article 26.6 waste-heat obligations get
+      transposed into non-EU Southeast European states, a genuinely new
+      jurisdiction set not covered by any existing eu.yaml or country
+      file. Site is Cloudflare-protected — passed bot-check via a real
+      browser but returned 403 to a plain HTTP fetch; requires_playwright
+      + possibly a JS-challenge solve needed. The specific "Energy
+      efficiency" acquis sub-path was not independently confirmed (only
+      the parent acquis.html page and its category list) — verify the
+      exact slug when the crawler is built. verified: yes, with the
+      Cloudflare caveat above (full browser session confirmed page
+      title + acquis category list including "Energy efficiency").
+
+  - name: "ASEAN Centre for Energy (ACE)"
+    id: "asean_centre_for_energy"
+    enabled: false
+    base_url: "https://aseanenergy.org"
+    start_paths:
+      - "/knowledge-hub"
+      - "/topics"
+      - "/apaec"
+    region:
+      - "apac"
+    category: "coordination_body"
+    tags:
+      - "efficiency"
+      - "planning"
+      - "research"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (supranational agent)"
+    notes: |
+      Append to config/domains/apac.yaml. Category mapped from original
+      "energy_ministry" to "coordination_body" (better fit — ACE is a
+      regional IGO/energy-policy body for the 10 ASEAN member states, not
+      a single-country ministry; same treatment as RCREEE/AFREC in the
+      MENA/Africa draft). Fills a real APAC gap — a regional
+      multi-country energy policy body (unlike australia.yaml/apac.yaml's
+      existing single-country entries). Publishes building/industrial
+      energy-efficiency financing reports and references data-center
+      energy-rating guidelines as a recommended regional policy direction.
+      /aeds and /aeds/ (ASEAN Energy Database System, mentioned in
+      secondary sources) both 404'd this session — do NOT add without
+      re-checking; use the confirmed /knowledge-hub path instead.
+      verified: yes (homepage loads, live publications confirmed
+      including "From Potential to Pipeline" and PEEB reports).
+
+  - name: "C40 Knowledge Hub - Data Centers and Climate"
+    id: "c40_knowledge_hub"
+    enabled: false
+    base_url: "https://www.c40knowledgehub.org"
+    start_paths:
+      - "/s/article/Data-centers-and-the-climate-landscape-An-actionable-resource-for-US-mayors"
+      - "/s/"
+    region:
+      - "supranational"
+      - "global"
+    category: "coordination_body"
+    tags:
+      - "planning"
+      - "carbon"
+    policy_types:
+      - "guidance"
+      - "report"
+    language: "en"
+    requires_playwright: true
+    rate_limit_seconds: 3.0
+    verified_by: "source-expansion-research (supranational agent)"
+    notes: |
+      New file: config/domains/supranational.yaml. Region values
+      "supranational"/"global" not in VALID_REGIONS (see file header
+      note). Category mapped from original "economic_dev" to
+      "coordination_body" (C40 is a global mayors' climate network, 40+
+      member megacities — same treatment as ACE/RCREEE/AFREC). Live
+      (published Jan 2026) implementation guide specifically on data
+      centers: local policy levers (zoning, permitting), grid, climate
+      impact aimed at city governments. Currently a single US-focused
+      article, but the Knowledge Hub as a whole is the type of source
+      likely to add more city-level DC guides over time. JS-heavy
+      Salesforce Community platform — plain HTTP fetch returned only a
+      "CSS Error" shell; requires_playwright is MANDATORY, not optional,
+      for this domain. verified: yes, via full browser session (page
+      title + body text on zoning/permitting/grid/water-use policy levers
+      confirmed; a plain WebFetch to the same URL failed, confirming the
+      Playwright requirement).
+
+  - name: "ISO/IEC 30134 - Data Centre KPI Standards Catalog"
+    id: "iso_iec_30134_datacentre_kpi"
+    enabled: false
+    base_url: "https://www.iso.org"
+    start_paths:
+      - "/standard/71717.html"
+      - "/committee/6889696.html"
+    max_depth: 1
+    region:
+      - "supranational"
+      - "global"
+    category: "standards"
+    tags:
+      - "efficiency"
+    policy_types:
+      - "standard"
+    language: "en"
+    verified_by: "source-expansion-research (supranational agent)"
+    notes: |
+      New file: config/domains/supranational.yaml. Region values
+      "supranational"/"global" not in VALID_REGIONS (see file header
+      note). Global standards body (ISO/IEC JTC 1/SC 39). ISO/IEC 30134-6
+      (Energy Reuse Factor) is the international technical standard
+      underpinning "heat reuse" measurement globally — worth indexing
+      even though only catalog/abstract pages are free (full standard
+      text is paywalled at CHF 100/part, confirmed on the ERF part — do
+      NOT attempt to crawl/download the paywalled PDFs, catalog pages
+      only, hence max_depth: 1). The abstract text itself ("ratio of
+      energy being reused... to sum of all energy consumed") is exactly
+      the taxonomy's core subject-matter language, useful for catching
+      new/revised parts as they publish (30134-6 status is "to be
+      revised", ISO/IEC AWI 30134-6 already underway). verified: yes
+      (fetched /standard/71717.html directly, abstract + revision status
+      + CHF 100 paywall notice confirmed).
+
+# -----------------------------------------------------------------------------
+# Append to EXISTING config/domains/eu.yaml (not a new file — these two are
+# EU/European-standards-specific, unlike the global entries above):
+# -----------------------------------------------------------------------------
+
+  - name: "CEN-CENELEC-ETSI Green Data Centres Coordination Group"
+    id: "cencenelec_green_datacentres"
+    enabled: false
+    base_url: "https://www.cencenelec.eu"
+    start_paths:
+      - "/areas-of-work/cenelec-sectors/digital-society-cenelec/green-data-centres/"
+    region:
+      - "eu"
+    category: "standards"
+    tags:
+      - "efficiency"
+      - "research"
+    policy_types:
+      - "standard"
+      - "guidance"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (supranational agent)"
+    notes: |
+      Append to config/domains/eu.yaml. The actual joint European
+      Standards Organisations body (CEN, CENELEC, ETSI together) behind
+      EN 50600, called out by name in the brief. One page indexes the
+      entire European DC-standardization landscape and its free summary
+      brochures (current: "Review of standardisation activities - Energy
+      Management and Environmental Viability of Data Centres," edition
+      11, 2024 — catalogues the full EN 50600 KPI series: PUE, ERF, CUE,
+      WUE, etc. plus in-preparation standards). Full EN 50600 standard
+      texts are paywalled through national standards bodies (same caveat
+      as ISO above) — this page + brochure is free. CEN-CENELEC
+      restructured their sector URLs; two older paths
+      (/standards/sectors/ict/pages/greendatacentres and
+      /areas-of-work/cen-sectors/digital-society/green-data-centres/)
+      both 404 — use the path above instead. verified: yes (fetched
+      directly, CG GDC group description + 2024 brochure link confirmed).
+
+  - name: "Euroheat & Power - Knowledge Hub"
+    id: "euroheat_power_knowledge_hub"
+    enabled: false
+    base_url: "https://www.euroheat.org"
+    start_paths:
+      - "/knowledge-hub/"
+      - "/dhc/knowledge-hub/"
+    region:
+      - "eu"
+    category: "district_heating"
+    tags:
+      - "efficiency"
+      - "research"
+      - "planning"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    rate_limit_seconds: 2.5
+    verified_by: "source-expansion-research (supranational agent)"
+    notes: |
+      Append to config/domains/eu.yaml. International district heating &
+      cooling association (members across ~30 European + non-European
+      countries) — best single aggregator of data-center-waste-heat-to-
+      district-heating case studies found in this pass, e.g. a named
+      comparative analysis of DC waste-heat scenarios for DH networks of
+      different generations, plus country-specific case studies
+      (Amsterdam, Braunschweig). Some content is gated behind
+      membership/newsletter prompts but articles render without login —
+      rate-limit politely (2-3s). verified: yes (fetched the comparative-
+      analysis article page directly, published 2025-05-26, confirmed
+      on-topic).
+
+# -----------------------------------------------------------------------------
+# Not included above (see INVENTORY.md appendix for full detail + reasons —
+# these are IGO/global sources that could NOT be confirmed reachable or
+# whose API shape could not be confirmed this pass):
+#   - IEA Policies API (api.iea.org/policies/v2) — backend responds but
+#     every query attempted returned 400 Bad Request; no public API docs
+#     found. Do not build a client until a real browser network trace from
+#     iea.org/policies is captured, or IEA confirms a documented endpoint.
+#   - Climate Policy Radar / climate-laws.org — exactly the "one
+#     integration, many jurisdictions" climate-law source the brief calls
+#     out, but Climate Policy Radar's own site states its API is "coming
+#     soon" — not live. Re-check in a future pass.
+#   - World Bank RISE (Regulatory Indicators for Sustainable Energy) —
+#     rise.worldbank.org/library does not resolve (DNS failure); a possible
+#     successor at data360.worldbank.org/en/dataset/WB_RISE loads but RISE's
+#     specific data reachability through its API was not confirmed.
+#   - ICLEI — active in sustainable-energy work but no data-center-specific
+#     content found, and no database distinct enough from the C40 Knowledge
+#     Hub entry above to justify a separate line item.
+#   - InforMEA/ECOLEX (UNEP-backed MEA + national-law database) — exists
+#     and broad in scope, but whether ECOLEX's national-law full-text
+#     search has an API, or whether energy-efficiency/DC content is
+#     findable there vs. drowned out by its much broader environmental-
+#     treaty scope, was not confirmed this session.
+#   - Climate Neutral Data Centre Pact (climateneutraldatacentre.net) — an
+#     INDUSTRY self-regulatory pact (EU-Commission-recognized as an EED
+#     Article 26 compliance mechanism), not a government/IGO policy
+#     source — outside this brief's scope as written. Not a candidate;
+#     flagging only in case the project later wants industry co-regulation
+#     tracked alongside government policy.
+# -----------------------------------------------------------------------------

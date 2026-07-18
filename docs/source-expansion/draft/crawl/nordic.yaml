@@ -1,0 +1,182 @@
+# =============================================================================
+# DRAFT — Nordic source expansion (tier-b crawl domains only)
+# Source: docs/source-expansion/regions/nordic.md
+# Every entry below is `enabled: false`. nve_overskuddsvarme_guide,
+# island_is_reglugerdir, energiateollisuus_fi, veitur_is append to
+# config/domains/nordic.yaml; stockholm_exergi_odh appends to
+# config/domains/sweden.yaml. No new country file needed.
+# Tier-c candidates for this region (Storting Open Data API / stortinget_api,
+# Eduskunta Avoin Data API / eduskunta_api) are NOT in this file — see
+# docs/source-expansion/draft/new-clients.md.
+# =============================================================================
+
+domains:
+  - name: "NVE - Guide to the Waste Heat Cost-Benefit Analysis Regulation"
+    id: "nve_overskuddsvarme_guide"
+    enabled: false
+    base_url: "https://veiledere.nve.no"
+    start_paths:
+      - "/kost-nytteanalyse-av-overskuddsvarme/"
+    allowed_path_patterns:
+      - "/kost-nytteanalyse-av-overskuddsvarme/*"
+    region:
+      - "nordic"
+      - "norway"
+    category: "regulatory"
+    tags:
+      - "mandates"
+      - "waste_heat"
+      - "research"
+      - "district_heating"
+    policy_types:
+      - "guidance"
+      - "regulation"
+    language: "no"
+    verified_by: "source-expansion-research (nordic agent)"
+    notes: |
+      Single best find of the Nordic pass. NVE's (Norwegian Water Resources
+      and Energy Directorate) official implementation guide for Forskrift
+      2024-09-25-2263, the regulation already tracked via lovdata_no —
+      explicit 2MW data-center threshold, >20MW thresholds for
+      thermal/industrial/DH facilities, how NVE reviews cost-benefit
+      analyses before construction approval. Tags mapped from originals
+      "nve_approval"->mandates and "cost_benefit_analysis"->research (not
+      in VALID_TAGS as literal strings). No robots.txt check done this
+      pass — do before enabling. verified: yes (WebFetch quoted the
+      "datasentre med mer enn 2 MW" text directly).
+
+  - name: "Island.is - Regulations Database (Reglugerdasafn)"
+    id: "island_is_reglugerdir"
+    enabled: false
+    base_url: "https://island.is"
+    start_paths:
+      - "/reglugerdir"
+    region:
+      - "nordic"
+      - "iceland"
+    category: "legislation"
+    tags:
+      - "mandates"
+      - "district_heating"
+      - "efficiency"
+    policy_types:
+      - "law"
+      - "regulation"
+    language: "is"
+    requires_playwright: true
+    verified_by: "source-expansion-research (nordic agent)"
+    notes: |
+      Iceland's official consolidated regulations database (Ministry of
+      Justice, reglugerdir@dmr.is), publishing all of Section B of the
+      Government Gazette with keyword search. Closes Iceland's national
+      legislation-database gap — nordic.yaml currently only has the energy
+      agency (orkustofnun_is), same gap already closed for Finland
+      (finlex_fi) and Norway (lovdata_no). island.is is a JS-driven SPA —
+      requires_playwright recommended unless plain fetch is confirmed to
+      return full content. Seed with a district-heating/waste-heat keyword
+      search URL similar to how finlex_fi seeds on "kaukolampo".
+      verified: yes (WebFetch confirmed live portal, third consolidated
+      version since 2021).
+
+  - name: "Stockholm Exergi - Open District Heating (waste-heat purchase program)"
+    id: "stockholm_exergi_odh"
+    enabled: false
+    base_url: "https://www.stockholmexergi.se"
+    start_paths:
+      - "/varmeatervinning/"
+    region:
+      - "nordic"
+      - "sweden"
+    category: "district_heating"
+    tags:
+      - "waste_heat"
+      - "incentives"
+    policy_types:
+      - "guidance"
+      - "incentive"
+    language: "sv"
+    verified_by: "source-expansion-research (nordic agent)"
+    notes: |
+      Append to config/domains/sweden.yaml (not nordic.yaml).
+      Majority owned by the City of Stockholm; runs "Oppen Fjarrvarme"
+      (Open District Heating), letting data centers sell waste heat into
+      the municipal DH network under standardized contracts (~SEK
+      2M/MW/year, temperature-indexed compensation, two contract models,
+      proximity requirement). The practical/operational counterpart to
+      the Riksdagen law (riksdagen_se_dc) and Energimyndigheten reporting
+      requirement already tracked for Sweden. Historical English domain
+      opendistrictheating.com now 301s to this Swedish-language page. Tag
+      "waste_heat_data" from the original mapped to "waste_heat" (not a
+      literal VALID_TAGS entry). verified: yes (WebFetch after following
+      the redirect).
+
+  - name: "Finnish Energy (Energiateollisuus) - district heating section"
+    id: "energiateollisuus_fi"
+    enabled: false
+    base_url: "https://energia.fi"
+    start_paths:
+      - "/en/statistics/statistics-on-district-heating/"
+      - "/en/energy-policy/"
+    region:
+      - "nordic"
+      - "finland"
+      - "eu"
+    category: "district_heating"
+    tags:
+      - "district_heating"
+      - "reporting"
+      - "efficiency"
+    policy_types:
+      - "guidance"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (nordic agent)"
+    notes: |
+      National industry association for electricity + district-heating
+      utilities. Publishes legislative statements, sector recommendations,
+      and a dedicated Energy Policy nav section (climate roadmap, EU
+      policy, Nordic cooperation) alongside the annual DH statistical
+      publication. Cross-check against the ministry (tem_fi) and regulator
+      (energiavirasto_fi) already tracked. verified: yes (WebFetch).
+
+  - name: "Veitur - District Heating Network (Reykjavik capital area + regions)"
+    id: "veitur_is"
+    enabled: false
+    base_url: "https://www.veitur.is"
+    start_paths:
+      - "/en/dreifikerfi-heitt-vatn"
+    region:
+      - "nordic"
+      - "iceland"
+    category: "district_heating"
+    tags:
+      - "district_heating"
+      - "efficiency"
+    policy_types:
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (nordic agent)"
+    notes: |
+      Lowest-priority entry in this file. Iceland's dominant DH operator
+      (subsidiary of Orkuveita Reykjavikur), geothermal DH across Reykjavik
+      capital area + seven regional systems — complements the national
+      energy authority (orkustofnun_is). Confirmed live and on-topic but
+      thin on policy content (no tariff/regulatory detail on-page, only a
+      footer link to a separate Rates section, not independently
+      verified). verified: yes, with the thin-content caveat above.
+
+# -----------------------------------------------------------------------------
+# Not included above (see INVENTORY.md appendix for full detail):
+#   - Nordic Energy Research (nordicenergy.org) — WebFetch 403 on every URL
+#     this pass (bot-blocking suspected); live "WasteHeatSES" project page
+#     and a Flex4RES report PDF were confirmed only via WebSearch. If a human
+#     confirms access, this is a supranational (Nordic Council of Ministers)
+#     candidate, not nordic-country-specific.
+#   - Althingi (Iceland Parliament) open data — no confirmed live API
+#     endpoint found; only a 2016-era resolution directing future open-data
+#     legislation.
+#   - HOFOR (Copenhagen DH utility) — live but customer-facing marketing
+#     content only, no waste-heat/DC/regulatory mention; does not clear the
+#     "policy document" bar. Copenhagen-area waste-heat/DC deals are
+#     reportedly with VEKS/CTR instead — worth a future pass.
+# -----------------------------------------------------------------------------

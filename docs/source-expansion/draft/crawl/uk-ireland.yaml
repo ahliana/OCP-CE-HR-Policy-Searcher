@@ -1,0 +1,184 @@
+# =============================================================================
+# DRAFT — UK Devolved Nations + Ireland source expansion (tier-b crawl
+# domains only)
+# Source: docs/source-expansion/regions/uk-ireland.md
+# Every entry below is `enabled: false`. ie_dcee_district_heating and
+# sdcc_ie_district_heating append to config/domains/ireland.yaml (currently
+# thin — 4 entries). wales_nicw and uregni_general append to
+# config/domains/uk.yaml (already ~60 entries — saturated for this region).
+# Tier-c candidates for this region (Houses of the Oireachtas Open Data API,
+# Scottish Parliament Open Data API) are NOT in this file — see
+# docs/source-expansion/draft/new-clients.md.
+# =============================================================================
+
+domains:
+  # REVIEWER: base_url https://www.gov.ie is already used by the existing
+  # `gov_ie_dc` entry in config/domains/ireland.yaml (which crawls only the
+  # *data-centre* reporting page). This entry targets a different topic (the DH
+  # program hub) with a unique id, so it is NOT an id collision, but the two
+  # share a base_url. Decide before enabling: keep as a distinct domain, or fold
+  # these start_paths + path patterns into `gov_ie_dc`.
+  - name: "Department of Climate, Energy and the Environment - District Heating policy hub (Ireland)"
+    id: "ie_dcee_district_heating"
+    enabled: false
+    base_url: "https://www.gov.ie"
+    start_paths:
+      - "/en/department-of-climate-energy-and-the-environment/"
+      - "/en/department-of-climate-energy-and-the-environment/publications/district-heating-pre-construction-fund/"
+      - "/en/department-of-climate-energy-and-the-environment/consultations/district-heating-sector-consultation-heat-networks-and-miscellaneous-provisions-bill-2024/"
+      - "/en/department-of-climate-energy-and-the-environment/publications/heat-and-built-environment-taskforce/"
+      - "/en/department-of-the-environment-climate-and-communications/policy-information/renewable-heat/"
+    region:
+      - "ireland"
+    category: "energy_ministry"
+    tags:
+      - "district_heating"
+      - "incentives"
+      - "mandates"
+    policy_types:
+      - "law"
+      - "incentive"
+      - "guidance"
+      - "report"
+    language: "en"
+    verified_by: "source-expansion-research (uk-ireland agent)"
+    notes: |
+      Append to config/domains/ireland.yaml. Ireland's lead ministry for
+      the Heat (Networks and Miscellaneous Provisions) Bill 2024 (Ireland's
+      first primary legislation establishing a DH regulatory/licensing
+      framework, CRU as regulator), the EUR5m District Heating
+      Pre-Construction Fund (live scheme, EoI/Phase 2 stages), and the
+      Heat and Built Environment Taskforce. Existing ireland.yaml only has
+      a data-center-specific gov.ie page, not this DH program hub.
+      Department renamed mid-2026 (DECC -> DCEE) — both URL slugs
+      currently resolve, included as separate start_paths; confirm which
+      one the redirect settles on at next recrawl. gov.ie 403s plain
+      WebFetch/curl (bot protection) but renders fine in-browser — same
+      pattern as the existing gov_ie_dc entry. verified: yes for the
+      Pre-Construction Fund and Sector Consultation URLs (fetched via
+      browser); renewable-heat and taskforce URLs confirmed via search
+      snippet only, one confidence level below the other two.
+
+  - name: "South Dublin County Council - Tallaght District Heating Scheme (Ireland)"
+    id: "sdcc_ie_district_heating"
+    enabled: false
+    base_url: "https://www.sdcc.ie"
+    start_paths:
+      - "/en/climate-action/spotlight-tallaght-district-heating-scheme/"
+      - "/en/climate-action/what-we-are-doing/energy-buildings/energy-buildings-actions/energy-efficiency-renewables/development-of-the-tallaght-district-heating-scheme.html"
+    region:
+      - "ireland"
+    category: "district_heating"
+    tags:
+      - "data_center_specific"
+      - "heat_reuse"
+      - "district_heating"
+      - "waste_heat"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (uk-ireland agent)"
+    notes: |
+      Append to config/domains/ireland.yaml. Category mapped from original
+      "local_government" (not in VALID_CATEGORIES) to "district_heating"
+      (topical fit — no local-government category exists). Real, operating
+      example of exactly what PolicyPulse tracks: South Dublin County
+      Council runs Ireland's first data-center-waste-heat DH network,
+      sourcing 10MW of waste heat at no cost from an Amazon data center in
+      Tallaght, delivered via council-owned Heatworks/South Dublin
+      District Heating Company. Irish counterpart to the GLA/Old Oak &
+      Park Royal entries already in uk.yaml. heatworks.ie (the operating
+      utility's own site) is live but reads as operational/customer
+      content, not a separate policy source — not proposed. verified: yes
+      (both URLs fetched directly, scheme details, 2023 completion, 2025
+      expansion to 133 units confirmed).
+
+  - name: "National Infrastructure Commission for Wales (NICW) - Energy / Wales Infrastructure Assessment"
+    id: "wales_nicw"
+    enabled: false
+    base_url: "https://nationalinfrastructurecommission.wales"
+    start_paths:
+      - "/energy26/"
+      - "/renewable2050/"
+      - "/publications-2/"
+    region:
+      - "uk"
+      - "wales"
+    category: "policy"
+    tags:
+      - "planning"
+      - "district_heating"
+    policy_types:
+      - "report"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (uk-ireland agent)"
+    notes: |
+      Append to config/domains/uk.yaml. Category mapped from original
+      "advisory_body" (not in VALID_CATEGORIES) to "policy" (closest —
+      "Government policy frameworks"). Independent statutory advisory body
+      (Wales's analogue to the existing CCC entry) publishing "Wales
+      Infrastructure Assessment 2026 - Energy," which explicitly covers
+      district/heat-network deployment barriers ("missed opportunities for
+      district heating due to regulatory complexity") alongside
+      electricity/gas capacity. Not currently represented in uk.yaml
+      (which covers Welsh Government and Senedd but not this independent
+      commission). verified: yes (live page + downloadable Energy
+      Summary/Report PDFs confirmed).
+
+  - name: "Utility Regulator (Northern Ireland) - general regulatory site"
+    id: "uregni_general"
+    enabled: false
+    base_url: "https://www.uregni.gov.uk"
+    start_paths:
+      - "/electricity"
+      - "/about-us"
+      - "/news"
+    region:
+      - "uk"
+      - "northern_ireland"
+    category: "regulatory_authority"
+    tags:
+      - "district_heating"
+      - "mandates"
+      - "planning"
+    policy_types:
+      - "regulation"
+      - "guidance"
+    language: "en"
+    verified_by: "source-expansion-research (uk-ireland agent)"
+    notes: |
+      Append to config/domains/uk.yaml — OR, per the caution below, fold
+      into the existing nisep_ni entry instead of creating a second
+      uregni.gov.uk domain. Category mapped from original "regulator" (not
+      in VALID_CATEGORIES) to "regulatory_authority". UREGNI is NI's
+      counterpart to Ofgem and the body the Dept for the Economy's 2022
+      Heat Networks Market Framework consultation proposed giving
+      oversight/pricing/consumer-protection powers over NI heat networks
+      (NI currently has no dedicated heat-network law, unlike Scotland).
+      CAUTION: uk.yaml already has nisep_ni with base_url
+      https://www.uregni.gov.uk/nisep (a specific funding-scheme subpage,
+      categorized as an incentive program). This candidate proposes the
+      ROOT domain for general electricity/consultations/news content —
+      materially different content, same host. A human should decide
+      whether to fold this into nisep_ni's start_paths instead of a
+      second entry. verified: yes (/electricity fetched directly,
+      licensing/price-control/SEM market content confirmed).
+
+# -----------------------------------------------------------------------------
+# Not included above (recommendations to broaden EXISTING entries, not new
+# domains — see INVENTORY.md appendix for full detail):
+#   - CRU (Ireland) district-heating publications filter — expand the
+#     EXISTING cru_ie_dc entry's start_paths to /publications/ generally
+#     (with requires_playwright: true, filter UI is JS/AJAX-driven). Do not
+#     add as a standalone entry; base_url already present in ireland.yaml.
+#   - Dublin City Council district heating / Poolbeg scheme — plausible
+#     second Irish local-authority candidate alongside SDCC, but no live
+#     dublincity.ie page was fetched this pass — not verified, do not add
+#     without checking a live URL first.
+#   - NI Department for the Economy /articles/heat-networks — real page,
+#     but economy-ni.gov.uk is already a base_url in uk.yaml (uk_ni_economy,
+#     which already includes /topics/heat). Recommend adding this specific
+#     path to uk_ni_economy's start_paths instead of a new entry.
+# -----------------------------------------------------------------------------
