@@ -9,6 +9,44 @@ Last updated: 2026-07-18.
 
 ---
 
+## Rebase + jurisdiction-registry compliance (2026-07-18)
+
+This branch was rebased onto the latest `main`, which now includes the merged
+**canonical jurisdiction registry** (`config/jurisdictions.yaml` +
+`src/core/jurisdictions.py`). Region validation changed: a source's `region:`
+value is now resolved against that registry (`jurisdictions.get()`), not the old
+`VALID_REGIONS` dict. Re-validated all 371 draft entries against it:
+
+- **67 of 70 distinct region values already resolve** - including everything the
+  earlier waves flagged as "not in VALID_REGIONS" (central_asia, caucasus, the
+  city/province slugs, china, malaysia, ...). The registry is far richer + has
+  alias/substring resolution.
+- **3 values still miss**, in 5 of 371 entries: `supranational` (4), `global` (3),
+  `manitoba` (1). Warnings only, never errors, and the drafts are `enabled: false`,
+  so nothing is broken.
+- Fix is proposed in **[jurisdiction-additions.yaml](jurisdiction-additions.yaml)**:
+  two rows to merge into the registry (a `manitoba` subnational row like
+  ontario/quebec; a `global` group row like europe/apac, aliasing `supranational`).
+  My earlier "add to VALID_REGIONS" note is obsolete - the registry's own rule is
+  "add a source's new region = add one row in jurisdictions.yaml."
+
+### Coordination with the map interface
+
+The jurisdiction registry is the shared contract between this source research and
+the **map interface** being built in parallel (not yet in a pushed branch). The
+registry reserves `iso_numeric` as "the world-atlas map key" and renders
+group/supranational rows (eu, apac, ...) via their `members`. So: every source's
+`region:` must be a registry slug for the map to place it. This branch is now
+95%+ map-ready; the two proposed rows close the rest. **This branch stays
+docs-only (touches nothing in `config/` or `src/`), so it cannot conflict with the
+registry or map work** - the two proposed rows are handed off for the registry
+owner to merge, keeping both efforts mergeable.
+
+`config/jurisdictions.yaml` is a hot shared file (main + the map/registry work
+edit it); do not edit it from this branch.
+
+---
+
 ## Totals so far
 
 | Wave | Verified sources | Crawl domains (tier-b) | New-client APIs (tier-c) | Unverified (needs human check) |
@@ -78,9 +116,11 @@ data-centre efficiency workstream.
 2. **4 national-portal duplicate pairs** (wave 2 validation) - two draft entries each
    share one unified portal (`argentina.gob.ar`, `gob.pe`, `gub.uy`, `aragon.es`).
    Keep as separate department entries or merge each pair's start_paths.
-3. **Enum additions** - 3 region values (`manitoba`, `supranational`, `global`) sit
-   outside `VALID_REGIONS` in `src/core/config.py` (loader only warns). One small edit
-   adds them; I can do it on your go, or map them to existing buckets instead.
+3. **Jurisdiction-registry additions** - merge the 2 proposed rows in
+   [jurisdiction-additions.yaml](jurisdiction-additions.yaml) (`manitoba`, and a
+   `global` bucket for IGO sources). Needs the registry/map owner; includes one map
+   rendering decision (how to show a members-less "Global" bucket). Supersedes the
+   old "add to VALID_REGIONS" note.
 4. **US data.gov now needs an api_key** (was keyless) - noted for the portal-API client.
 
 None of these block review; they are the open human decisions so far.

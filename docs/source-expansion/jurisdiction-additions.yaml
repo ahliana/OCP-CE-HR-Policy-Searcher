@@ -1,0 +1,65 @@
+# Proposed jurisdiction-registry additions (for the registry / map owners)
+# ---------------------------------------------------------------------------
+# The source-expansion research (feature/source-expansion-research) drafts 371
+# crawl sources. After rebasing onto main's canonical jurisdiction registry
+# (config/jurisdictions.yaml), 67 of 70 distinct `region:` values already
+# resolve via jurisdictions.get(). Only THREE values still miss, in 5 entries:
+#   supranational (4 entries), global (3 entries), manitoba (1 entry).
+#
+# The registry's own rule is "adding a new source's region = add one row here."
+# But jurisdictions.yaml is a shared main file the map interface renders from
+# (iso_numeric = world-atlas key; group/supranational rows render via members).
+# So rather than edit it from this docs-only branch and risk a merge conflict
+# with the registry/map work, these are the exact rows to merge there. Once
+# merged, all 5 draft entries resolve and become map-ready with zero further
+# change on this side.
+#
+# These follow existing patterns already in the registry:
+#   - manitoba mirrors the ontario/quebec rows (kind: subnational, parent: canada)
+#   - global mirrors the europe/apac/us_states rows (kind: group, iso_numeric: null,
+#     rendered by members, not a single shape)
+# ---------------------------------------------------------------------------
+
+jurisdictions:
+
+  # Canadian province - one wave-2 source (manitoba_energy) tags region: manitoba.
+  # Real, mappable subnational; renders like the existing ontario/quebec rows.
+  - slug: manitoba
+    name: Manitoba
+    kind: subnational
+    code: CA-MB          # ISO 3166-2
+    parent: canada
+    aliases:
+      - manitoba
+      - province of manitoba
+
+  # Global / supranational IGO bucket - the wave-1 supranational sources
+  # (IEA 4E EDNA, OECD, C40, ISO/IEC 30134, Euroheat, etc.) are worldwide in
+  # scope with no single country shape. This mirrors the existing europe/apac
+  # group rows: iso_numeric: null, rendered via members (or as an off-map
+  # "Global" bucket in the legend). The aliases fold BOTH of our missing values
+  # (`supranational`, `global`) into this one row.
+  #
+  # MAP-OWNER DECISION NEEDED: how to display a members-less global bucket -
+  # a "Global / international" chip/legend entry beside the map, vs. shading all
+  # countries. The existing eu/europe rows already prove the map handles
+  # iso_numeric: null jurisdictions, so this only needs a rendering choice, not
+  # new plumbing.
+  - slug: global
+    name: Global / International
+    kind: group
+    iso_numeric: null
+    members: []          # worldwide; not a fixed member set
+    aliases:
+      - global
+      - supranational
+      - international
+      - worldwide
+      - world
+
+# ---------------------------------------------------------------------------
+# Note for reviewers: a few of the 4 "supranational" entries could instead be
+# retagged region: eu if they are EU-institution-specific rather than truly
+# global (eu already resolves). Check each in draft/crawl/wave2 & the wave-1
+# supranational file before merging the `global` row, in case some belong to eu.
+# ---------------------------------------------------------------------------
