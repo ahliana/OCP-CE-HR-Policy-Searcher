@@ -102,7 +102,9 @@ countries (Mauritius, Panama, Fiji, Kosovo*...) with `iso3`+`iso_numeric`, and 3
 subnational rows (India/China/Japan/Spain/Italy/Belgium/Germany/Australia/Canada
 states+regions) with `code`+`parent`. These are the new places that light up the map
 when the sources promote. Every wave-4 region slug resolves against registry+proposed
-rows except **kosovo** (*no ISO 3166-1 code, contested - human decision). Belgium
+rows (63/63 resolve; **kosovo** DECIDED 2026-07-18 by Ahliana - list-only, code `XK`,
+`iso_numeric` null, so it resolves and its policies count but it renders off-map with
+no cartographic stance). Belgium
 regions need the `belgium` row's aliases trimmed at promotion.
 
 **Wave 2 added** (angles wave 1 under-mined): 7 keyless legislation APIs (Poland Sejm,

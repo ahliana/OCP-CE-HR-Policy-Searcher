@@ -40,7 +40,7 @@ Nothing here has shipped. The next move is a human choosing what to promote/buil
 | # | Decision | Recommendation |
 |---|---|---|
 | 1 | **Push destination.** `origin` dual-pushes to your mirror AND the public OCP org. Branch is unpushed. | Mirror-only until the source branches consolidate, or leave parked. |
-| 2 | **Kosovo** jurisdiction - no ISO 3166-1 code (contested). | Map track recommends `XK` + list-only/off-map (same class as N. Cyprus, Somaliland). Record on the `kosovo` row when decided. |
+| 2 | ~~**Kosovo** jurisdiction~~ - DECIDED 2026-07-18 (Ahliana): list-only, `code: XK`, `iso_numeric: null`. Row set in `jurisdiction-additions-wave4.yaml`. No action left. | Done. |
 | 3 | **Belgium** regions - `belgium` registry row's aliases (wallonia/flanders/brussels) must be trimmed when their own subnational rows merge. | No map impact (coverage rolls up via `country_of`). Research track owns this modify; do it in the promotion PR. |
 | 4 | **`gov.ie` overlap** + 4 national-portal dup pairs (argentina.gob.ar, gob.pe, gub.uy, aragon.es). | Keep as separate department entries or merge start_paths. Flagged inline. |
 | 5 | **API keys** (free signup) for keyed clients. | Get keys before building: data.gov, Congress.gov, Open States, Korea Open Assembly, India OGD. |

@@ -589,9 +589,27 @@ jurisdictions:
     code: IN-BR
     parent: india
     aliases: []
+  # RESOLVED by Ahliana 2026-07-18 (relayed via the map track): list-only.
+  # Kosovo has no official ISO 3166-1 numeric (contested recognition), so
+  # iso_numeric stays null -> the map renders it in the off-map/list tray
+  # (no border fill, no cartographic stance), while the slug resolves so its
+  # sources/policies are still counted. code XK is the user-assigned alpha-2;
+  # iso3 XKX is the widely-used unofficial alpha-3 (Eurostat/World Bank/SWIFT).
+  # The map rule is generic: any jurisdiction with null iso_numeric goes
+  # off-map, so N. Cyprus / Somaliland would get the same treatment if added.
+  - slug: kosovo
+    name: Kosovo
+    kind: country
+    iso3: XKX
+    iso_numeric: null
+    code: XK
+    parent: null
+    aliases:
+      - kosovo
+      - republic of kosovo
 
 # ---------------------------------------------------------------------------
-# NEEDS HUMAN ISO LOOKUP (1) - do not guess these, per task instructions
+# (RESOLVED) former NEEDS-HUMAN-ISO-LOOKUP item - kosovo, decided list-only above
 # ---------------------------------------------------------------------------
 #
 # - kosovo (used by longtail-countries.md candidate #13, Ministry of Economy
