@@ -9,6 +9,7 @@ import ApiKeySettingsModal from './ApiKeySettingsModal';
 import DomainScanPanel from './DomainScanPanel';
 import PolicyScannerHeader from './PolicyScannerHeader';
 import SearchPanel from './SearchPanel';
+import WorldMap from './WorldMap';
 
 function AgentPanel({ adminRequired = false, hasAdminToken = false, onAdminTokenChange }) {
     const [selectedRegions, setSelectedRegions] = useState([]);
@@ -18,6 +19,7 @@ function AgentPanel({ adminRequired = false, hasAdminToken = false, onAdminToken
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [hasApiKey, setHasApiKey] = useState(false);
     const [isSearchBusy, setIsSearchBusy] = useState(false);
+    const [placeRequest, setPlaceRequest] = useState(null);
     const isStandardMode = mode === 'standard';
     const isReadOnly = adminRequired && !hasAdminToken;
     const scanOptions = {
@@ -32,6 +34,10 @@ function AgentPanel({ adminRequired = false, hasAdminToken = false, onAdminToken
             type,
             text,
         });
+    }, []);
+
+    const handleSelectPlace = useCallback((place) => {
+        setPlaceRequest({ value: place, nonce: Date.now() });
     }, []);
 
     const { wsRef, isChatRunning, setIsChatRunning } = useAgentSocket({
@@ -91,6 +97,7 @@ function AgentPanel({ adminRequired = false, hasAdminToken = false, onAdminToken
     return (
         <section className="Policy-scanner" aria-label="Policy Scanner">
             <PolicyScannerHeader onOpenSettings={() => setIsSettingsOpen(true)} />
+            <WorldMap onSelectPlace={handleSelectPlace} />
             <ApiKeySettingsModal
                 open={isSettingsOpen}
                 onClose={() => {
@@ -111,6 +118,7 @@ function AgentPanel({ adminRequired = false, hasAdminToken = false, onAdminToken
                         isBusy={isBusy}
                         onBusyChange={setIsSearchBusy}
                         adminRequired={adminRequired}
+                        externalPlace={placeRequest}
                     />
                     <details className="advanced-scan">
                         <summary className="advanced-scan-summary">
