@@ -162,6 +162,29 @@ def resolve_text(jurisdiction_string: Optional[str]) -> Optional[Jurisdiction]:
     if hit:
         return hit
 
+    # 1b. A parenthetical that names a subnational child of the outer place
+    #     ('Germany (Peine, Lower Saxony)' -> Lower Saxony). Only elevate when
+    #     the inner place is a subnational rolling up to the SAME country as the
+    #     outer place; otherwise fall through so 'Sweden (EU)' and 'Germany
+    #     (Federal)' keep resolving to the country.
+    paren = re.search(r"\(([^)]*)\)", norm)
+    if paren:
+        outer_norm = _strip_parentheticals(norm)
+        outer_j = _by_alias(outer_norm) or _substring_match(outer_norm)
+        if outer_j is not None:
+            inner_raw = paren.group(1)
+            inner_j = _by_alias(_normalize(inner_raw)) or _substring_match(_normalize(inner_raw))
+            if inner_j is None and "," in inner_raw:
+                for part in inner_raw.split(","):
+                    inner_j = _by_alias(_normalize(part)) or _substring_match(_normalize(part))
+                    if inner_j is not None:
+                        break
+            if inner_j is not None and inner_j.kind in ("subnational", "us_state"):
+                inner_country = country_of(inner_j)
+                outer_country = country_of(outer_j)
+                if inner_country and outer_country and inner_country.slug == outer_country.slug:
+                    return inner_j
+
     # 2. Strip parentheticals, retry exact. Must precede comma handling so a
     #    comma *inside* parens ('Germany (Peine, Lower Saxony)') is removed
     #    before we split.
