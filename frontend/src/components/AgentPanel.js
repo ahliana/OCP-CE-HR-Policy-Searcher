@@ -7,7 +7,9 @@ import { DEFAULT_CHANNELS, buildScanRequests } from '../utils/scanTargets';
 import AgentChatPanel from './AgentChatPanel';
 import ApiKeySettingsModal from './ApiKeySettingsModal';
 import DomainScanPanel from './DomainScanPanel';
+import LeadsInbox from './LeadsInbox';
 import PolicyScannerHeader from './PolicyScannerHeader';
+import ReviewInbox from './ReviewInbox';
 import SearchPanel from './SearchPanel';
 import WorldMap from './WorldMap';
 
@@ -20,8 +22,12 @@ function AgentPanel({ adminRequired = false, hasAdminToken = false, onAdminToken
     const [hasApiKey, setHasApiKey] = useState(false);
     const [isSearchBusy, setIsSearchBusy] = useState(false);
     const [placeRequest, setPlaceRequest] = useState(null);
+    const [adminOpen, setAdminOpen] = useState(false);
     const isStandardMode = mode === 'standard';
-    const isReadOnly = adminRequired && !hasAdminToken;
+    // Scanning and other admin tools are gated on a token only when the
+    // server has ADMIN_TOKEN set; a local single-user deployment unlocks
+    // immediately.
+    const adminUnlocked = !adminRequired || hasAdminToken;
     const scanOptions = {
         discover: mode === 'discover',
         deep: mode === 'deep',
@@ -94,10 +100,23 @@ function AgentPanel({ adminRequired = false, hasAdminToken = false, onAdminToken
         fetchApiKeyStatus();
     }, [fetchApiKeyStatus]);
 
+    const handleToggleAdmin = () => {
+        setAdminOpen((prev) => {
+            const next = !prev;
+            // Locked and just opened: prompt for the token via the same
+            // modal that holds the admin token field, rather than a
+            // separate dialog.
+            if (next && !adminUnlocked) {
+                setIsSettingsOpen(true);
+            }
+            return next;
+        });
+    };
+
     return (
         <section className="Policy-scanner" aria-label="Policy Scanner">
-            <PolicyScannerHeader onOpenSettings={() => setIsSettingsOpen(true)} />
-            <WorldMap onSelectPlace={handleSelectPlace} />
+            <PolicyScannerHeader onToggleAdmin={handleToggleAdmin} adminOpen={adminOpen} />
+            <WorldMap onSelectPlace={handleSelectPlace} showScanAction={adminOpen} />
             <ApiKeySettingsModal
                 open={isSettingsOpen}
                 onClose={() => {
@@ -107,12 +126,22 @@ function AgentPanel({ adminRequired = false, hasAdminToken = false, onAdminToken
                 adminRequired={adminRequired}
                 onAdminTokenChange={onAdminTokenChange}
             />
-            {isReadOnly ? (
-                <p className="admin-readonly-note" role="status">
-                    This is a read-only view of the policy library. Administrators can sign in from Settings.
-                </p>
-            ) : (
-                <>
+            {adminOpen && (adminUnlocked ? (
+                <div className="admin-area">
+                    {!adminRequired && (
+                        <p className="admin-open-mode-note" role="note">
+                            Local open mode - set ADMIN_TOKEN for public deployments.
+                        </p>
+                    )}
+                    <div className="admin-area-actions">
+                        <button
+                            type="button"
+                            className="button"
+                            onClick={() => setIsSettingsOpen(true)}
+                        >
+                            API key settings
+                        </button>
+                    </div>
                     <SearchPanel
                         hasApiKey={hasApiKey}
                         isBusy={isBusy}
@@ -149,8 +178,14 @@ function AgentPanel({ adminRequired = false, hasAdminToken = false, onAdminToken
                         onRunningChange={setIsChatRunning}
                         isRunning={isChatRunning}
                     />
-                </>
-            )}
+                    <ReviewInbox isAdmin={adminUnlocked} />
+                    <LeadsInbox adminRequired={adminRequired} hasAdminToken={hasAdminToken} />
+                </div>
+            ) : (
+                <p className="admin-readonly-note" role="status">
+                    This is a read-only view of the policy library. Administrators can sign in from Settings.
+                </p>
+            ))}
         </section>
     );
 }
