@@ -341,7 +341,8 @@ function PolicyList({ externalPlace = null }) {
       {placeFilter && !isPlaceFilterLoading && (
         <div className="policy-list-place-filter">
           <span className="policy-place-chip">
-            {placeFilter.name} - {placeFilter.policies.length} policies
+            {placeFilter.name} - {placeFilter.policies.length}{' '}
+            {placeFilter.policies.length === 1 ? 'policy' : 'policies'}
             <button
               type="button"
               className="policy-place-chip-clear"
