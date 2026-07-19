@@ -181,8 +181,16 @@ def compute_children(
     registry depth, so new admin-1 rows need no code change here), and is
     dropped from this response when it resolves anywhere else. Children with
     no data (no source, no policy) are omitted, matching ``children_with_data``
-    on ``/api/coverage``. ``totals`` is ``national + sum(children)`` and must
-    reconcile with that country's entry in the world view.
+    on ``/api/coverage``.
+
+    ``totals`` reconciles exactly with this country's entry in the world view,
+    for both fields. Policies do so naturally (each resolves to exactly one
+    jurisdiction, so ``national + sum(children)`` is the country total).
+    Sources need a distinct-domain count: a domain tagged for both the country
+    and one of its states appears in both buckets (that overlap is real —
+    "3 sources watch Minnesota" and "165 watch the US" can share domains), so
+    ``totals.sources`` counts distinct domains, same semantics as the world
+    endpoint, and per-bucket sums may exceed it.
     """
     parent = jurisdictions.get(parent_slug)
     if parent is None or parent.kind != "country":
@@ -207,6 +215,11 @@ def compute_children(
         # else: resolves elsewhere (another country, supranational, ...) —
         # not part of this country's breakdown.
 
+    # Distinct domains attributed anywhere in this country — same semantics as
+    # the world endpoint's per-country ``sources``, so totals reconcile even
+    # when a multi-tag domain sits in several buckets below.
+    distinct_sources: set[str] = set()
+
     for domain in domains:
         did = domain.get("id")
         for slug in (domain.get("region") or []):
@@ -215,8 +228,10 @@ def compute_children(
                 continue
             if jur.slug == parent.slug:
                 national_sources.add(did)
+                distinct_sources.add(did)
             elif jur.slug in child_by_slug:
                 child_sources[jur.slug].add(did)
+                distinct_sources.add(did)
 
     national = {
         "sources": len(national_sources),
@@ -239,7 +254,6 @@ def compute_children(
     ]
     children_out.sort(key=lambda c: (-c["policies"], c["name"]))
 
-    total_sources = len(national_sources) + sum(len(s) for s in child_sources.values())
     total_policies = len(national_policies) + sum(len(p) for p in child_policies.values())
 
     return {
@@ -250,7 +264,7 @@ def compute_children(
         },
         "national": national,
         "children": children_out,
-        "totals": {"sources": total_sources, "policies": total_policies},
+        "totals": {"sources": len(distinct_sources), "policies": total_policies},
     }
 
 

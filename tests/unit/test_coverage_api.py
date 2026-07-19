@@ -448,13 +448,12 @@ class TestChildrenOfCountry:
 
 class TestChildrenSourcesBucketing:
     """Sources bucket per-region-tag (a domain tagged for a child slug counts
-    for that child; tagged for the country slug counts for national) with no
-    dedup ACROSS buckets — unlike the world view, which counts a domain once
-    per country regardless of how many of its tags land there. So a domain
-    tagged for both the country and one of its states is intentionally
-    counted in both totals here; only totals.policies is guaranteed to
-    reconcile with the world view (policies resolve to exactly one
-    jurisdiction; a single domain can legitimately cover several)."""
+    for that child; tagged for the country slug counts for national), so a
+    domain tagged for both the country and one of its states legitimately
+    appears in both buckets. ``totals.sources`` however counts DISTINCT
+    domains — the same semantics as the world endpoint's per-country number —
+    so the honest invariant is ``national + sum(children) >= totals``, with
+    equality only when no domain spans buckets."""
 
     def test_domain_tagged_for_child_counts_only_for_that_child(self):
         domains = [{"id": "d1", "region": ["california"]}]
@@ -462,20 +461,27 @@ class TestChildrenSourcesBucketing:
         ca = next(c for c in result["children"] if c["slug"] == "california")
         assert ca["sources"] == 1
         assert result["national"]["sources"] == 0
+        assert result["totals"]["sources"] == 1
 
     def test_domain_tagged_for_country_counts_for_national_only(self):
         domains = [{"id": "d1", "region": ["us"]}]
         result = compute_children("us", [], domains)
         assert result["national"]["sources"] == 1
         assert result["children"] == []  # no data landed on any state
+        assert result["totals"]["sources"] == 1
 
-    def test_domain_tagged_for_both_counts_in_both_buckets(self):
+    def test_domain_tagged_for_both_appears_in_both_buckets_but_totals_dedupes(self):
         domains = [{"id": "d1", "region": ["us", "california"]}]
         result = compute_children("us", [], domains)
         assert result["national"]["sources"] == 1
         ca = next(c for c in result["children"] if c["slug"] == "california")
         assert ca["sources"] == 1
-        assert result["totals"]["sources"] == 2  # not deduped across buckets
+        # One distinct domain: totals dedupes, buckets keep the real overlap.
+        assert result["totals"]["sources"] == 1
+        bucket_sum = result["national"]["sources"] + sum(
+            c["sources"] for c in result["children"]
+        )
+        assert bucket_sum >= result["totals"]["sources"]
 
 
 class TestChildrenNoDataOmitted:
@@ -513,9 +519,10 @@ class TestChildrenUnknownParent:
 
 class TestChildrenGenericInvariant:
     """Not hardcoded to the US: walks every country the registry currently
-    gives child jurisdictions to, and proves policy reconciliation for each.
-    Belgian/German subnational rows landing in a parallel branch (per the map
-    drill-down plan) get covered here automatically, with no test change."""
+    gives child jurisdictions to, and proves BOTH totals fields reconcile with
+    the world endpoint's entry for that country. Belgian/German subnational
+    rows landing in a parallel branch (per the map drill-down plan) get
+    covered here automatically, with no test change."""
 
     def _countries_with_registered_children(self):
         jurisdictions._load()
@@ -524,26 +531,45 @@ class TestChildrenGenericInvariant:
             if j.kind == "country" and jurisdictions.children_of(j)
         ]
 
-    def test_every_drillable_country_reconciles_on_policies(self):
+    def test_every_drillable_country_reconciles_with_world_entry(self):
         countries = self._countries_with_registered_children()
         assert countries, "registry currently has no country with subnational/us_state children"
 
         policies = []
+        domains = []
         for country in countries:
             policies.append(_pol(country.name, f"{country.slug}-national"))
-            for child in jurisdictions.children_of(country):
+            children = jurisdictions.children_of(country)
+            for child in children:
                 policies.append(_pol(child.name, f"{child.slug}-policy"))
+                domains.append(
+                    {"id": f"src-{child.slug}", "region": [child.slug]}
+                )
+            # A multi-tag domain spanning national + first child: the world
+            # endpoint counts it once for the country, so totals.sources here
+            # must too (per-bucket counts still both see it).
+            domains.append(
+                {
+                    "id": f"src-{country.slug}-span",
+                    "region": [country.slug, children[0].slug],
+                }
+            )
 
-        cov = compute_coverage(policies, [])
+        cov = compute_coverage(policies, domains)
         drillable = [c for c in cov["countries"] if c["children_with_data"] > 0]
         assert drillable, "fixture should make every listed country drillable"
 
         for c in drillable:
             country = jurisdictions.resolve_text(c["name"])
-            result = compute_children(country.slug, policies, [])
+            result = compute_children(country.slug, policies, domains)
             assert result["totals"]["policies"] == c["policies"], country.slug
+            assert result["totals"]["sources"] == c["sources"], country.slug
             assert result["national"]["policies"] == 1
             assert len(result["children"]) == c["children_with_data"]
+            bucket_sum = result["national"]["sources"] + sum(
+                ch["sources"] for ch in result["children"]
+            )
+            assert bucket_sum >= result["totals"]["sources"], country.slug
 
 
 # --- Route wiring: GET /api/coverage/children ---
