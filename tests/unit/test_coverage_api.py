@@ -15,7 +15,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from src.core import jurisdictions
-from src.api.routes.coverage import compute_coverage
+from src.api.routes.coverage import compute_children, compute_coverage
 
 
 @pytest.fixture(autouse=True)
@@ -329,7 +329,8 @@ class TestRouteWiring:
         swe = _by_iso(body["countries"], _iso("Sweden"))
         assert swe["policies"] == 1 and swe["sources"] == 1
         assert set(swe) == {"name", "iso_numeric", "sources", "policies",
-                            "top_policy_names"}
+                            "top_policy_names", "children_with_data"}
+        assert swe["children_with_data"] == 0
         eu = _by_slug(body["supranational"], "eu")
         assert eu["policies"] == 1
         assert set(eu) == {"name", "slug", "sources", "policies", "top_policy_names"}
@@ -370,3 +371,234 @@ class TestFreshness:
             app.dependency_overrides.clear()
         assert body["totals"]["policies"] == 1
         assert _by_iso(body["countries"], _iso("Sweden"))["policies"] == 1
+
+
+# --- GET /api/coverage/children (per-country state/province drill-down) ---
+#
+# data/policies.json is gitignored runtime output; test_full_pipeline.py's own
+# isolation note says tests "must not see the developer's real data/policies.json".
+# So, like test_jurisdictions.py, the real strings are pinned here as literals
+# rather than read from the live file at test time.
+
+class TestChildrenOfCountry:
+    """The exact strings + counts that resolve to a US state in
+    data/policies.json today (17 total): New Jersey x5, Minnesota x4,
+    Washington State x3, Georgia x2, Connecticut x1, California x1, Michigan x1
+    — same real strings test_jurisdictions.py pins."""
+
+    _US_STATE_STRINGS = (
+        ["New Jersey, United States"] * 5
+        + ["Minnesota, USA"] * 4
+        + ["Washington State, USA"] * 3
+        + ["Georgia, United States"] * 2
+        + ["Connecticut, United States"]
+        + ["California, USA"]
+        + ["Michigan, USA"]
+    )
+
+    def _us_policies(self):
+        state_policies = [
+            _pol(s, f"state-{i}") for i, s in enumerate(self._US_STATE_STRINGS)
+        ]
+        national_policies = [
+            _pol("US", "federal-a"), _pol("United States (Federal)", "federal-b"),
+        ]
+        other_policies = [_pol("Sweden", "unrelated")]
+        return state_policies + national_policies + other_policies
+
+    def test_us_children_include_states_with_policies(self):
+        policies = self._us_policies()
+        # Derive the expected count dynamically via resolve_text rather than
+        # hardcoding "17" — proves the bucketing rule, not just the fixture.
+        expected_state_count = sum(
+            1 for p in policies
+            if jurisdictions.resolve_text(p["jurisdiction"]).kind == "us_state"
+        )
+        result = compute_children("us", policies, [])
+        assert sum(c["policies"] for c in result["children"]) == expected_state_count
+        assert result["national"]["policies"] == 2
+        # Sweden's policy must not leak into the US breakdown.
+        total_in_response = (
+            sum(c["policies"] for c in result["children"]) + result["national"]["policies"]
+        )
+        assert total_in_response == len(policies) - 1
+
+    def test_us_children_with_data_is_positive_and_reconciles(self):
+        policies = self._us_policies()
+        cov = compute_coverage(policies, [])
+        us = _by_iso(cov["countries"], _iso("US"))
+        assert us["children_with_data"] > 0
+        result = compute_children("us", policies, [])
+        # Every policy resolves to exactly one jurisdiction (resolve_text), so
+        # national + children reconciles exactly with the world view's total
+        # for that country.
+        assert result["totals"]["policies"] == us["policies"]
+
+    def test_children_sorted_by_policies_desc_then_name(self):
+        result = compute_children("us", self._us_policies(), [])
+        slugs = [c["slug"] for c in result["children"]]
+        assert slugs[0] == "new_jersey"  # 5 policies, the most
+        assert slugs[1] == "minnesota"  # 4 policies
+
+    def test_top_policy_names_capped_at_three_per_child(self):
+        result = compute_children("us", self._us_policies(), [])
+        nj = next(c for c in result["children"] if c["slug"] == "new_jersey")
+        assert len(nj["top_policy_names"]) == 3
+
+
+class TestChildrenSourcesBucketing:
+    """Sources bucket per-region-tag (a domain tagged for a child slug counts
+    for that child; tagged for the country slug counts for national) with no
+    dedup ACROSS buckets — unlike the world view, which counts a domain once
+    per country regardless of how many of its tags land there. So a domain
+    tagged for both the country and one of its states is intentionally
+    counted in both totals here; only totals.policies is guaranteed to
+    reconcile with the world view (policies resolve to exactly one
+    jurisdiction; a single domain can legitimately cover several)."""
+
+    def test_domain_tagged_for_child_counts_only_for_that_child(self):
+        domains = [{"id": "d1", "region": ["california"]}]
+        result = compute_children("us", [], domains)
+        ca = next(c for c in result["children"] if c["slug"] == "california")
+        assert ca["sources"] == 1
+        assert result["national"]["sources"] == 0
+
+    def test_domain_tagged_for_country_counts_for_national_only(self):
+        domains = [{"id": "d1", "region": ["us"]}]
+        result = compute_children("us", [], domains)
+        assert result["national"]["sources"] == 1
+        assert result["children"] == []  # no data landed on any state
+
+    def test_domain_tagged_for_both_counts_in_both_buckets(self):
+        domains = [{"id": "d1", "region": ["us", "california"]}]
+        result = compute_children("us", [], domains)
+        assert result["national"]["sources"] == 1
+        ca = next(c for c in result["children"] if c["slug"] == "california")
+        assert ca["sources"] == 1
+        assert result["totals"]["sources"] == 2  # not deduped across buckets
+
+
+class TestChildrenNoDataOmitted:
+    def test_child_with_zero_sources_and_zero_policies_is_omitted(self):
+        # Switzerland has one registered subnational child (zurich) but no
+        # data attributed to it here — it must not appear as a zero row.
+        result = compute_children(
+            "switzerland", [_pol("Switzerland", "national-only")], []
+        )
+        assert result["children"] == []
+        assert result["national"]["policies"] == 1
+
+    def test_country_with_no_registered_children_returns_empty_children(self):
+        # Denmark has no us_state/subnational rows in the registry at all.
+        cov_policies = [_pol("Denmark", "a"), _pol("Denmark", "b")]
+        cov = compute_coverage(cov_policies, [])
+        dk = _by_iso(cov["countries"], _iso("Denmark"))
+        result = compute_children("denmark", cov_policies, [])
+        assert result["children"] == []
+        assert result["national"]["policies"] == dk["policies"] == 2
+        assert result["totals"] == {"sources": dk["sources"], "policies": dk["policies"]}
+
+
+class TestChildrenUnknownParent:
+    def test_unknown_slug_returns_none(self):
+        assert compute_children("atlantis", [], []) is None
+
+    def test_non_country_parent_returns_none(self):
+        # "california" is a real registry slug, but a us_state, not a country.
+        assert compute_children("california", [], []) is None
+
+    def test_supranational_parent_returns_none(self):
+        assert compute_children("eu", [], []) is None
+
+
+class TestChildrenGenericInvariant:
+    """Not hardcoded to the US: walks every country the registry currently
+    gives child jurisdictions to, and proves policy reconciliation for each.
+    Belgian/German subnational rows landing in a parallel branch (per the map
+    drill-down plan) get covered here automatically, with no test change."""
+
+    def _countries_with_registered_children(self):
+        jurisdictions._load()
+        return [
+            j for j in jurisdictions._by_slug.values()
+            if j.kind == "country" and jurisdictions.children_of(j)
+        ]
+
+    def test_every_drillable_country_reconciles_on_policies(self):
+        countries = self._countries_with_registered_children()
+        assert countries, "registry currently has no country with subnational/us_state children"
+
+        policies = []
+        for country in countries:
+            policies.append(_pol(country.name, f"{country.slug}-national"))
+            for child in jurisdictions.children_of(country):
+                policies.append(_pol(child.name, f"{child.slug}-policy"))
+
+        cov = compute_coverage(policies, [])
+        drillable = [c for c in cov["countries"] if c["children_with_data"] > 0]
+        assert drillable, "fixture should make every listed country drillable"
+
+        for c in drillable:
+            country = jurisdictions.resolve_text(c["name"])
+            result = compute_children(country.slug, policies, [])
+            assert result["totals"]["policies"] == c["policies"], country.slug
+            assert result["national"]["policies"] == 1
+            assert len(result["children"]) == c["children_with_data"]
+
+
+# --- Route wiring: GET /api/coverage/children ---
+
+class _ChildrenFakeStore:
+    def __init__(self, policies):
+        self._policies = policies
+
+    def get_all(self):
+        return list(self._policies)
+
+
+@pytest.fixture
+def children_client():
+    from src.api.app import app
+    from src.api import deps
+
+    policies = (
+        [_pol("New Jersey, United States", f"nj-{i}") for i in range(2)]
+        + [_pol("US", "federal")]
+    )
+    store = _ChildrenFakeStore(policies)
+    config = _FakeConfig([])
+    app.dependency_overrides[deps.get_policy_store] = lambda: store
+    app.dependency_overrides[deps.get_scan_manager] = lambda: _FakeManager([])
+    app.dependency_overrides[deps.get_config] = lambda: config
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.clear()
+
+
+class TestChildrenRouteWiring:
+    def test_children_endpoint_shape_for_us(self, children_client):
+        resp = children_client.get("/api/coverage/children", params={"parent": "us"})
+        assert resp.status_code == 200
+        body = resp.json()
+        assert set(body) == {"parent", "national", "children", "totals"}
+        assert body["parent"] == {
+            "slug": "us", "name": "United States", "iso_numeric": "840",
+        }
+        assert body["national"]["policies"] == 1
+        nj = next(c for c in body["children"] if c["slug"] == "new_jersey")
+        assert nj["policies"] == 2 and nj["kind"] == "us_state" and nj["code"] == "US-NJ"
+        assert body["totals"] == {"sources": 0, "policies": 3}
+
+    def test_unknown_parent_returns_404_standard_envelope(self, children_client):
+        resp = children_client.get(
+            "/api/coverage/children", params={"parent": "atlantis"}
+        )
+        assert resp.status_code == 404
+        assert "detail" in resp.json()
+
+    def test_non_country_parent_returns_404(self, children_client):
+        resp = children_client.get(
+            "/api/coverage/children", params={"parent": "california"}
+        )
+        assert resp.status_code == 404
+        assert "detail" in resp.json()

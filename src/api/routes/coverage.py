@@ -21,9 +21,23 @@ Attribution rules (uniform for policies and sources):
   of its ``region`` tags roll up there. Off-map entries carry a ``sources``
   count too, but only for null-iso countries; supranational/group entries stay
   policy-driven (a broad ``region`` tag like ``nordic`` is not a chip).
+- Each country entry also carries ``children_with_data``: the count of its
+  ``us_state``/``subnational`` children (per the registry) with >=1 policy or
+  source resolved *directly* to them (no roll-up). 0 means not drillable.
+
+``GET /api/coverage/children?parent=<country-slug>`` answers "what does this
+one country look like broken out by state/province" — the drill-down behind
+``children_with_data``. Unlike the world view, nothing is rolled up: a policy
+or source lands under ``national`` only if it resolves to the country
+jurisdiction itself, under a child only if it resolves to that exact child,
+and nowhere in this response if it resolves elsewhere. ``national`` and each
+child are kept visually distinct so a federal/nationwide policy is never
+mistaken for a single-state one.
 """
 
-from fastapi import APIRouter, Depends
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException
 
 from ..deps import get_config, get_policy_store, get_scan_manager
 from ...core import jurisdictions
@@ -66,6 +80,10 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
     offmap_sources: dict[str, set[str]] = {}
     unresolved_policies: list[str] = []
     unresolved_slugs: set[str] = set()
+    # country iso_numeric -> slugs of its us_state/subnational children that
+    # have >=1 policy or source resolved directly to them (no roll-up). Drives
+    # ``children_with_data`` — the drill affordance for /api/coverage/children.
+    child_data: dict[str, set[str]] = {}
 
     for policy in policies:
         raw = policy.get("jurisdiction")
@@ -77,6 +95,8 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
         if country is not None and country.iso_numeric:
             country_names.setdefault(country.iso_numeric, country.name)
             country_policies.setdefault(country.iso_numeric, []).append(policy)
+            if jur.kind in ("us_state", "subnational"):
+                child_data.setdefault(country.iso_numeric, set()).add(jur.slug)
         elif country is not None:
             # A real country the registry has no iso_numeric for (Kosovo).
             offmap_names.setdefault(country.slug, country.name)
@@ -100,6 +120,8 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
             if country is not None and country.iso_numeric:
                 country_names.setdefault(country.iso_numeric, country.name)
                 country_sources.setdefault(country.iso_numeric, set()).add(did)
+                if jur.kind in ("us_state", "subnational"):
+                    child_data.setdefault(country.iso_numeric, set()).add(jur.slug)
             elif country is not None:
                 # Null-iso country source (Kosovo) -> off-map, keyed by slug,
                 # so a country tracked-but-with-no-shape still shows coverage.
@@ -116,6 +138,7 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
             "sources": len(country_sources.get(iso, set())),
             "policies": len(country_policies.get(iso, [])),
             "top_policy_names": _top_policy_names(country_policies.get(iso, [])),
+            "children_with_data": len(child_data.get(iso, set())),
         }
         for iso in (country_names.keys() | country_sources.keys())
     ]
@@ -141,6 +164,93 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
             "unresolved_policies": unresolved_policies,
             "unresolved_region_slugs": sorted(unresolved_slugs),
         },
+    }
+
+
+def compute_children(
+    parent_slug: str, policies: list[dict], domains: list[dict]
+) -> Optional[dict]:
+    """Break one country out by its registered state/province children.
+
+    Pure, like :func:`compute_coverage`. Returns ``None`` when ``parent_slug``
+    is not a known ``country`` jurisdiction — the route turns that into a 404.
+
+    No roll-up: a policy or source lands under ``national`` only when it
+    resolves to the country jurisdiction itself, under a child only when it
+    resolves to that exact child (``jurisdictions.children_of`` — generic over
+    registry depth, so new admin-1 rows need no code change here), and is
+    dropped from this response when it resolves anywhere else. Children with
+    no data (no source, no policy) are omitted, matching ``children_with_data``
+    on ``/api/coverage``. ``totals`` is ``national + sum(children)`` and must
+    reconcile with that country's entry in the world view.
+    """
+    parent = jurisdictions.get(parent_slug)
+    if parent is None or parent.kind != "country":
+        return None
+
+    children = jurisdictions.children_of(parent)
+    child_by_slug = {c.slug: c for c in children}
+
+    national_policies: list[dict] = []
+    child_policies: dict[str, list[dict]] = {slug: [] for slug in child_by_slug}
+    national_sources: set[str] = set()
+    child_sources: dict[str, set[str]] = {slug: set() for slug in child_by_slug}
+
+    for policy in policies:
+        jur = jurisdictions.resolve_text(policy.get("jurisdiction"))
+        if jur is None:
+            continue
+        if jur.slug == parent.slug:
+            national_policies.append(policy)
+        elif jur.slug in child_by_slug:
+            child_policies[jur.slug].append(policy)
+        # else: resolves elsewhere (another country, supranational, ...) —
+        # not part of this country's breakdown.
+
+    for domain in domains:
+        did = domain.get("id")
+        for slug in (domain.get("region") or []):
+            jur = jurisdictions.get(slug)
+            if jur is None:
+                continue
+            if jur.slug == parent.slug:
+                national_sources.add(did)
+            elif jur.slug in child_by_slug:
+                child_sources[jur.slug].add(did)
+
+    national = {
+        "sources": len(national_sources),
+        "policies": len(national_policies),
+        "top_policy_names": _top_policy_names(national_policies),
+    }
+
+    children_out = [
+        {
+            "slug": c.slug,
+            "name": c.name,
+            "kind": c.kind,
+            "code": c.code,
+            "sources": len(child_sources[c.slug]),
+            "policies": len(child_policies[c.slug]),
+            "top_policy_names": _top_policy_names(child_policies[c.slug]),
+        }
+        for c in children
+        if child_sources[c.slug] or child_policies[c.slug]
+    ]
+    children_out.sort(key=lambda c: (-c["policies"], c["name"]))
+
+    total_sources = len(national_sources) + sum(len(s) for s in child_sources.values())
+    total_policies = len(national_policies) + sum(len(p) for p in child_policies.values())
+
+    return {
+        "parent": {
+            "slug": parent.slug,
+            "name": parent.name,
+            "iso_numeric": parent.iso_numeric,
+        },
+        "national": national,
+        "children": children_out,
+        "totals": {"sources": total_sources, "policies": total_policies},
     }
 
 
@@ -173,6 +283,25 @@ def get_coverage(
         _all_policies(store, manager), config.get_enabled_domains("all")
     )
     return {k: result[k] for k in ("countries", "supranational", "totals")}
+
+
+@router.get("/coverage/children")
+def get_coverage_children(
+    parent: str,
+    store: PolicyStore = Depends(get_policy_store),
+    manager: ScanManager = Depends(get_scan_manager),
+    config: ConfigLoader = Depends(get_config),
+):
+    """One country broken out by state/province: national vs. each child.
+
+    404s for a ``parent`` slug that is not a known country jurisdiction.
+    """
+    result = compute_children(
+        parent, _all_policies(store, manager), config.get_enabled_domains("all")
+    )
+    if result is None:
+        raise HTTPException(status_code=404, detail=f"Unknown country '{parent}'")
+    return result
 
 
 @router.get("/coverage/unresolved")

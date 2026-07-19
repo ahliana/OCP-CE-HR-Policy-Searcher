@@ -220,6 +220,32 @@ def country_of(slug_or_jur) -> Optional[Jurisdiction]:
     return j
 
 
+def children_of(slug_or_jur) -> list[Jurisdiction]:
+    """All ``us_state``/``subnational`` jurisdictions that roll up to this
+    country via :func:`country_of`. Never raises.
+
+    Generic over registry depth and content: new admin-1 rows (German Laender,
+    Belgian regions, ...) show up automatically once merged, with no code
+    change here. Returns [] for an unknown slug or a non-country jurisdiction.
+    """
+    if isinstance(slug_or_jur, Jurisdiction):
+        parent = slug_or_jur
+    else:
+        parent = get(slug_or_jur) or resolve_text(slug_or_jur)
+    if parent is None or parent.kind != "country":
+        return []
+
+    by_slug = _load()
+    out = []
+    for j in by_slug.values():
+        if j.kind not in ("us_state", "subnational"):
+            continue
+        country = country_of(j)
+        if country is not None and country.slug == parent.slug:
+            out.append(j)
+    return out
+
+
 def members_of(slug: str) -> list[Jurisdiction]:
     """Expand a group/supranational to its leaf members, recursively.
 
