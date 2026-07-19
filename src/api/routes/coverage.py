@@ -69,6 +69,7 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
     # country iso_numeric -> aggregate; slug -> supranational aggregate
     country_policies: dict[str, list[dict]] = {}
     country_names: dict[str, str] = {}
+    country_slugs: dict[str, str] = {}
     country_sources: dict[str, set[str]] = {}
     # "off-map" = jurisdictions with no choropleth shape: supranational/group
     # (the EU, a future global IGO bucket) AND countries the registry carries
@@ -94,6 +95,7 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
         country = jurisdictions.country_of(jur)
         if country is not None and country.iso_numeric:
             country_names.setdefault(country.iso_numeric, country.name)
+            country_slugs.setdefault(country.iso_numeric, country.slug)
             country_policies.setdefault(country.iso_numeric, []).append(policy)
             if jur.kind in ("us_state", "subnational"):
                 child_data.setdefault(country.iso_numeric, set()).add(jur.slug)
@@ -119,6 +121,7 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
             country = jurisdictions.country_of(jur)
             if country is not None and country.iso_numeric:
                 country_names.setdefault(country.iso_numeric, country.name)
+                country_slugs.setdefault(country.iso_numeric, country.slug)
                 country_sources.setdefault(country.iso_numeric, set()).add(did)
                 if jur.kind in ("us_state", "subnational"):
                     child_data.setdefault(country.iso_numeric, set()).add(jur.slug)
@@ -134,6 +137,7 @@ def compute_coverage(policies: list[dict], domains: list[dict]) -> dict:
     countries = [
         {
             "name": country_names[iso],
+            "slug": country_slugs[iso],
             "iso_numeric": iso,
             "sources": len(country_sources.get(iso, set())),
             "policies": len(country_policies.get(iso, [])),
