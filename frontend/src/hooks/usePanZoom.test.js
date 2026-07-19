@@ -150,4 +150,31 @@ describe('usePanZoom (hook integration)', () => {
     expect(result.current.viewBox.w).toBeCloseTo(ZOOM_BOUNDS.minW, 5);
     expect(result.current.canZoomIn).toBe(false);
   });
+
+  describe('zoomToward', () => {
+    it('narrows the viewBox by the given factor, centered on the given world point', () => {
+      const ref = { current: null };
+      const { result } = renderHook(() => usePanZoom(ref));
+
+      act(() => result.current.zoomToward(205.8, 84, 2));
+
+      expect(result.current.viewBox.w).toBeCloseTo(WORLD_VIEWBOX.w / 2, 5);
+      expect(result.current.canZoomOut).toBe(true);
+      // The focal point stays at the same fractional position it started at.
+      const { viewBox } = result.current;
+      expect((205.8 - viewBox.x) / viewBox.w).toBeCloseTo((205.8 - WORLD_VIEWBOX.x) / WORLD_VIEWBOX.w, 5);
+    });
+
+    it('is independent of the current viewBox center, unlike zoomIn', () => {
+      const ref = { current: null };
+      const { result } = renderHook(() => usePanZoom(ref));
+
+      act(() => result.current.zoomToward(50, 50, 3));
+
+      const { viewBox } = result.current;
+      // Zooming toward a point in the far corner should pull the viewBox
+      // origin toward that corner, not stay anchored on the world center.
+      expect(viewBox.x).toBeLessThan(WORLD_VIEWBOX.w / 2 - viewBox.w / 2);
+    });
+  });
 });

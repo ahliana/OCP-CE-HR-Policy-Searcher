@@ -61,10 +61,35 @@ export function joinCountries(worldCountries, coverageCountries) {
     });
 }
 
+// Parses an SVG path `d` string's coordinate pairs to find its bounding-box
+// width, in the same world units the atlas polygon is drawn in. The 110m
+// atlas paths (d3.geoPath output) are straight M/L/Z segments only - no
+// curves or H/V shorthand - so every pair of consecutive numbers is an
+// (x, y) vertex and this simple scan is exact, not an approximation.
+export function pathBoundingWidth(d) {
+  if (!d) return null;
+  const nums = d.match(/-?\d+\.?\d*(?:e-?\d+)?/g);
+  if (!nums || nums.length < 2) return null;
+  let minX = Infinity;
+  let maxX = -Infinity;
+  for (let i = 0; i < nums.length - 1; i += 2) {
+    const x = parseFloat(nums[i]);
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+  }
+  if (!Number.isFinite(minX) || !Number.isFinite(maxX)) return null;
+  return maxX - minX;
+}
+
 // Dot markers for tracked places a click can't reliably land on: on-atlas
 // polygons under the area threshold, plus places absent from the atlas
 // entirely (Singapore). Untracked microstates get no marker - there's no
 // coverage record to show, and the polygon (however tiny) already renders.
+//
+// `polyWidth` (world units) lets the renderer hide an on-atlas dot once its
+// own polygon has grown large enough on screen to click directly - see
+// isMarkerHidden below. Off-atlas markers (no polygon exists at all) get
+// `polyWidth: null` and must never be hidden by that check.
 export function computeMicroMarkers(worldCountries, coverageCountries) {
   const byId = new Map(worldCountries.map((c) => [c.id, c]));
   const byIso = new Map((coverageCountries || []).map((c) => [String(c.iso_numeric), c]));
@@ -82,10 +107,42 @@ export function computeMicroMarkers(worldCountries, coverageCountries) {
       cx: coords.cx,
       cy: coords.cy,
       bin: binForCoverage(byIso.get(id)),
+      polyWidth: geo ? pathBoundingWidth(geo.d) : null,
     });
   }
 
   return markers;
+}
+
+// Micro-marker dots are drawn in WORLD units (the atlas viewBox), so at
+// r=4.2 flat they'd inflate into a giant disc as the viewBox zoom narrows.
+// Scaling the radius by the current viewBox width against the full-world
+// width keeps the dot a constant size on screen at any zoom level.
+export const MICRO_MARKER_BASE_RADIUS = 4.2;
+export const MICRO_MARKER_BASE_WIDTH = 960;
+
+export function microMarkerRadius(viewBoxWidth) {
+  return MICRO_MARKER_BASE_RADIUS * (viewBoxWidth / MICRO_MARKER_BASE_WIDTH);
+}
+
+// Once an on-atlas marker's own polygon is comfortably clickable on screen,
+// the dot on top of it is redundant clutter - hide it. Screen width is
+// estimated from the polygon's world-unit bounding width against how many
+// screen pixels the current viewBox spans. Off-atlas markers (polyWidth
+// null - e.g. Singapore) have no polygon to fall back on, so they are never
+// hidden, at any zoom: the dot is the only way to reach them.
+// Screen width (px) at which an on-atlas polygon is a comfortable click
+// target on its own, so its helper dot can be hidden. Kept a little below a
+// fingertip target (~44px) so small islands (Ireland's outline caps at ~48px
+// even at max zoom) actually cross it and their dot disappears when zoomed
+// in, rather than sitting exactly on the boundary and never hiding.
+export const MARKER_HIDE_THRESHOLD_PX = 40;
+
+export function isMarkerHidden(marker, viewBoxWidth, svgPxWidth) {
+  if (marker.polyWidth == null) return false;
+  if (!viewBoxWidth || !svgPxWidth) return false;
+  const screenWidth = (marker.polyWidth * svgPxWidth) / viewBoxWidth;
+  return screenWidth > MARKER_HIDE_THRESHOLD_PX;
 }
 
 export function pluralize(count, singular, plural = `${singular}s`) {

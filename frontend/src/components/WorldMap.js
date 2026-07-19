@@ -109,6 +109,28 @@ function WorldMap({ onSelectPlace }) {
     );
   }, [coverage.countries, coverage.supranational]);
 
+  // An id is drillable when it is BOTH drillable per the live API
+  // (children_with_data > 0 - state/province data actually exists) AND
+  // listed in DRILLABLE_COUNTRIES (we have admin-1 geometry for it).
+  // Supranational selections (slug-prefixed ids) never qualify. Takes an
+  // arbitrary iso - not just the current selection - so it can also answer
+  // "is the country under the pointer/double-click drillable" for the
+  // hover tooltip, cursor cue, and double-click routing below.
+  const isDrillable = useCallback((id) => {
+    if (!id || id.startsWith('sup:')) return false;
+    if (!DRILLABLE_COUNTRIES[id]) return false;
+    const cov = covByIso.get(id);
+    return Boolean(cov && cov.children_with_data > 0);
+  }, [covByIso]);
+
+  const drillableIds = useMemo(() => {
+    const set = new Set();
+    for (const iso of Object.keys(DRILLABLE_COUNTRIES)) {
+      if (isDrillable(iso)) set.add(iso);
+    }
+    return set;
+  }, [isDrillable]);
+
   const handleHover = useCallback((id, event) => {
     const holderRect = holderRef.current?.getBoundingClientRect();
     if (!holderRect) return;
@@ -122,8 +144,9 @@ function WorldMap({ onSelectPlace }) {
       y,
       name: nameOfCountry(id),
       cov: covByIso.get(id) || null,
+      drillable: isDrillable(id),
     });
-  }, [nameOfCountry, covByIso]);
+  }, [nameOfCountry, covByIso, isDrillable]);
 
   const handleHoverEnd = useCallback(() => setHover(null), []);
 
@@ -152,28 +175,41 @@ function WorldMap({ onSelectPlace }) {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [selectedId, drilldown]);
 
-  // A country only gets the drill affordance when it is BOTH drillable per
-  // the live API (children_with_data > 0 - state/province data actually
-  // exists) AND listed in DRILLABLE_COUNTRIES (we have admin-1 geometry for
-  // it). Supranational selections (slug-prefixed ids) never qualify.
-  const canDrill = useMemo(() => {
-    if (!selectedId || selectedId.startsWith('sup:')) return false;
-    if (!DRILLABLE_COUNTRIES[selectedId]) return false;
-    const cov = covByIso.get(selectedId);
-    return Boolean(cov && cov.children_with_data > 0);
-  }, [selectedId, covByIso]);
+  const canDrill = useMemo(() => isDrillable(selectedId), [isDrillable, selectedId]);
 
-  const handleExploreCountry = useCallback(() => {
-    const entry = DRILLABLE_COUNTRIES[selectedId];
+  // Shared by the panel's "Explore regions" button (selectedId) and
+  // double-click / Shift+Enter on the map (an arbitrary id) - both open the
+  // same country view and close whatever panel is open.
+  const drillInto = useCallback((id) => {
+    const entry = DRILLABLE_COUNTRIES[id];
     if (!entry) return;
     setDrilldown({
-      iso: selectedId,
+      iso: id,
       slug: entry.slug,
       load: entry.load,
-      name: nameOfCountry(selectedId),
+      name: nameOfCountry(id),
     });
     setSelectedId(null);
-  }, [selectedId, nameOfCountry]);
+  }, [nameOfCountry]);
+
+  const handleExploreCountry = useCallback(() => {
+    drillInto(selectedId);
+  }, [drillInto, selectedId]);
+
+  // Routes a double-click (or Shift+Enter) on a country <path>: drill
+  // straight in if it qualifies, otherwise zoom in ~2x centered on that
+  // country's own centroid so a user who double-clicks expecting detail
+  // gets a step toward it instead of nothing happening. Either way, close
+  // any panel the double-click's own first click already opened.
+  const handleDrillOrZoom = useCallback((id) => {
+    if (isDrillable(id)) {
+      drillInto(id);
+      return;
+    }
+    setSelectedId(null);
+    const geo = worldById.get(id);
+    if (geo) panZoom.zoomToward(geo.cx, geo.cy, 2);
+  }, [isDrillable, drillInto, worldById, panZoom]);
 
   const handleExitCountryView = useCallback(() => setDrilldown(null), []);
 
@@ -290,9 +326,11 @@ function WorldMap({ onSelectPlace }) {
               hitIds={hitIds}
               viewBox={panZoom.viewBox}
               panZoomHandlers={panZoom.handlers}
+              drillableIds={drillableIds}
               onHover={handleHover}
               onHoverEnd={handleHoverEnd}
               onSelect={handleSelectId}
+              onDrillOrZoom={handleDrillOrZoom}
             />
             <div className="wm-controls" role="group" aria-label="Map zoom controls">
               <button

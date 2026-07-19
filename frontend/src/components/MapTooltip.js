@@ -22,6 +22,9 @@ function MapTooltip({ hover }) {
           ) : (
             <div className="wm-tooltip-sample">Sources watched - nothing surfaced yet.</div>
           )}
+          {hover.drillable && (
+            <div className="wm-tooltip-drill">Double-click to see state and province detail.</div>
+          )}
         </>
       ) : (
         <>
