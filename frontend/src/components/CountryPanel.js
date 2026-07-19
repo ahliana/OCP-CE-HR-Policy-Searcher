@@ -2,15 +2,23 @@ import React from 'react';
 import { pluralize } from '../utils/mapCoverage';
 
 // Click commits: a side panel, never a modal, so the map stays explorable
-// while a result is open. The "Search {place}" action is the one path from
-// the map into the app's real place-first search - same resolve_place flow
-// typing the name would use. `onExplore` is optional: WorldMap only passes
-// it for a country with admin-1 geometry AND state/province-level data
-// (see DRILLABLE_COUNTRIES in config/drillableCountries.js), so most
-// countries' panels render exactly as before.
-function CountryPanel({ selection, onClose, onSearchPlace, onExplore }) {
+// while a result is open. The primary action is "View {n} found policies" -
+// jumping straight to what has already been found for this place - via
+// `onViewPlacePolicies({ slug, name })`. The paid "Search {place}" scan
+// action still exists but is demoted to a secondary/link-styled action
+// (label: "Scan {name} for new policies"), and its visibility is controlled
+// by `showScanAction` (another workstream sets it false for visitors).
+// `onExplore` is optional: WorldMap only passes it for a country with
+// admin-1 geometry AND state/province-level data (see DRILLABLE_COUNTRIES in
+// config/drillableCountries.js), so most countries' panels render exactly
+// as before.
+function CountryPanel({
+  selection, onClose, onSearchPlace, onExplore,
+  onViewPlacePolicies, showScanAction = true,
+}) {
   const isOpen = Boolean(selection);
   const tracked = selection && (selection.sources > 0 || selection.policies > 0);
+  const hasFoundPolicies = selection && selection.policies > 0;
 
   return (
     <aside
@@ -49,13 +57,24 @@ function CountryPanel({ selection, onClose, onSearchPlace, onExplore }) {
                   A fresh scan may change that.
                 </p>
               )}
-              <button
-                type="button"
-                className="wm-panel-cta"
-                onClick={() => onSearchPlace(selection.name)}
-              >
-                Search {selection.name}
-              </button>
+              {hasFoundPolicies && (
+                <button
+                  type="button"
+                  className="wm-panel-cta"
+                  onClick={() => onViewPlacePolicies({ slug: selection.slug, name: selection.name })}
+                >
+                  View {selection.policies} found {pluralize(selection.policies, 'policy', 'policies')}
+                </button>
+              )}
+              {showScanAction && (
+                <button
+                  type="button"
+                  className="wm-panel-cta-link"
+                  onClick={() => onSearchPlace(selection.name)}
+                >
+                  Scan {selection.name} for new policies
+                </button>
+              )}
               {onExplore && (
                 <button
                   type="button"
@@ -72,13 +91,15 @@ function CountryPanel({ selection, onClose, onSearchPlace, onExplore }) {
                 No tracked sources yet. Searching still works - finding sources here
                 is how coverage grows.
               </p>
-              <button
-                type="button"
-                className="wm-panel-cta"
-                onClick={() => onSearchPlace(selection.name)}
-              >
-                Search {selection.name} anyway
-              </button>
+              {showScanAction && (
+                <button
+                  type="button"
+                  className="wm-panel-cta-link"
+                  onClick={() => onSearchPlace(selection.name)}
+                >
+                  Scan {selection.name} for new policies
+                </button>
+              )}
             </>
           )}
         </div>

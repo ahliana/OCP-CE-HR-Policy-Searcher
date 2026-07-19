@@ -133,6 +133,26 @@ class TestTopPolicyNames:
         assert swe["top_policy_names"] == ["high", "mid", "low"]
 
 
+class TestCountrySlug:
+    """Every country entry carries the registry slug the map/panel need to
+    call /api/policies?place=<slug> - added alongside iso_numeric, not in
+    place of it."""
+
+    def test_country_entry_carries_its_registry_slug(self):
+        cov = compute_coverage(
+            [_pol("Sweden (EU)", "s"), _pol("Wallonia, Belgium", "w")], []
+        )
+        swe = _by_iso(cov["countries"], _iso("Sweden"))
+        bel = _by_iso(cov["countries"], _iso("Belgium"))
+        assert swe["slug"] == "sweden"
+        assert bel["slug"] == "belgium"
+
+    def test_country_reached_only_via_source_still_carries_slug(self):
+        cov = compute_coverage([], [{"id": "d1", "region": ["denmark"]}])
+        dk = _by_iso(cov["countries"], _iso("Denmark"))
+        assert dk["slug"] == "denmark"
+
+
 class TestSourceAttribution:
     def _domains(self):
         return [
@@ -328,8 +348,9 @@ class TestRouteWiring:
         assert body["totals"] == {"sources": 1, "policies": 2}
         swe = _by_iso(body["countries"], _iso("Sweden"))
         assert swe["policies"] == 1 and swe["sources"] == 1
-        assert set(swe) == {"name", "iso_numeric", "sources", "policies",
+        assert set(swe) == {"name", "slug", "iso_numeric", "sources", "policies",
                             "top_policy_names", "children_with_data"}
+        assert swe["slug"] == "sweden"
         assert swe["children_with_data"] == 0
         eu = _by_slug(body["supranational"], "eu")
         assert eu["policies"] == 1

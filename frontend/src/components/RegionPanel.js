@@ -3,14 +3,18 @@ import { pluralize } from '../utils/mapCoverage';
 import CityChips from './CityChips';
 
 // Country view's unit/federal panel - mirrors CountryPanel exactly (name,
-// "{sources} sources · {policies} policies", top policy names, a "Search
-// {name}" CTA into the same place-first search WorldMap's panel uses), plus
-// two things a state/province panel needs that the world panel does not:
-// a federal badge (so a nationwide law is never read as a single-region
-// one) and optional city chips.
-function RegionPanel({ selection, onClose, onSearchPlace }) {
+// "{sources} sources · {policies} policies", top policy names, a primary
+// "View {n} found policies" CTA via `onViewPlacePolicies({ slug, name })`,
+// and the demoted/optional "Scan {name} for new policies" scan action
+// gated by `showScanAction`), plus two things a state/province panel needs
+// that the world panel does not: a federal badge (so a nationwide law is
+// never read as a single-region one) and optional city chips.
+function RegionPanel({
+  selection, onClose, onSearchPlace, onViewPlacePolicies, showScanAction = true,
+}) {
   const isOpen = Boolean(selection);
   const tracked = selection && (selection.sources > 0 || selection.policies > 0);
+  const hasFoundPolicies = selection && selection.policies > 0;
   const classes = ['wm-panel'];
   if (isOpen) classes.push('wm-panel-open');
   if (selection?.isFederal) classes.push('wm-panel-federal');
@@ -56,13 +60,24 @@ function RegionPanel({ selection, onClose, onSearchPlace }) {
                 </p>
               )}
               <CityChips cities={selection.cities} />
-              <button
-                type="button"
-                className="wm-panel-cta"
-                onClick={() => onSearchPlace(selection.name)}
-              >
-                Search {selection.name}
-              </button>
+              {hasFoundPolicies && (
+                <button
+                  type="button"
+                  className="wm-panel-cta"
+                  onClick={() => onViewPlacePolicies({ slug: selection.slug, name: selection.name })}
+                >
+                  View {selection.policies} found {pluralize(selection.policies, 'policy', 'policies')}
+                </button>
+              )}
+              {showScanAction && (
+                <button
+                  type="button"
+                  className="wm-panel-cta-link"
+                  onClick={() => onSearchPlace(selection.name)}
+                >
+                  Scan {selection.name} for new policies
+                </button>
+              )}
             </>
           ) : (
             <>
@@ -71,13 +86,15 @@ function RegionPanel({ selection, onClose, onSearchPlace }) {
                 is how coverage grows.
               </p>
               <CityChips cities={selection.cities} />
-              <button
-                type="button"
-                className="wm-panel-cta"
-                onClick={() => onSearchPlace(selection.name)}
-              >
-                Search {selection.name} anyway
-              </button>
+              {showScanAction && (
+                <button
+                  type="button"
+                  className="wm-panel-cta-link"
+                  onClick={() => onSearchPlace(selection.name)}
+                >
+                  Scan {selection.name} for new policies
+                </button>
+              )}
             </>
           )}
         </div>

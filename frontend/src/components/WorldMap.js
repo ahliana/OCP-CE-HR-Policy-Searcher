@@ -24,7 +24,7 @@ function normalize(value) {
 // a word, and every entry point here - map click, quick-filter, legend,
 // off-map chip, browse list - ends at the same place, the "Search {place}"
 // action that feeds the app's existing place-first search box below.
-function WorldMap({ onSelectPlace }) {
+function WorldMap({ onSelectPlace, onViewPlacePolicies, showScanAction = true }) {
   const { coverage, error } = useCoverage();
   const holderRef = useRef(null);
   const svgRef = useRef(null);
@@ -257,6 +257,7 @@ function WorldMap({ onSelectPlace }) {
       if (!entry) return null;
       return {
         id: selectedId,
+        slug: entry.slug,
         name: entry.name,
         sources: entry.sources,
         policies: entry.policies,
@@ -266,6 +267,7 @@ function WorldMap({ onSelectPlace }) {
     const cov = covByIso.get(selectedId);
     return {
       id: selectedId,
+      slug: cov?.slug,
       name: cov?.name || worldById.get(selectedId)?.name || selectedId,
       sources: cov?.sources || 0,
       policies: cov?.policies || 0,
@@ -293,6 +295,8 @@ function WorldMap({ onSelectPlace }) {
           load={drilldown.load}
           onBack={handleExitCountryView}
           onSelectPlace={handleSearchPlace}
+          onViewPlacePolicies={onViewPlacePolicies}
+          showScanAction={showScanAction}
         />
       ) : (
         <>
@@ -367,6 +371,8 @@ function WorldMap({ onSelectPlace }) {
               onClose={handleClosePanel}
               onSearchPlace={handleSearchPlace}
               onExplore={canDrill ? handleExploreCountry : undefined}
+              onViewPlacePolicies={onViewPlacePolicies}
+              showScanAction={showScanAction}
             />
           </div>
 

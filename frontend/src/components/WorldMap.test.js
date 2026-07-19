@@ -5,16 +5,16 @@ import WorldMap from './WorldMap';
 const BASE_COVERAGE = {
   countries: [
     {
-      name: 'United States', iso_numeric: '840', sources: 162, policies: 23,
+      name: 'United States', slug: 'us', iso_numeric: '840', sources: 162, policies: 23,
       top_policy_names: ['Heat Reuse Act', 'Thermal Energy Network Pilot Program'],
     },
     {
-      name: 'Sweden', iso_numeric: '752', sources: 8, policies: 0, top_policy_names: [],
+      name: 'Sweden', slug: 'sweden', iso_numeric: '752', sources: 8, policies: 0, top_policy_names: [],
     },
     {
       // Absent from the 110m atlas entirely - no <path> can ever exist for
       // it. Must still reach the map (as a micro dot) and the browse list.
-      name: 'Singapore', iso_numeric: '702', sources: 2, policies: 0, top_policy_names: [],
+      name: 'Singapore', slug: 'singapore', iso_numeric: '702', sources: 2, policies: 0, top_policy_names: [],
     },
   ],
   supranational: [
@@ -97,7 +97,10 @@ describe('WorldMap', () => {
 
     fireEvent.click(dot);
     expect(await screen.findByRole('heading', { name: 'Singapore' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Search Singapore' }));
+    // No policies found yet (policies: 0), so the primary "View found
+    // policies" CTA does not render - only the demoted scan action does.
+    expect(screen.queryByRole('button', { name: /View \d+ found/ })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Scan Singapore for new policies' }));
     expect(onSelectPlace).toHaveBeenCalledWith('Singapore');
   });
 
@@ -126,11 +129,34 @@ describe('WorldMap', () => {
     expect(screen.getByText(/162 tracked sources/)).toBeInTheDocument();
     expect(screen.getByText('Heat Reuse Act')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Search United States' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Scan United States for new policies' }));
     expect(onSelectPlace).toHaveBeenCalledWith('United States');
   });
 
-  it('an untracked country still opens the panel, offering "search anyway"', async () => {
+  it('a tracked country with policies leads with "View found policies", wired to onViewPlacePolicies', async () => {
+    const onViewPlacePolicies = jest.fn();
+    global.fetch = mockFetch();
+    render(<WorldMap onSelectPlace={jest.fn()} onViewPlacePolicies={onViewPlacePolicies} />);
+
+    const path = await screen.findByRole('button', { name: /United States of America/ });
+    fireEvent.click(path);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'View 23 found policies' }));
+    expect(onViewPlacePolicies).toHaveBeenCalledWith({ slug: 'us', name: 'United States' });
+  });
+
+  it('hides the scan action when showScanAction is false, keeping the view-policies CTA', async () => {
+    global.fetch = mockFetch();
+    render(<WorldMap onSelectPlace={jest.fn()} showScanAction={false} />);
+
+    const path = await screen.findByRole('button', { name: /United States of America/ });
+    fireEvent.click(path);
+
+    expect(await screen.findByRole('button', { name: 'View 23 found policies' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Scan United States/ })).not.toBeInTheDocument();
+  });
+
+  it('an untracked country still opens the panel, offering to scan anyway', async () => {
     global.fetch = mockFetch();
     render(<WorldMap onSelectPlace={jest.fn()} />);
 
@@ -138,20 +164,27 @@ describe('WorldMap', () => {
     fireEvent.click(path);
 
     expect(await screen.findByRole('heading', { name: 'Germany' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Search Germany anyway' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Scan Germany for new policies' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /View \d+ found/ })).not.toBeInTheDocument();
   });
 
   it('never drops an off-map jurisdiction: the EU renders as a clickable chip', async () => {
     const onSelectPlace = jest.fn();
+    const onViewPlacePolicies = jest.fn();
     global.fetch = mockFetch();
-    render(<WorldMap onSelectPlace={onSelectPlace} />);
+    render(
+      <WorldMap onSelectPlace={onSelectPlace} onViewPlacePolicies={onViewPlacePolicies} />,
+    );
 
     const tray = await screen.findByLabelText('Coverage without a map shape');
     const chip = within(tray).getByRole('button', { name: /European Union/ });
     fireEvent.click(chip);
 
     expect(await screen.findByRole('heading', { name: 'European Union' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Search European Union' }));
+    fireEvent.click(screen.getByRole('button', { name: 'View 7 found policies' }));
+    expect(onViewPlacePolicies).toHaveBeenCalledWith({ slug: 'eu', name: 'European Union' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Scan European Union for new policies' }));
     expect(onSelectPlace).toHaveBeenCalledWith('European Union');
   });
 

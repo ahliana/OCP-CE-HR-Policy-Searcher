@@ -49,7 +49,10 @@ function Admin1Path({ item, onHover, onHoverEnd, onSelect }) {
 // drillableCountries.js) - the frontend-only bridge for the two things
 // /api/coverage does not carry: a slug to query /api/coverage/children
 // with, and which countries have admin-1 geometry at all.
-function CountryView({ slug, countryName, load, onBack, onSelectPlace }) {
+function CountryView({
+  slug, countryName, load, onBack, onSelectPlace,
+  onViewPlacePolicies, showScanAction = true,
+}) {
   const holderRef = useRef(null);
   const svgRef = useRef(null);
 
@@ -120,6 +123,7 @@ function CountryView({ slug, countryName, load, onBack, onSelectPlace }) {
   const handleSelectUnit = useCallback((unit, cov) => {
     setSelection({
       id: unit.code,
+      slug: cov?.slug,
       name: unit.name,
       sources: cov?.sources || 0,
       policies: cov?.policies || 0,
@@ -131,9 +135,10 @@ function CountryView({ slug, countryName, load, onBack, onSelectPlace }) {
 
   const handleSelectFederal = useCallback(() => {
     if (!childrenData) return;
-    const { national } = childrenData;
+    const { national, parent } = childrenData;
     setSelection({
       id: 'federal',
+      slug: parent?.slug,
       name: countryName,
       sources: national.sources,
       policies: national.policies,
@@ -266,7 +271,13 @@ function CountryView({ slug, countryName, load, onBack, onSelectPlace }) {
         </div>
 
         <MapTooltip hover={hover} />
-        <RegionPanel selection={selection} onClose={handleClosePanel} onSearchPlace={onSelectPlace} />
+        <RegionPanel
+          selection={selection}
+          onClose={handleClosePanel}
+          onSearchPlace={onSelectPlace}
+          onViewPlacePolicies={onViewPlacePolicies}
+          showScanAction={showScanAction}
+        />
       </div>
     </div>
   );

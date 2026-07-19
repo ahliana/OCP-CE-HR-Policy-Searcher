@@ -11,7 +11,10 @@ import PolicyScannerHeader from './PolicyScannerHeader';
 import SearchPanel from './SearchPanel';
 import WorldMap from './WorldMap';
 
-function AgentPanel({ adminRequired = false, hasAdminToken = false, onAdminTokenChange }) {
+function AgentPanel({
+    adminRequired = false, hasAdminToken = false, onAdminTokenChange,
+    onViewPlacePolicies, showScanAction = true,
+}) {
     const [selectedRegions, setSelectedRegions] = useState([]);
     const [mode, setMode] = useState('standard');
     const [channels, setChannels] = useState(DEFAULT_CHANNELS);
@@ -97,7 +100,11 @@ function AgentPanel({ adminRequired = false, hasAdminToken = false, onAdminToken
     return (
         <section className="Policy-scanner" aria-label="Policy Scanner">
             <PolicyScannerHeader onOpenSettings={() => setIsSettingsOpen(true)} />
-            <WorldMap onSelectPlace={handleSelectPlace} />
+            <WorldMap
+                onSelectPlace={handleSelectPlace}
+                onViewPlacePolicies={onViewPlacePolicies}
+                showScanAction={showScanAction}
+            />
             <ApiKeySettingsModal
                 open={isSettingsOpen}
                 onClose={() => {

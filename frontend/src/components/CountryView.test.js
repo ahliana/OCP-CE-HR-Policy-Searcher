@@ -86,8 +86,67 @@ describe('CountryView', () => {
     expect(screen.getByText(/1 tracked source/)).toBeInTheDocument();
     expect(screen.getByText('Brussels Heat Directive')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Search Brussels' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Scan Brussels for new policies' }));
     expect(onSelectPlace).toHaveBeenCalledWith('Brussels');
+  });
+
+  it('leads with "View found policies" for a unit with policies, wired to onViewPlacePolicies', async () => {
+    const onViewPlacePolicies = jest.fn();
+    global.fetch = mockFetchChildren();
+    render(
+      <CountryView
+        slug="belgium"
+        countryName="Belgium"
+        load={mockLoad()}
+        onBack={jest.fn()}
+        onSelectPlace={jest.fn()}
+        onViewPlacePolicies={onViewPlacePolicies}
+      />,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: /Brussels: 1 sources/ }));
+    fireEvent.click(await screen.findByRole('button', { name: 'View 3 found policies' }));
+    expect(onViewPlacePolicies).toHaveBeenCalledWith({ slug: 'belgium-bru', name: 'Brussels' });
+  });
+
+  it('the federal chip\'s panel views policies under the country\'s own slug', async () => {
+    const onViewPlacePolicies = jest.fn();
+    global.fetch = mockFetchChildren({
+      ...CHILDREN_RESPONSE,
+      national: { sources: 6, policies: 2, top_policy_names: ['Federal Heat Reuse Act'] },
+    });
+    render(
+      <CountryView
+        slug="belgium"
+        countryName="Belgium"
+        load={mockLoad()}
+        onBack={jest.fn()}
+        onSelectPlace={jest.fn()}
+        onViewPlacePolicies={onViewPlacePolicies}
+      />,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: /Federal \/ nationwide/ }));
+    fireEvent.click(await screen.findByRole('button', { name: 'View 2 found policies' }));
+    expect(onViewPlacePolicies).toHaveBeenCalledWith({ slug: 'belgium', name: 'Belgium' });
+  });
+
+  it('hides the scan action when showScanAction is false', async () => {
+    global.fetch = mockFetchChildren();
+    render(
+      <CountryView
+        slug="belgium"
+        countryName="Belgium"
+        load={mockLoad()}
+        onBack={jest.fn()}
+        onSelectPlace={jest.fn()}
+        showScanAction={false}
+      />,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: /Brussels: 1 sources/ }));
+    expect(await screen.findByRole('button', { name: 'View 3 found policies' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Scan Brussels/ })).not.toBeInTheDocument();
   });
 
   it('the federal chip is not a map unit path, and opens a distinctly federal-badged panel', async () => {

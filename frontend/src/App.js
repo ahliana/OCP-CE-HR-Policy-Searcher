@@ -18,6 +18,11 @@ function App() {
   const [isFirstRunHelpOpen, setIsFirstRunHelpOpen] = useState(false);
   const [adminRequired, setAdminRequired] = useState(false);
   const [hasAdminToken, setHasAdminToken] = useState(Boolean(getAdminToken()));
+  const [placePolicyRequest, setPlacePolicyRequest] = useState(null);
+
+  const handleViewPlacePolicies = useCallback(({ slug, name }) => {
+    setPlacePolicyRequest({ slug, name, nonce: Date.now() });
+  }, []);
 
   const refreshAdminTokenStatus = useCallback(() => {
     setHasAdminToken(Boolean(getAdminToken()));
@@ -95,13 +100,14 @@ function App() {
             adminRequired={adminRequired}
             hasAdminToken={hasAdminToken}
             onAdminTokenChange={refreshAdminTokenStatus}
+            onViewPlacePolicies={handleViewPlacePolicies}
           />
         </section>
         <section className="app-stage" aria-label="Discovered policies">
           <ReviewInbox isAdmin={!adminRequired || hasAdminToken} />
           <AskPolicyBox />
           <LeadsInbox adminRequired={adminRequired} hasAdminToken={hasAdminToken} />
-          <PolicyList />
+          <PolicyList externalPlace={placePolicyRequest} />
         </section>
       </main>
     </div>
