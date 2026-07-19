@@ -142,7 +142,7 @@ function AdminSignInDialog({ open, onClose, onAdminTokenChange }) {
             onClick={onClose}
             aria-label="Close admin sign-in"
           >
-            x
+            &times;
           </button>
         </div>
         <div style={styles.body}>
