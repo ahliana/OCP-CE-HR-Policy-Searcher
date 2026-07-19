@@ -185,7 +185,11 @@ function usePanZoom(svgRef, config) {
 
   const handlePointerDown = useCallback((event) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
-    event.currentTarget.setPointerCapture?.(event.pointerId);
+    // Do NOT capture the pointer here. Capturing on pointerdown retargets the
+    // follow-up click AND dblclick to the <svg> (compat mouse events fire on
+    // the capture element, not the country <path> under the cursor), so a
+    // plain click never opens the panel and a double-click never drills.
+    // Capture is set later, only once an actual drag begins (handlePointerMove).
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     if (pointersRef.current.size === 2) {
       // A second finger landed: hand off from single-pointer drag to pinch.
@@ -231,6 +235,15 @@ function usePanZoom(svgRef, config) {
     const dyClient = event.clientY - drag.startClientY;
     if (!drag.moved && Math.hypot(dxClient, dyClient) > DRAG_THRESHOLD_PX) {
       drag.moved = true;
+      // Now that a real drag is underway, capture the pointer so panning keeps
+      // tracking even if the cursor leaves the svg. Safe here (a moved pointer
+      // is a drag, not a click), unlike capturing on pointerdown. Best-effort:
+      // setPointerCapture throws on a stale pointer id / under jsdom.
+      try {
+        svgRef.current?.setPointerCapture(event.pointerId);
+      } catch {
+        /* capture is a nicety; drag still works while the pointer is over the svg */
+      }
     }
     if (!drag.moved) return;
     const node = svgRef.current;
