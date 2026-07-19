@@ -1,21 +1,24 @@
 import React from 'react';
 import { pluralize } from '../utils/mapCoverage';
+import CityChips from './CityChips';
 
-// Click commits: a side panel, never a modal, so the map stays explorable
-// while a result is open. The "Search {place}" action is the one path from
-// the map into the app's real place-first search - same resolve_place flow
-// typing the name would use. `onExplore` is optional: WorldMap only passes
-// it for a country with admin-1 geometry AND state/province-level data
-// (see DRILLABLE_COUNTRIES in config/drillableCountries.js), so most
-// countries' panels render exactly as before.
-function CountryPanel({ selection, onClose, onSearchPlace, onExplore }) {
+// Country view's unit/federal panel - mirrors CountryPanel exactly (name,
+// "{sources} sources · {policies} policies", top policy names, a "Search
+// {name}" CTA into the same place-first search WorldMap's panel uses), plus
+// two things a state/province panel needs that the world panel does not:
+// a federal badge (so a nationwide law is never read as a single-region
+// one) and optional city chips.
+function RegionPanel({ selection, onClose, onSearchPlace }) {
   const isOpen = Boolean(selection);
   const tracked = selection && (selection.sources > 0 || selection.policies > 0);
+  const classes = ['wm-panel'];
+  if (isOpen) classes.push('wm-panel-open');
+  if (selection?.isFederal) classes.push('wm-panel-federal');
 
   return (
     <aside
-      className={`wm-panel${isOpen ? ' wm-panel-open' : ''}`}
-      aria-label="Place details"
+      className={classes.join(' ')}
+      aria-label="Region details"
       aria-hidden={!isOpen}
     >
       <button type="button" className="wm-panel-close" aria-label="Close panel" onClick={onClose}>
@@ -23,6 +26,9 @@ function CountryPanel({ selection, onClose, onSearchPlace, onExplore }) {
       </button>
       {selection && (
         <div className="wm-panel-body">
+          {selection.isFederal && (
+            <span className="wm-federal-badge">Federal / nationwide</span>
+          )}
           <h3>{selection.name}</h3>
           {tracked ? (
             <>
@@ -49,6 +55,7 @@ function CountryPanel({ selection, onClose, onSearchPlace, onExplore }) {
                   A fresh scan may change that.
                 </p>
               )}
+              <CityChips cities={selection.cities} />
               <button
                 type="button"
                 className="wm-panel-cta"
@@ -56,15 +63,6 @@ function CountryPanel({ selection, onClose, onSearchPlace, onExplore }) {
               >
                 Search {selection.name}
               </button>
-              {onExplore && (
-                <button
-                  type="button"
-                  className="wm-panel-cta wm-panel-cta-secondary"
-                  onClick={onExplore}
-                >
-                  Explore {selection.name}&rsquo;s regions &rarr;
-                </button>
-              )}
             </>
           ) : (
             <>
@@ -72,6 +70,7 @@ function CountryPanel({ selection, onClose, onSearchPlace, onExplore }) {
                 No tracked sources yet. Searching still works - finding sources here
                 is how coverage grows.
               </p>
+              <CityChips cities={selection.cities} />
               <button
                 type="button"
                 className="wm-panel-cta"
@@ -87,4 +86,4 @@ function CountryPanel({ selection, onClose, onSearchPlace, onExplore }) {
   );
 }
 
-export default CountryPanel;
+export default RegionPanel;

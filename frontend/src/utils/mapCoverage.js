@@ -91,3 +91,21 @@ export function computeMicroMarkers(worldCountries, coverageCountries) {
 export function pluralize(count, singular, plural = `${singular}s`) {
   return count === 1 ? singular : plural;
 }
+
+// Joins one country's admin-1 geometry (frontend/src/assets/admin1/<iso>.json
+// `units[]`) to a live /api/coverage/children `children[]` response, keyed by
+// ISO 3166-2 `code`. Mirrors joinCountries: every geometry unit appears
+// exactly once, tagged with its bin. A unit absent from `children[]` (the
+// API omits children with zero data) is 'untracked' rather than dropped, so
+// the country outline still draws in full.
+export function joinAdmin1(units, children) {
+  const byCode = new Map();
+  for (const c of children || []) {
+    byCode.set(c.code, c);
+  }
+
+  return (units || []).map((unit) => {
+    const cov = byCode.get(unit.code) || null;
+    return { unit, cov, bin: binForCoverage(cov) };
+  });
+}

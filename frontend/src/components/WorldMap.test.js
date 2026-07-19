@@ -35,6 +35,37 @@ function mockFetch(coverage = BASE_COVERAGE) {
   });
 }
 
+// /api/coverage/children?parent=<slug> is a distinct endpoint but its path
+// still contains "/api/coverage" - checked first here so it never falls
+// through to the world coverage payload.
+function mockFetchWithChildren(coverage, childrenByParent) {
+  return jest.fn(async (url) => {
+    const s = String(url);
+    if (s.includes('/api/coverage/children')) {
+      const parent = new URL(s).searchParams.get('parent');
+      const payload = childrenByParent[parent];
+      if (!payload) return { ok: false, status: 404, text: async () => 'not found' };
+      return { ok: true, json: async () => payload };
+    }
+    if (s.includes('/api/coverage')) {
+      return { ok: true, json: async () => coverage };
+    }
+    return { ok: false, text: async () => 'not found' };
+  });
+}
+
+const US_CHILDREN = {
+  parent: { slug: 'us', name: 'United States', iso_numeric: '840' },
+  national: { sources: 6, policies: 6, top_policy_names: ['Federal Heat Reuse Act'] },
+  children: [
+    {
+      slug: 'us-mn', name: 'Minnesota', kind: 'us_state', code: 'US-MN',
+      sources: 3, policies: 5, top_policy_names: ['MN Thermal Pilot'],
+    },
+  ],
+  totals: { sources: 8, policies: 11 },
+};
+
 afterEach(() => {
   jest.restoreAllMocks();
 });
@@ -158,5 +189,69 @@ describe('WorldMap', () => {
     });
 
     await waitFor(() => expect(screen.getByText('119')).toBeInTheDocument());
+  });
+
+  it('offers "Explore regions" only for a country with both admin-1 geometry and state data', async () => {
+    global.fetch = mockFetch({
+      ...BASE_COVERAGE,
+      countries: BASE_COVERAGE.countries.map((c) => (
+        // United States (iso 840) is in DRILLABLE_COUNTRIES; give it real
+        // children_with_data. Sweden (752) is not in the registry at all,
+        // even with children_with_data it must never show the affordance.
+        c.iso_numeric === '840'
+          ? { ...c, children_with_data: 28 }
+          : { ...c, children_with_data: 3 }
+      )),
+    });
+    render(<WorldMap onSelectPlace={jest.fn()} />);
+
+    const usPath = await screen.findByRole('button', { name: /United States of America/ });
+    fireEvent.click(usPath);
+    expect(await screen.findByRole('button', { name: /Explore United States.*regions/ }))
+      .toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Close panel' }));
+
+    const swedenPath = screen.getByLabelText(/Sweden: 8 sources/);
+    fireEvent.click(swedenPath);
+    expect(await screen.findByRole('heading', { name: 'Sweden' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Explore/ })).not.toBeInTheDocument();
+  });
+
+  it('does not offer "Explore regions" for a drillable-registry country with no state data yet', async () => {
+    global.fetch = mockFetch(BASE_COVERAGE); // no children_with_data on United States
+    render(<WorldMap onSelectPlace={jest.fn()} />);
+
+    const usPath = await screen.findByRole('button', { name: /United States of America/ });
+    fireEvent.click(usPath);
+    expect(await screen.findByRole('heading', { name: 'United States' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Explore/ })).not.toBeInTheDocument();
+  });
+
+  it('enters country view from the drill affordance and returns to the world via the breadcrumb', async () => {
+    const onSelectPlace = jest.fn();
+    global.fetch = mockFetchWithChildren(
+      {
+        ...BASE_COVERAGE,
+        countries: BASE_COVERAGE.countries.map((c) => (
+          c.iso_numeric === '840' ? { ...c, children_with_data: 28 } : c
+        )),
+      },
+      { us: US_CHILDREN },
+    );
+    render(<WorldMap onSelectPlace={onSelectPlace} />);
+
+    const usPath = await screen.findByRole('button', { name: /United States of America/ });
+    fireEvent.click(usPath);
+    fireEvent.click(await screen.findByRole('button', { name: /Explore United States.*regions/ }));
+
+    // The world map's own controls are gone; the country view's own unit
+    // (Minnesota) and federal chip have replaced them.
+    expect(screen.queryByRole('button', { name: /United States of America/ })).not.toBeInTheDocument();
+    expect(await screen.findByLabelText(/Minnesota: 3 sources, 5 policies/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Federal \/ nationwide/ })).toBeInTheDocument();
+    expect(screen.getByText(/6 federal polic/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /World/ }));
+    expect(await screen.findByRole('button', { name: /United States of America/ })).toBeInTheDocument();
   });
 });

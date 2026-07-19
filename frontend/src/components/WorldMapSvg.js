@@ -20,6 +20,7 @@ function CountryPath({ item, isHit, isDimmed, onHover, onHoverEnd, onSelect }) {
       aria-label={countryLabel(geo, cov)}
       tabIndex={tracked ? 0 : undefined}
       role={tracked ? 'button' : undefined}
+      vectorEffect="non-scaling-stroke"
       onPointerMove={(event) => onHover(geo.id, event)}
       onPointerLeave={onHoverEnd}
       onClick={() => onSelect(geo.id)}
@@ -48,6 +49,7 @@ function MicroMarker({ marker, isHit, isDimmed, onHover, onHoverEnd, onSelect })
       aria-label={`${marker.name}: tracked, too small to show on the map outline`}
       tabIndex={0}
       role="button"
+      vectorEffect="non-scaling-stroke"
       onPointerMove={(event) => onHover(marker.id, event)}
       onPointerLeave={onHoverEnd}
       onClick={() => onSelect(marker.id)}
@@ -64,13 +66,22 @@ function MicroMarker({ marker, isHit, isDimmed, onHover, onHoverEnd, onSelect })
 // Inline SVG choropleth: precomputed Equal Earth paths (world-atlas 110m),
 // styled entirely by CSS class so bins/hover/dim/hit states are one class
 // list each, no per-element style computation.
-function WorldMapSvg({ joined, microMarkers, activeBin, hitIds, onHover, onHoverEnd, onSelect }) {
+//
+// Pan/zoom is driven by the viewBox itself (see hooks/usePanZoom) rather
+// than a CSS/<g> transform, so every <path>/<circle>'s own coordinates -
+// and therefore hit-testing - never change.
+function WorldMapSvg({
+  svgRef, joined, microMarkers, activeBin, hitIds, viewBox, panZoomHandlers,
+  onHover, onHoverEnd, onSelect,
+}) {
   return (
     <svg
+      ref={svgRef}
       className="wm-svg"
-      viewBox="0 0 960 421.5"
+      viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
       role="group"
       aria-label="World map of PolicyPulse coverage"
+      {...panZoomHandlers}
     >
       {joined.map((item) => (
         <CountryPath

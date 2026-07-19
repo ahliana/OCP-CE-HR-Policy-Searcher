@@ -22,6 +22,12 @@
   --wm-map-hover-stroke: #1c2318;
   --wm-tooltip-bg: #1c2318;
   --wm-tooltip-ink: #f2f5ee;
+  /* Federal/nationwide: deliberately a different hue (indigo) from the
+     green choropleth bins, so a federal law can never be mistaken for a
+     single-region color at a glance. */
+  --wm-federal-bg: #eef2ff;
+  --wm-federal-border: #6366f1;
+  --wm-federal-ink: #3730a3;
 
   grid-column: 1 / -1;
   text-align: left;
@@ -52,6 +58,9 @@
     --wm-map-hover-stroke: #e8ece3;
     --wm-tooltip-bg: #e8ece3;
     --wm-tooltip-ink: #1c2318;
+    --wm-federal-bg: #23264a;
+    --wm-federal-border: #818cf8;
+    --wm-federal-ink: #c7d2fe;
   }
 }
 
@@ -142,6 +151,66 @@
   display: block;
   width: 100%;
   height: auto;
+  cursor: grab;
+  touch-action: none;
+}
+
+.wm-svg:active {
+  cursor: grabbing;
+}
+
+.wm-controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 4;
+  display: flex;
+  gap: 4px;
+  background: var(--wm-card);
+  border: 1px solid var(--wm-line);
+  border-radius: 8px;
+  padding: 3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+
+.wm-control-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--wm-ink);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.wm-control-btn:hover:not(:disabled) {
+  background: var(--wm-panel);
+}
+
+.wm-control-btn:focus-visible {
+  outline: 2px solid var(--wm-accent-deep);
+  outline-offset: 1px;
+}
+
+.wm-control-btn:disabled {
+  color: var(--wm-muted);
+  opacity: 0.4;
+  cursor: default;
+}
+
+.wm-control-reset {
+  width: auto;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .wm-country {
@@ -469,8 +538,161 @@
   font-variant-numeric: tabular-nums;
 }
 
+.wm-panel-cta-secondary {
+  background: transparent;
+  color: var(--wm-accent-deep);
+  border: 1px solid var(--wm-accent-deep);
+}
+
+.wm-panel-cta-secondary:hover {
+  background: var(--wm-panel);
+  filter: none;
+}
+
+.wm-attribution {
+  margin: 14px 0 0;
+  font-size: 11px;
+  color: var(--wm-muted);
+}
+
+/* Country drill-down view */
+
+.wm-breadcrumb {
+  margin: 2px 0 12px;
+  font-size: 13px;
+  color: var(--wm-muted);
+}
+
+.wm-breadcrumb-world {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--wm-accent-deep);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.wm-breadcrumb-world:focus-visible {
+  outline: 2px solid var(--wm-accent-deep);
+  outline-offset: 2px;
+}
+
+.wm-reconcile {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--wm-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.wm-country-view-message {
+  padding: 8px 0 24px;
+}
+
+.wm-loading {
+  font-size: 13.5px;
+  color: var(--wm-muted);
+}
+
+/* The world map's .wm-svg is width:100%/height:auto - fine for the fixed
+   960x421.5 world atlas. Admin-1 geometry varies from landscape (US,
+   960x561.6) to portrait (Germany, 960x1299.5); constraining by max-height
+   as well (and letting the intrinsic viewBox aspect ratio drive the rest)
+   keeps a portrait country from blowing past a sensible height and shifting
+   the rest of the page, without needing per-country CSS. */
+.wm-country-view .wm-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+}
+
+.wm-country-view .wm-svg {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 70vh;
+  margin: 0 auto;
+}
+
+.wm-federal-chip {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  font: inherit;
+  text-align: left;
+  color: var(--wm-federal-ink);
+  background: var(--wm-federal-bg);
+  border: 1.5px dashed var(--wm-federal-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+
+.wm-federal-chip[aria-pressed="true"] {
+  border-style: solid;
+}
+
+.wm-federal-chip:focus-visible {
+  outline: 2px solid var(--wm-federal-border);
+  outline-offset: 2px;
+}
+
+.wm-federal-chip-label {
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.wm-federal-chip-count {
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.wm-federal-badge {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--wm-federal-ink);
+  background: var(--wm-federal-bg);
+  border: 1px solid var(--wm-federal-border);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.wm-panel-federal {
+  border-left: 3px solid var(--wm-federal-border);
+}
+
+.wm-city-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 6px;
+}
+
+.wm-city-chip {
+  font-size: 11.5px;
+  color: var(--wm-ink);
+  background: var(--wm-panel);
+  border: 1px solid var(--wm-line);
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+
 @media (max-width: 640px) {
   .world-map { padding: 12px; }
   .wm-stat b { font-size: 20px; }
   .wm-panel { width: 100%; }
+  .wm-country-view .wm-svg { max-height: 50vh; }
 }
