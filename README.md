@@ -276,6 +276,10 @@ To export discovered policies to Google Sheets (in addition to `data/policies.js
 
 Without these variables, policies are saved to `data/policies.json` only.
 
+The Staging sheet doubles as the canonical cross-machine dataset: once it holds
+reviewed policies, a fresh deployment can seed its local store from it instead
+of re-scanning — see `python -m src.output.import_sheet` in [CLI Reference](#cli-reference).
+
 ### Run the AI Agent (recommended)
 
 ```bash
@@ -317,6 +321,17 @@ All agent modes and flags at a glance:
 | `python -m src.agent --logs audit` | View audit trail (scan starts, policy finds) |
 | `python -m src.agent --logs --level error` | View only errors |
 | `python -m src.agent --help` | Show full CLI help |
+| `python -m src.output.import_sheet` | Seed/refresh `data/policies.json` from the Google Sheets Staging worksheet |
+| `python -m src.output.import_sheet --dry-run` | Preview the import (map + summarize) without writing |
+| `python -m src.output.import_sheet --data-dir /path/to/data` | Import into a non-default data directory |
+
+`import_sheet` is the deployment-seeding path: a fresh install with the Staging
+sheet already populated runs it once and the store (and therefore the map/list
+UI) light up without a re-scan. It requires the same `GOOGLE_CREDENTIALS` /
+`SPREADSHEET_ID` as the writer and is idempotent — re-running only imports rows
+new since the last run (deduped by URL). Rows missing a URL or Name, or with
+values that fail Policy validation, are skipped and reported by row number
+rather than aborting the import.
 
 ### Deep Scanning Mode
 
