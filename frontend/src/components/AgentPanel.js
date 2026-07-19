@@ -4,6 +4,7 @@ import useAgentSocket from '../hooks/useAgentSocket';
 import useCostEstimate from '../hooks/useCostEstimate';
 import useScanQueue from '../hooks/useScanQueue';
 import { DEFAULT_CHANNELS, buildScanRequests } from '../utils/scanTargets';
+import AdminSignInDialog from './AdminSignInDialog';
 import AgentChatPanel from './AgentChatPanel';
 import ApiKeySettingsModal from './ApiKeySettingsModal';
 import DomainScanPanel from './DomainScanPanel';
@@ -21,6 +22,7 @@ function AgentPanel({
     const [channels, setChannels] = useState(DEFAULT_CHANNELS);
     const [chatNotice, setChatNotice] = useState(null);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isAdminSignInOpen, setIsAdminSignInOpen] = useState(false);
     const [hasApiKey, setHasApiKey] = useState(false);
     const [isSearchBusy, setIsSearchBusy] = useState(false);
     const [placeRequest, setPlaceRequest] = useState(null);
@@ -105,11 +107,10 @@ function AgentPanel({
     const handleToggleAdmin = () => {
         setAdminOpen((prev) => {
             const next = !prev;
-            // Locked and just opened: prompt for the token via the same
-            // modal that holds the admin token field, rather than a
-            // separate dialog.
+            // Locked and just opened: prompt for the admin passphrase via
+            // its own dialog, kept separate from the Anthropic API key modal.
             if (next && !adminUnlocked) {
-                setIsSettingsOpen(true);
+                setIsAdminSignInOpen(true);
             }
             return next;
         });
@@ -129,7 +130,10 @@ function AgentPanel({
                     setIsSettingsOpen(false);
                     fetchApiKeyStatus();
                 }}
-                adminRequired={adminRequired}
+            />
+            <AdminSignInDialog
+                open={isAdminSignInOpen}
+                onClose={() => setIsAdminSignInOpen(false)}
                 onAdminTokenChange={onAdminTokenChange}
             />
             {adminOpen && (adminUnlocked ? (
@@ -188,7 +192,7 @@ function AgentPanel({
                 </div>
             ) : (
                 <p className="admin-readonly-note" role="status">
-                    This is a read-only view of the policy library. Administrators can sign in from Settings.
+                    This is a read-only view of the policy library. Click Admin again to sign in.
                 </p>
             ))}
         </section>
