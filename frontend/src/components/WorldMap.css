@@ -563,6 +563,28 @@
   filter: none;
 }
 
+/* Demoted scan action ("Scan {name} for new policies") - a link, not a
+   button, so "View found policies" reads as the one obvious next step. */
+.wm-panel-cta-link {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--wm-muted);
+  background: none;
+  border: none;
+  padding: 4px 0;
+  text-align: left;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.wm-panel-cta-link:hover {
+  color: var(--wm-accent-deep);
+}
+
 .wm-attribution {
   margin: 14px 0 0;
   font-size: 11px;
