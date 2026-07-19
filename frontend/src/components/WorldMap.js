@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import worldAtlas from '../assets/worldAtlas110m.json';
 import useCoverage from '../hooks/useCoverage';
+import usePanZoom from '../hooks/usePanZoom';
 import { binForCoverage, computeMicroMarkers, joinCountries } from '../utils/mapCoverage';
 import CoverageStatStrip from './CoverageStatStrip';
 import MapLegend from './MapLegend';
@@ -24,6 +25,8 @@ function normalize(value) {
 function WorldMap({ onSelectPlace }) {
   const { coverage, error } = useCoverage();
   const holderRef = useRef(null);
+  const svgRef = useRef(null);
+  const panZoom = usePanZoom(svgRef);
 
   const [hover, setHover] = useState(null);
   const [activeBin, setActiveBin] = useState(null);
@@ -232,14 +235,46 @@ function WorldMap({ onSelectPlace }) {
 
       <div className="wm-stage" ref={holderRef}>
         <WorldMapSvg
+          svgRef={svgRef}
           joined={joined}
           microMarkers={microMarkers}
           activeBin={activeBin}
           hitIds={hitIds}
+          viewBox={panZoom.viewBox}
+          panZoomHandlers={panZoom.handlers}
           onHover={handleHover}
           onHoverEnd={handleHoverEnd}
           onSelect={handleSelectId}
         />
+        <div className="wm-controls" role="group" aria-label="Map zoom controls">
+          <button
+            type="button"
+            className="wm-control-btn"
+            aria-label="Zoom in"
+            onClick={panZoom.zoomIn}
+            disabled={!panZoom.canZoomIn}
+          >
+            +
+          </button>
+          <button
+            type="button"
+            className="wm-control-btn"
+            aria-label="Zoom out"
+            onClick={panZoom.zoomOut}
+            disabled={!panZoom.canZoomOut}
+          >
+            &minus;
+          </button>
+          <button
+            type="button"
+            className="wm-control-btn wm-control-reset"
+            aria-label="Reset map view"
+            onClick={panZoom.reset}
+            disabled={!panZoom.canZoomOut}
+          >
+            Reset
+          </button>
+        </div>
         <MapTooltip hover={hover} />
         <CountryPanel
           selection={selection}

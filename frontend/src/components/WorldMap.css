@@ -142,6 +142,66 @@
   display: block;
   width: 100%;
   height: auto;
+  cursor: grab;
+  touch-action: none;
+}
+
+.wm-svg:active {
+  cursor: grabbing;
+}
+
+.wm-controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 4;
+  display: flex;
+  gap: 4px;
+  background: var(--wm-card);
+  border: 1px solid var(--wm-line);
+  border-radius: 8px;
+  padding: 3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+
+.wm-control-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--wm-ink);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.wm-control-btn:hover:not(:disabled) {
+  background: var(--wm-panel);
+}
+
+.wm-control-btn:focus-visible {
+  outline: 2px solid var(--wm-accent-deep);
+  outline-offset: 1px;
+}
+
+.wm-control-btn:disabled {
+  color: var(--wm-muted);
+  opacity: 0.4;
+  cursor: default;
+}
+
+.wm-control-reset {
+  width: auto;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .wm-country {
