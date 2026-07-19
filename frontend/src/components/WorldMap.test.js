@@ -320,6 +320,32 @@ describe('WorldMap', () => {
       });
     });
 
+    it('does not capture the pointer on a plain press, so click/double-click reach the country', async () => {
+      // Regression guard for the drill-dead bug: capturing on pointerdown
+      // retargets the follow-up click AND dblclick to the <svg>, so the country
+      // <path>'s onClick / onDoubleClick never fire - single-click stops opening
+      // the panel and double-click stops drilling. fireEvent.click on the path
+      // bypasses this (no real capture), which is why unit tests missed it, so
+      // assert the capture is NOT taken on a plain press. (Capture-on-drag is
+      // exercised manually - jsdom carries no pointer geometry to drive it.)
+      global.fetch = mockFetch();
+      const originalCapture = Element.prototype.setPointerCapture;
+      const capture = jest.fn();
+      Element.prototype.setPointerCapture = capture;
+      try {
+        render(<WorldMap onSelectPlace={jest.fn()} />);
+        await screen.findByRole('button', { name: /United States of America/ });
+        const svg = screen.getByRole('group', { name: 'World map of PolicyPulse coverage' });
+
+        fireEvent.pointerDown(svg, {
+          pointerId: 1, button: 0, pointerType: 'mouse', clientX: 100, clientY: 100,
+        });
+        expect(capture).not.toHaveBeenCalled();
+      } finally {
+        Element.prototype.setPointerCapture = originalCapture;
+      }
+    });
+
     it('marks a drillable country with the drill cursor class and a tooltip hint on hover', async () => {
       global.fetch = mockFetch(withDrillableUS);
       render(<WorldMap onSelectPlace={jest.fn()} />);
