@@ -1,9 +1,14 @@
 import {
+  MARKER_HIDE_THRESHOLD_PX,
+  MICRO_MARKER_BASE_RADIUS,
   OFF_ATLAS_MICROSTATES,
   binForCoverage,
   computeMicroMarkers,
+  isMarkerHidden,
   joinAdmin1,
   joinCountries,
+  microMarkerRadius,
+  pathBoundingWidth,
   pluralize,
 } from './mapCoverage';
 
@@ -13,6 +18,16 @@ const WORLD = [
   { id: '442', name: 'Luxembourg', d: 'M2,2Z', cx: 480, cy: 90, area: 3.1 },
   { id: '', name: 'Kosovo', d: 'M3,3Z', cx: 529.6, cy: 88, area: 9.2 },
   { id: '', name: 'Somaliland', d: 'M4,4Z', cx: 604.4, cy: 198, area: 135.1 },
+];
+
+// Wide-but-tiny-area outline (e.g. a sliver-shaped territory) - a second,
+// standalone atlas used only by the polyWidth/hide-threshold tests below so
+// it doesn't perturb the shared WORLD fixture's counts used elsewhere.
+const WORLD_WITH_SLIVER = [
+  ...WORLD,
+  {
+    id: '074', name: 'Bouvet Island', d: 'M10,10L30,12L28,30L9,28Z', cx: 20, cy: 20, area: 5,
+  },
 ];
 
 describe('binForCoverage', () => {
@@ -85,6 +100,80 @@ describe('computeMicroMarkers', () => {
     ]);
     expect(markers).toHaveLength(1);
     expect(markers[0].cx).toBe(OFF_ATLAS_MICROSTATES[singapore].cx);
+  });
+
+  it('sets polyWidth from the polygon bounding box for an on-atlas marker', () => {
+    const markers = computeMicroMarkers(WORLD_WITH_SLIVER, [
+      { iso_numeric: '074', name: 'Bouvet Island', sources: 1, policies: 0 },
+    ]);
+    expect(markers).toHaveLength(1);
+    // d = M10,10 L30,12 L28,30 L9,28 Z -> x ranges 9..30
+    expect(markers[0].polyWidth).toBeCloseTo(21, 5);
+  });
+
+  it('sets polyWidth to null for an off-atlas marker - it has no polygon to measure', () => {
+    const singapore = Object.keys(OFF_ATLAS_MICROSTATES)[0];
+    const markers = computeMicroMarkers(WORLD, [
+      { iso_numeric: singapore, name: 'Singapore', sources: 2, policies: 0 },
+    ]);
+    expect(markers[0].polyWidth).toBeNull();
+  });
+});
+
+describe('pathBoundingWidth', () => {
+  it('finds the x-axis bounding width from a straight-segment path', () => {
+    expect(pathBoundingWidth('M10,10L30,12L28,30L9,28Z')).toBeCloseTo(21, 5);
+  });
+
+  it('returns 0 for a single-point path', () => {
+    expect(pathBoundingWidth('M2,2Z')).toBe(0);
+  });
+
+  it('returns null for an empty or missing path', () => {
+    expect(pathBoundingWidth('')).toBeNull();
+    expect(pathBoundingWidth(undefined)).toBeNull();
+  });
+});
+
+describe('microMarkerRadius', () => {
+  it('is the base radius at the full-world viewBox width', () => {
+    expect(microMarkerRadius(960)).toBeCloseTo(MICRO_MARKER_BASE_RADIUS, 5);
+  });
+
+  it('scales down proportionally to viewBox width as the map zooms in', () => {
+    expect(microMarkerRadius(480)).toBeCloseTo(MICRO_MARKER_BASE_RADIUS * 0.5, 5);
+    expect(microMarkerRadius(240)).toBeCloseTo(MICRO_MARKER_BASE_RADIUS * 0.25, 5);
+  });
+});
+
+describe('isMarkerHidden', () => {
+  const onAtlasMarker = { id: '074', polyWidth: 21 };
+  const offAtlasMarker = { id: '702', polyWidth: null };
+
+  it('hides an on-atlas marker once its polygon is comfortably clickable on screen', () => {
+    // 21 world units * 1000 screen px / 200 viewBox width = 105px > 48px
+    expect(isMarkerHidden(onAtlasMarker, 200, 1000)).toBe(true);
+  });
+
+  it('keeps an on-atlas marker visible while its polygon is still too small to click', () => {
+    // 21 * 800 / 960 = 17.5px < 48px
+    expect(isMarkerHidden(onAtlasMarker, 960, 800)).toBe(false);
+  });
+
+  it('sits right at the threshold boundary correctly', () => {
+    // polyWidth * svgPxWidth / viewBoxWidth == MARKER_HIDE_THRESHOLD_PX exactly
+    const viewBoxWidth = 100;
+    const svgPxWidth = (MARKER_HIDE_THRESHOLD_PX * viewBoxWidth) / onAtlasMarker.polyWidth;
+    expect(isMarkerHidden(onAtlasMarker, viewBoxWidth, svgPxWidth)).toBe(false);
+  });
+
+  it('never hides an off-atlas marker (polyWidth null), at any zoom', () => {
+    expect(isMarkerHidden(offAtlasMarker, 120, 2000)).toBe(false);
+    expect(isMarkerHidden(offAtlasMarker, 960, 300)).toBe(false);
+  });
+
+  it('does not hide anything before the svg has measured a real pixel width', () => {
+    expect(isMarkerHidden(onAtlasMarker, 200, 0)).toBe(false);
   });
 });
 

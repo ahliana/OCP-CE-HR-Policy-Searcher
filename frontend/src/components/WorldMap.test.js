@@ -254,4 +254,107 @@ describe('WorldMap', () => {
     fireEvent.click(screen.getByRole('button', { name: /World/ }));
     expect(await screen.findByRole('button', { name: /United States of America/ })).toBeInTheDocument();
   });
+
+  describe('drill discoverability (double-click / keyboard)', () => {
+    // Reduced-motion forces usePanZoom's animateTo() to apply the target
+    // viewBox synchronously (see hooks/usePanZoom.js) instead of stepping
+    // through requestAnimationFrame, so the zoom-toward assertions below
+    // don't need to pump animation frames.
+    const originalMatchMedia = window.matchMedia;
+
+    beforeEach(() => {
+      window.matchMedia = jest.fn((query) => ({
+        matches: true,
+        media: query,
+        addListener: () => {},
+        removeListener: () => {},
+      }));
+    });
+
+    afterEach(() => {
+      window.matchMedia = originalMatchMedia;
+    });
+
+    const withDrillableUS = {
+      ...BASE_COVERAGE,
+      countries: BASE_COVERAGE.countries.map((c) => (
+        c.iso_numeric === '840' ? { ...c, children_with_data: 28 } : c
+      )),
+    };
+
+    it('double-clicking a drillable country drills straight into its regions', async () => {
+      global.fetch = mockFetchWithChildren(withDrillableUS, { us: US_CHILDREN });
+      render(<WorldMap onSelectPlace={jest.fn()} />);
+
+      const usPath = await screen.findByRole('button', { name: /United States of America/ });
+      fireEvent.doubleClick(usPath);
+
+      expect(await screen.findByLabelText(/Minnesota: 3 sources, 5 policies/)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /United States of America/ })).not.toBeInTheDocument();
+    });
+
+    it('double-clicking a non-drillable country zooms toward it instead of doing nothing', async () => {
+      global.fetch = mockFetch();
+      render(<WorldMap onSelectPlace={jest.fn()} />);
+
+      const swedenPath = await screen.findByLabelText(/Sweden: 8 sources/);
+      const svg = screen.getByRole('group', { name: 'World map of PolicyPulse coverage' });
+      const before = svg.getAttribute('viewBox');
+
+      fireEvent.doubleClick(swedenPath);
+
+      await waitFor(() => expect(svg.getAttribute('viewBox')).not.toBe(before));
+      const [, , w] = svg.getAttribute('viewBox').split(' ').map(Number);
+      expect(w).toBeLessThan(960);
+    });
+
+    it('closes an open panel when a double-click zooms instead of drilling', async () => {
+      global.fetch = mockFetch();
+      render(<WorldMap onSelectPlace={jest.fn()} />);
+
+      const swedenPath = await screen.findByLabelText(/Sweden: 8 sources/);
+      fireEvent.doubleClick(swedenPath);
+
+      await waitFor(() => {
+        expect(screen.queryByRole('heading', { name: 'Sweden' })).not.toBeInTheDocument();
+      });
+    });
+
+    it('marks a drillable country with the drill cursor class and a tooltip hint on hover', async () => {
+      global.fetch = mockFetch(withDrillableUS);
+      render(<WorldMap onSelectPlace={jest.fn()} />);
+
+      const usPath = await screen.findByRole('button', { name: /United States of America/ });
+      expect(usPath).toHaveClass('wm-drillable');
+
+      const swedenPath = screen.getByLabelText(/Sweden: 8 sources/);
+      expect(swedenPath).not.toHaveClass('wm-drillable');
+
+      // jsdom in this environment has no native PointerEvent constructor, so
+      // fireEvent.pointerMove's options (clientX/clientY) never reach the
+      // dispatched event - build one by hand so handleHover sees real
+      // coordinates instead of NaN.
+      const moveEvent = new window.Event('pointermove', { bubbles: true });
+      Object.assign(moveEvent, { clientX: 10, clientY: 10 });
+      fireEvent(usPath, moveEvent);
+
+      expect(await screen.findByText('Double-click to see state and province detail.'))
+        .toBeInTheDocument();
+    });
+
+    it('Shift+Enter on a focused drillable country drills it; plain Enter still opens the panel', async () => {
+      global.fetch = mockFetchWithChildren(withDrillableUS, { us: US_CHILDREN });
+      render(<WorldMap onSelectPlace={jest.fn()} />);
+
+      const usPath = await screen.findByRole('button', { name: /United States of America/ });
+      fireEvent.keyDown(usPath, { key: 'Enter' });
+      expect(await screen.findByRole('heading', { name: 'United States' })).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Close panel' }));
+      fireEvent.keyDown(usPath, { key: 'Enter', shiftKey: true });
+
+      expect(await screen.findByRole('button', { name: /Federal \/ nationwide/ })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /United States of America/ })).not.toBeInTheDocument();
+    });
+  });
 });

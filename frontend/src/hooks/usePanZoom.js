@@ -152,6 +152,16 @@ function usePanZoom(svgRef, config) {
 
   const reset = useCallback(() => animateTo(initialViewBox), [animateTo, initialViewBox]);
 
+  // Eases toward `factor`x zoom centered on a given world point (fx, fy) -
+  // unlike zoomIn/zoomOut, which always zoom on the current viewBox center.
+  // Used for "double-click a non-drillable country" - zoom in on that
+  // country's own centroid rather than wherever the viewport happens to be
+  // pointed.
+  const zoomToward = useCallback((fx, fy, factor) => {
+    const prev = viewBoxRef.current;
+    animateTo(zoomAt(prev, factor, fx, fy, bounds));
+  }, [animateTo, bounds]);
+
   // Wheel must preventDefault to stop the page scrolling while over the
   // map. Attached imperatively (not via JSX onWheel) because React treats
   // onWheel as a passive listener by default.
@@ -292,6 +302,7 @@ function usePanZoom(svgRef, config) {
     viewBox,
     zoomIn,
     zoomOut,
+    zoomToward,
     reset,
     canZoomIn: !isMaxZoom,
     canZoomOut: !isFullView,

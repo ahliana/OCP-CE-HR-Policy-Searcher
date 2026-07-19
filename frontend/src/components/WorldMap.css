@@ -229,6 +229,14 @@
   cursor: pointer;
 }
 
+/* Drillable countries get their own cursor so the double-click affordance
+   reads as "opens into more detail," distinct from the plain-click "open
+   panel" cursor above. Declared after the bin rules (same specificity) so
+   it wins on a drillable + tracked country. */
+.wm-country.wm-drillable {
+  cursor: zoom-in;
+}
+
 .wm-bin-t0 { fill: var(--wm-map-tracked0); }
 .wm-bin-b1 { fill: var(--wm-map-bin1); }
 .wm-bin-b2 { fill: var(--wm-map-bin2); }
@@ -294,6 +302,12 @@
   border-top: 1px solid rgba(255, 255, 255, 0.2);
   font-style: italic;
   opacity: 0.8;
+}
+
+.wm-tooltip-drill {
+  margin-top: 5px;
+  font-size: 11.5px;
+  opacity: 0.85;
 }
 
 .wm-panel {
