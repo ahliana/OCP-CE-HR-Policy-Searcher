@@ -57,8 +57,21 @@ Found 3 policies:
 
 ---
 
+## Using the App (Visitors)
+
+Anyone can browse the deployed web interface for free - no account, API key, or sign-in required:
+
+- **Explore the map** — click a country to see the policies found there; double-click to drill into its states or provinces.
+- **View found policies** — filter, search, and expand any result in the policy list below the map.
+- **Ask questions** — the "Ask about found policies" box answers in your own language, using only what has already been discovered.
+
+Scanning for *new* policies costs API credits (Anthropic + LegiScan) and lives behind the collapsible **Admin** area — that part is for operators running their own deployment. See [Quick Start](#quick-start) to set one up.
+
+---
+
 ## Table of Contents
 
+- [Using the App (Visitors)](#using-the-app-visitors)
 - [Key Features](#key-features)
 - [Geographic Coverage](#geographic-coverage) — 40+ countries, coverage depth
 - [Architecture](#architecture)
