@@ -182,6 +182,16 @@ class TestFromStagingRow:
         assert rebuilt.referenced_policies == ["EU EED Art 26"]
         assert rebuilt.referenced_urls == ["https://eur-lex.europa.eu/x"]
 
+    def test_sheets_rendered_datetime_with_single_digit_hour(self):
+        """Google Sheets re-renders ISO datetimes on read ("2026-07-07 6:28:07",
+        no zero-padded hour) - 56 of 122 real Staging rows failed on this
+        before the strptime normalization."""
+        policy = self._full_policy()
+        row = _row(policy)
+        row["Discovered At"] = "2026-07-07 6:28:07"
+        rebuilt = Policy(**from_staging_row(row))
+        assert rebuilt.discovered_at == datetime(2026, 7, 7, 6, 28, 7)
+
     def test_round_trip_us_state_jurisdiction(self):
         policy = self._full_policy(jurisdiction="New Jersey")
         kwargs = from_staging_row(_row(policy))

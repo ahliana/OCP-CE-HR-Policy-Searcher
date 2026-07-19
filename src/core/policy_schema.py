@@ -11,6 +11,7 @@ core.models can delegate to it without a layering inversion.
 """
 
 import re
+from datetime import datetime
 
 from src.agent.domain_generator import US_STATE_ABBREVS
 
@@ -273,6 +274,20 @@ def _split_list(value: str, sep: str) -> list[str]:
     return [v.strip() for v in (value or "").split(sep) if v.strip()]
 
 
+def _parse_sheet_datetime(value: str) -> str | datetime:
+    """Normalize a datetime string as Google Sheets renders it.
+
+    Values are written as ISO (USER_ENTERED), but Sheets re-renders them on
+    read as e.g. "2026-07-07 6:28:07" - a single-digit hour that strict ISO
+    parsing rejects. strptime tolerates the missing zero-padding; anything
+    else passes through unchanged for pydantic to parse.
+    """
+    try:
+        return datetime.strptime(value.strip(), "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return value
+
+
 def from_staging_row(row: dict) -> dict:
     """Map a Staging sheet row (header-keyed dict) into Policy constructor kwargs.
 
@@ -325,7 +340,7 @@ def from_staging_row(row: dict) -> dict:
         kwargs["effective_date"] = effective_date
     discovered_at = g("Discovered At")
     if discovered_at:
-        kwargs["discovered_at"] = discovered_at
+        kwargs["discovered_at"] = _parse_sheet_datetime(discovered_at)
 
     return kwargs
 
