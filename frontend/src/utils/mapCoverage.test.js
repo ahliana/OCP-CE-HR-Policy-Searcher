@@ -2,6 +2,7 @@ import {
   OFF_ATLAS_MICROSTATES,
   binForCoverage,
   computeMicroMarkers,
+  joinAdmin1,
   joinCountries,
   pluralize,
 } from './mapCoverage';
@@ -84,6 +85,38 @@ describe('computeMicroMarkers', () => {
     ]);
     expect(markers).toHaveLength(1);
     expect(markers[0].cx).toBe(OFF_ATLAS_MICROSTATES[singapore].cx);
+  });
+});
+
+describe('joinAdmin1', () => {
+  const UNITS = [
+    { code: 'BE-BRU', name: 'Brussels', d: 'M0,0Z', cx: 1, cy: 1, area: 100 },
+    { code: 'BE-VLG', name: 'Flanders', d: 'M1,1Z', cx: 2, cy: 2, area: 200 },
+    { code: 'BE-WAL', name: 'Wallonia', d: 'M2,2Z', cx: 3, cy: 3, area: 300 },
+  ];
+
+  it('keeps every geometry unit, tagging children with no data as untracked rather than dropping them', () => {
+    const joined = joinAdmin1(UNITS, [
+      { slug: 'belgium-bru', name: 'Brussels', kind: 'subnational', code: 'BE-BRU', sources: 1, policies: 3 },
+    ]);
+    expect(joined).toHaveLength(3);
+    expect(joined.find((j) => j.unit.code === 'BE-BRU').bin).toBe('b1');
+    expect(joined.find((j) => j.unit.code === 'BE-VLG').bin).toBe('untracked');
+    expect(joined.find((j) => j.unit.code === 'BE-VLG').cov).toBeNull();
+  });
+
+  it('joins on the ISO 3166-2 code, not name or slug', () => {
+    const joined = joinAdmin1(UNITS, [
+      { slug: 'belgium-wal', name: 'Wallonia (region)', kind: 'subnational', code: 'BE-WAL', sources: 2, policies: 4 },
+    ]);
+    expect(joined.find((j) => j.unit.code === 'BE-WAL').bin).toBe('b1');
+    expect(joined.find((j) => j.unit.code === 'BE-WAL').cov.name).toBe('Wallonia (region)');
+  });
+
+  it('handles an empty children list without dropping any unit', () => {
+    const joined = joinAdmin1(UNITS, []);
+    expect(joined).toHaveLength(3);
+    expect(joined.every((j) => j.bin === 'untracked')).toBe(true);
   });
 });
 

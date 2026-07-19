@@ -63,22 +63,39 @@ function pinchState(pointers) {
   };
 }
 
-// Pan/zoom for the world map's inline SVG. `svgRef` must point at the
-// <svg> element - it is used to map client (pointer) coordinates to viewBox
+// Pan/zoom for an inline SVG choropleth. `svgRef` must point at the <svg>
+// element - it is used to map client (pointer) coordinates to viewBox
 // coordinates and to attach a non-passive wheel listener (React's
 // synthetic onWheel is passive by default, so calling preventDefault()
 // there cannot stop page scroll).
-function usePanZoom(svgRef) {
-  const [viewBox, setViewBox] = useState(WORLD_VIEWBOX);
+//
+// `config` is an optional `{ viewBox, bounds }` pair, defaulting to the
+// world map's own constants - so the original `usePanZoom(svgRef)` call
+// site (and its tests) keeps working unchanged. Country view passes its
+// own admin-1 viewBox/bounds (see CountryView.js) so the same drag/wheel/
+// pinch/keyboard interactions work at any scale.
+function usePanZoom(svgRef, config) {
+  const { viewBox: initialViewBox = WORLD_VIEWBOX, bounds = ZOOM_BOUNDS } = config || {};
+  const [viewBox, setViewBox] = useState(initialViewBox);
   // Mirrors `viewBox` but updated eagerly (not via a post-render effect) so
   // synchronous back-to-back calls - e.g. two quick clicks on the zoom
   // button before React re-renders - each read the truly-latest value
   // instead of a stale one.
-  const viewBoxRef = useRef(WORLD_VIEWBOX);
+  const viewBoxRef = useRef(initialViewBox);
   const applyViewBox = useCallback((next) => {
     viewBoxRef.current = next;
     setViewBox(next);
   }, []);
+
+  // Reset to `initialViewBox` whenever its identity changes - true once on
+  // mount, and again if a caller swaps in a different config (e.g.
+  // CountryView's real viewBox arriving once its lazy-loaded geometry
+  // resolves, replacing the placeholder world default). Callers whose
+  // config never changes (the world map) see this fire exactly once, a
+  // no-op against the state useState already initialized to.
+  useEffect(() => {
+    applyViewBox(initialViewBox);
+  }, [initialViewBox, applyViewBox]);
 
   const dragRef = useRef(null); // { pointerId, startClientX, startClientY, moved, startViewBox }
   const justDraggedRef = useRef(false);
@@ -125,15 +142,15 @@ function usePanZoom(svgRef) {
 
   const zoomIn = useCallback(() => {
     const prev = viewBoxRef.current;
-    animateTo(zoomAt(prev, ZOOM_STEP, prev.x + prev.w / 2, prev.y + prev.h / 2));
-  }, [animateTo]);
+    animateTo(zoomAt(prev, ZOOM_STEP, prev.x + prev.w / 2, prev.y + prev.h / 2, bounds));
+  }, [animateTo, bounds]);
 
   const zoomOut = useCallback(() => {
     const prev = viewBoxRef.current;
-    animateTo(zoomAt(prev, 1 / ZOOM_STEP, prev.x + prev.w / 2, prev.y + prev.h / 2));
-  }, [animateTo]);
+    animateTo(zoomAt(prev, 1 / ZOOM_STEP, prev.x + prev.w / 2, prev.y + prev.h / 2, bounds));
+  }, [animateTo, bounds]);
 
-  const reset = useCallback(() => animateTo(WORLD_VIEWBOX), [animateTo]);
+  const reset = useCallback(() => animateTo(initialViewBox), [animateTo, initialViewBox]);
 
   // Wheel must preventDefault to stop the page scrolling while over the
   // map. Attached imperatively (not via JSX onWheel) because React treats
@@ -150,11 +167,11 @@ function usePanZoom(svgRef) {
       const prev = viewBoxRef.current;
       const factor = event.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
       const { x: fx, y: fy } = clientToWorld(event.clientX, event.clientY, prev);
-      applyViewBox(zoomAt(prev, factor, fx, fy));
+      applyViewBox(zoomAt(prev, factor, fx, fy, bounds));
     };
     node.addEventListener('wheel', onWheel, { passive: false });
     return () => node.removeEventListener('wheel', onWheel);
-  }, [svgRef, clientToWorld, applyViewBox]);
+  }, [svgRef, clientToWorld, applyViewBox, bounds]);
 
   const handlePointerDown = useCallback((event) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
@@ -192,7 +209,7 @@ function usePanZoom(svgRef) {
         const prev = viewBoxRef.current;
         const factor = next.distance / pinchRef.current.distance;
         const { x: fx, y: fy } = clientToWorld(next.cx, next.cy, prev);
-        applyViewBox(zoomAt(prev, factor, fx, fy));
+        applyViewBox(zoomAt(prev, factor, fx, fy, bounds));
       }
       pinchRef.current = next;
       return;
@@ -212,8 +229,8 @@ function usePanZoom(svgRef) {
     if (rect.width === 0 || rect.height === 0) return;
     const dx = -dxClient * (drag.startViewBox.w / rect.width);
     const dy = -dyClient * (drag.startViewBox.h / rect.height);
-    applyViewBox(panBy(drag.startViewBox, dx, dy));
-  }, [svgRef, clientToWorld, applyViewBox]);
+    applyViewBox(panBy(drag.startViewBox, dx, dy, bounds));
+  }, [svgRef, clientToWorld, applyViewBox, bounds]);
 
   const endPointer = useCallback((event) => {
     pointersRef.current.delete(event.pointerId);
@@ -260,16 +277,16 @@ function usePanZoom(svgRef) {
         if (event.key === 'ArrowRight') dx = prev.w * PAN_KEY_FRACTION;
         if (event.key === 'ArrowUp') dy = -prev.h * PAN_KEY_FRACTION;
         if (event.key === 'ArrowDown') dy = prev.h * PAN_KEY_FRACTION;
-        applyViewBox(panBy(prev, dx, dy));
+        applyViewBox(panBy(prev, dx, dy, bounds));
         break;
       }
       default:
         break;
     }
-  }, [zoomIn, zoomOut, applyViewBox]);
+  }, [zoomIn, zoomOut, applyViewBox, bounds]);
 
-  const isFullView = viewBox.w >= ZOOM_BOUNDS.maxW - 0.01;
-  const isMaxZoom = viewBox.w <= ZOOM_BOUNDS.minW + 0.01;
+  const isFullView = viewBox.w >= bounds.maxW - 0.01;
+  const isMaxZoom = viewBox.w <= bounds.minW + 0.01;
 
   return {
     viewBox,
