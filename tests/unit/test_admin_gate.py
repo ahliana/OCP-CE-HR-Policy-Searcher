@@ -125,6 +125,35 @@ class TestUngatedModeLoopbackOnly:
             resp = _patch_review(c)
         assert resp.status_code == 200
 
+    def test_forwarded_request_rejected_even_from_loopback_peer(self, monkeypatch):
+        """Behind a reverse proxy (Caddy), the TCP peer is the proxy on
+        loopback while the real client is remote; the forwarded header is the
+        tell. Without this, a public deploy that forgot ADMIN_TOKEN would
+        trust 100% of proxied traffic."""
+        monkeypatch.delenv("ADMIN_TOKEN", raising=False)
+        from src.api.app import app
+
+        with TestClient(app, client=("127.0.0.1", 12345)) as c:
+            resp = c.patch(
+                "/api/policies/review",
+                json={"url": "https://a.gov/1", "review_status": "reviewed"},
+                headers={"X-Forwarded-For": "203.0.113.5"},
+            )
+        assert resp.status_code == 403
+        assert "ADMIN_TOKEN" in resp.json()["detail"]
+
+    def test_forwarded_exempt_route_stays_open(self, monkeypatch):
+        monkeypatch.delenv("ADMIN_TOKEN", raising=False)
+        from src.api.app import app
+
+        with TestClient(app, client=("127.0.0.1", 12345)) as c:
+            resp = c.post(
+                "/api/leads",
+                json={"url": "https://8.8.8.8/heat-law"},
+                headers={"X-Forwarded-For": "203.0.113.5"},
+            )
+        assert resp.status_code == 200
+
     def test_remote_client_rejected_with_403(self, monkeypatch):
         monkeypatch.delenv("ADMIN_TOKEN", raising=False)
         from src.api.app import app

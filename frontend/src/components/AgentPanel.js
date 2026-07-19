@@ -7,7 +7,6 @@ import { DEFAULT_CHANNELS, buildScanRequests } from '../utils/scanTargets';
 import AgentChatPanel from './AgentChatPanel';
 import ApiKeySettingsModal from './ApiKeySettingsModal';
 import DomainScanPanel from './DomainScanPanel';
-import LeadsInbox from './LeadsInbox';
 import PolicyScannerHeader from './PolicyScannerHeader';
 import ReviewInbox from './ReviewInbox';
 import SearchPanel from './SearchPanel';
@@ -122,7 +121,7 @@ function AgentPanel({
             <WorldMap
                 onSelectPlace={handleSelectPlace}
                 onViewPlacePolicies={onViewPlacePolicies}
-                showScanAction={adminOpen}
+                showScanAction={adminOpen && adminUnlocked}
             />
             <ApiKeySettingsModal
                 open={isSettingsOpen}
@@ -186,7 +185,6 @@ function AgentPanel({
                         isRunning={isChatRunning}
                     />
                     <ReviewInbox isAdmin={adminUnlocked} />
-                    <LeadsInbox adminRequired={adminRequired} hasAdminToken={hasAdminToken} />
                 </div>
             ) : (
                 <p className="admin-readonly-note" role="status">

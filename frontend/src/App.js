@@ -3,6 +3,7 @@ import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined';
 import './App.css';
 import AgentPanel from './components/AgentPanel';
 import AskPolicyBox from './components/AskPolicyBox';
+import LeadsInbox from './components/LeadsInbox';
 import LogoImage from './assets/ocp-logo.svg';
 import PolicyList from './components/PolicyList';
 import HelpWindow from './components/HelpWindow';
@@ -106,6 +107,7 @@ function App() {
         </section>
         <section className="app-stage" aria-label="Discovered policies">
           <PolicyList externalPlace={placePolicyRequest} />
+          <LeadsInbox adminRequired={adminRequired} hasAdminToken={hasAdminToken} />
         </section>
       </main>
     </div>

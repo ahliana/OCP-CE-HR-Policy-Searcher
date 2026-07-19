@@ -105,8 +105,15 @@ class AdminGateMiddleware(BaseHTTPMiddleware):
                         content={"detail": "Administrator token required"},
                     )
             else:
+                # A forwarded header means the request traversed a reverse
+                # proxy (the deployment runs behind Caddy), so a loopback TCP
+                # peer is the proxy itself, not the operator - treat it as
+                # remote. Same reasoning as _client_ip in routes/ask.py.
+                forwarded = request.headers.get("x-forwarded-for") or request.headers.get(
+                    "x-real-ip"
+                )
                 host = request.client.host if request.client else ""
-                if host not in _LOOPBACK_HOSTS and host != _TESTCLIENT_HOST:
+                if forwarded or (host not in _LOOPBACK_HOSTS and host != _TESTCLIENT_HOST):
                     return JSONResponse(
                         status_code=403,
                         content={
