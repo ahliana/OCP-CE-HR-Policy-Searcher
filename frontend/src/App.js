@@ -3,6 +3,7 @@ import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined';
 import './App.css';
 import AgentPanel from './components/AgentPanel';
 import AskPolicyBox from './components/AskPolicyBox';
+import BackToTopButton from './components/BackToTopButton';
 import LeadsInbox from './components/LeadsInbox';
 import LogoImage from './assets/ocp-logo.svg';
 import PolicyList from './components/PolicyList';
@@ -110,6 +111,7 @@ function App() {
           <LeadsInbox adminRequired={adminRequired} hasAdminToken={hasAdminToken} />
         </section>
       </main>
+      <BackToTopButton />
     </div>
   );
 }
