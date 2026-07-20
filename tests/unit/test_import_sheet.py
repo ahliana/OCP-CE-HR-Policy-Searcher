@@ -79,6 +79,14 @@ class TestMapRowToPolicy:
         with pytest.raises(ValueError, match=r"row 5.*missing URL"):
             map_row_to_policy(row, row_number=5)
 
+    def test_non_web_url_scheme_rejected(self):
+        """The URL becomes a clickable href for every visitor - a curator
+        sheet cell must not be able to smuggle a javascript: link through."""
+        row = _row(_make_policy())
+        row["Link"] = "javascript:alert(1)"
+        with pytest.raises(ValueError, match=r"row 7.*http"):
+            map_row_to_policy(row, row_number=7)
+
     def test_missing_name_raises_with_row_number(self):
         row = _row(_make_policy())
         row["Name"] = ""

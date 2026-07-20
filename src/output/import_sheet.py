@@ -49,6 +49,11 @@ def map_row_to_policy(row: dict, row_number: int) -> Policy:
     kwargs = from_staging_row(row)
     if not kwargs["url"]:
         raise ValueError(f"row {row_number}: missing URL (Link column)")
+    # The URL becomes a clickable link for every visitor; the sheet is
+    # curator-edited, so reject non-web schemes (javascript:, file:, ...)
+    # at this boundary rather than trusting every cell.
+    if not kwargs["url"].startswith(("http://", "https://")):
+        raise ValueError(f"row {row_number}: URL must start with http:// or https://")
     if not kwargs["policy_name"]:
         raise ValueError(f"row {row_number}: missing Name")
     try:
