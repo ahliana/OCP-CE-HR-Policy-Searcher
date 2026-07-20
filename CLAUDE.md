@@ -15,6 +15,7 @@ Built for the Open Compute Project (OCP) Heat Reuse subproject.
 - `python -m src.agent "message"` — single command mode
 - `pytest` — run all tests (1085+, plus 3 skipped; must all pass before commits)
 - `cd frontend && CI=true npx react-scripts test --watchAll=false` — run frontend tests (153, across 18 suites)
+- `cd frontend && npm run e2e` — real-pointer Playwright smoke for the map (needs the dev stack running and `npx playwright install chromium` once)
 - `ruff check src/ tests/` — lint (must pass before commits)
 - `uvicorn src.api.app:app --port 8000` — run FastAPI server (there is no src.api __main__)
 - `npm run dev` — run backend + React frontend together
@@ -49,7 +50,7 @@ Data: `data/` — runtime output (policies.json, logs/, gitignored).
 - `PolicyAgent.__new__(PolicyAgent)` pattern to test agent without API key
 - `anthropic.RateLimitError.__new__()` with mock response to create catchable test exceptions
 - `AdminGateMiddleware`: `ADMIN_TOKEN` gates non-GET `/api`; unset = loopback-only (forwarded headers count as remote)
-- Map testing: jsdom's synthetic pointer events carry no real pointer geometry, so drag/pointer-capture bugs on the map (see `usePanZoom.js`'s `setPointerCapture` handling and the "drill-dead bug" regression test in `WorldMap.test.js`) aren't fully caught by the unit suite — capture-on-drag is exercised manually today, so verify it by hand for any pointer-interaction change
+- Map testing: jsdom's synthetic pointer events carry no real pointer geometry, so drag/pointer-capture bugs on the map (see `usePanZoom.js`'s `setPointerCapture` handling and the "drill-dead bug" regression test in `WorldMap.test.js`) aren't fully caught by the unit suite — run the real-input e2e smoke (`cd frontend && npm run e2e`, against a live `npm run dev` stack) for any pointer-interaction change
 
 ## Testing
 - Unit tests: `tests/unit/` — mock everything, no network/API calls
